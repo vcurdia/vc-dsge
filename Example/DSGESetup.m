@@ -22,21 +22,17 @@
 clear all
 tic
 
-%% Settings
-Spec = 'MyDSGE';
+diary('MyDSGE.log')
+diary on
 
+%% Initiate DSGE
+OpenDSGE('MyDSGE')
 
 %% Initiate parpool
 % parpool(2)
 
 %% -------------------------------------------------------------------
 
-%% create folder if needed
-if ~isdir(Spec)
-    mkdir(Spec)
-end
-cd(Spec)
-fprintf('\nSpec: %s\n',Spec);
 
 
 %% -------------------------------------------------------------------
@@ -44,12 +40,13 @@ fprintf('\nSpec: %s\n',Spec);
 %% Close parpool if needed
 % delete(gcp)
 
-%% Save workspace
-save('Output')
-cd ..
+%% Close DSGE
+CloseDSGE
     
 %% elapsed time
 fprintf('\n%s\n\n',vctoc)
+
+diary off
 
 %% exit if in server
 % exit
