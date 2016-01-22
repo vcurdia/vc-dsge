@@ -1,4 +1,4 @@
-function OpenDSGE(Spec)
+function s = OpenDSGE(Spec)
 
 %% -------------------------------------------------------------------
 
@@ -7,10 +7,12 @@ if ~isdir(Spec)
 end
 cd(Spec)
 
-if exist('Workspace','file')
+if exist([Spec,'.mat'],'file')
     fprintf('\nOpening DSGE: %s\n',Spec);
-    load('Workspace')
+    s = load(Spec);
 else
     fprintf('\nInitiating DSGE: %s\n',Spec);
+    s.Spec = Spec;
+    save(Spec,'-struct','s')
 end
 

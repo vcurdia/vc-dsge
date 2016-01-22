@@ -1,5 +1,10 @@
-function CloseDSGE
+function s = CloseDSGE(s,BaseFolder)
 
 fprintf('\nSaving workspace and exiting DSGE folder\n')
-save('Workspace')
-cd ..
+save(s.Spec,'-struct','s')
+if nargin>1
+    cd(BaseFolder)
+else
+    cd ..
+end
+

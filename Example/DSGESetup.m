@@ -22,6 +22,8 @@
 clear all
 tic
 
+BaseFolder = pwd;
+
 % diary('MyDSGE.log')
 % diary on
 
@@ -30,8 +32,7 @@ tic
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-
-OpenDSGE('MyDSGE')
+s = OpenDSGE('MyDSGE');
 
 
 %% Setup the model
@@ -111,15 +112,16 @@ Model.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
+s = ModelAnalysis(s);
 
+s.Model = Model;
 
 
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-
-CloseDSGE
+s = CloseDSGE(s,BaseFolder);
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)
