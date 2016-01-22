@@ -36,6 +36,36 @@ OpenDSGE('MyDSGE')
 
 %% Setup the model
 
+Model.Param = {...
+    'omega', 'G', 1, 0.2,'\omega';
+    'xi', 'G', 0.1, 0.05,'\xi';
+    'eta', 'B', 0.6, 0.2,'\eta';
+    'zeta', 'B', 0.6, 0.2,'\zeta';
+    'rho', 'B', 0.7, 0.15,'\rho';
+    'phipi', 'N', 1.5, 0.25,'\phi_\pi';
+    'phix', 'N', 0.5, 0.2,'\phi_x';
+    'pistar', 'N', 2, 1,'\pi^*';
+    'ra', 'N', 2, 1,'r^a';
+    'gammaa', 'N', 3, .35,'\gamma^a';
+    'rhodelta', 'B', 0.5, 0.2,'\rho_\delta';
+    'rhogamma', 'B', 0.5, 0.2,'\rho_\gamma';
+    'rhou', 'B', 0.5, 0.2,'\rho_u';
+    'sigmadelta', 'IG1', 0.5, 2,'\sigma_\delta';
+    'sigmagamma', 'IG1', 0.5, 2,'\sigma_\gamma';
+    'sigmau', 'IG1', 0.5, 2,'\sigma_u';
+    'sigmai', 'IG1', 0.5, 2,'\sigma_i';
+    };
+
+Model.AuxParam = {...
+    'beta','0.99','\beta';
+    'gamma','gammaa/400','\gamma';
+    'r','ra/400','r';
+    'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','phigammatil';
+    'etagammatil','exp(gamma)/(exp(gamma)-eta)','etagammatil';
+    'phigamma','phigammatil*etagammatil','\phi_\gamma';
+    'etagamma','eta/exp(gamma)','\eta_\gamma';
+    };
+
 Model.ObsVar = {'DGDP';'PI';'FFR'};
 
 Model.StateVar = {...
@@ -48,16 +78,6 @@ Model.StateVar = {...
     };
 
 Model.ShockVar = {'edelta';'egamma';'eu';'ei'}; 
-
-Model.AuxParam = {...
-    'beta','0.99';
-    'gamma','gammaa/400';
-    'r','ra/400';
-    'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)';
-    'etagammatil','exp(gamma)/(exp(gamma)-eta)';
-    'phigamma','phigammatil*etagammatil';
-    'etagamma','eta/exp(gamma)';
-    };
 
 Model.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
