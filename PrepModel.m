@@ -98,13 +98,25 @@ syms one
 
 % AuxVar
 s.nAuxVar = size(Model.AuxVar,1);
+AuxVar_t = sym(zeros(1,s.nAuxVar));
 for j=1:s.nAuxVar
     eval([Model.AuxVar{j,1},'_t = sym(',Model.AuxVar{j,2},');']);
+    AuxVar_t(j) = eval([Model.AuxVar{j},'_t']);
+    if all(jacobian(AuxVar_t,StateVar_tF)==0)
+        eval([Model.AuxVar{j,1},'_tF = sym(',Model.AuxVar{j,2},');']);
+    end
 end
+D_AuxVar_StateVar_tF = jacobian(AuxVar_t,StateVar_tF);
+D_AuxVar_StateVar_t = jacobian(AuxVar_t,StateVar_t);
+D_AuxVar_StateVar_tL = jacobian(AuxVar_t,StateVar_tL);
+if
+
+keyboard
+
 check for tF var in definition. If not, create tF variable.
 check for tL var in definition. If not, create tL variable.
     
-keyboard
+
 
 %% -------------------------------------------------------------------
 
