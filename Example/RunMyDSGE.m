@@ -2,11 +2,6 @@
 %
 % This file gives an example of how to use the VC_DSGE package
 %
-% Convention: x_t refers to x(t)
-%             x_tF refers to x(t+1)
-%             x_tL refers to x(t-1)
-%             x_ss refers to steady state of x(t)
-%
 %   
 % See also:
 % OpenDSGE, CloseDSGE, PrepModel
