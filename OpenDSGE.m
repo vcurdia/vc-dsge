@@ -25,11 +25,12 @@ end
 cd(Spec)
 
 if exist([Spec,'.mat'],'file')
-    fprintf('Opening DSGE: %s\n',Spec);
+    fprintf('Opening spec %s\n',Spec);
     s = load(Spec);
 else
     fprintf('Initiating DSGE: %s\n',Spec);
     s.Spec = Spec;
+    s.Status = struct;
     save(Spec,'-struct','s')
 end
 

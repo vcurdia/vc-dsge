@@ -11,7 +11,7 @@ function s = PrepModel(s,Model)
 %             x_ss refers to steady state of x(t)
 %
 % See also:
-% DSGESetup
+% RunMyDSGE
 %
 % ...........................................................................
 %
@@ -23,13 +23,15 @@ function s = PrepModel(s,Model)
 
 %% Preamble
 
+Action = 'PrepModel';
+
 % check if model already prepared
-if s.Done.PrepModel, return, end
+if isfield(s.Status,Action) && s.Status.(Action), return, end
 
 fprintf('Analyzing DSGE model...\n')
 
 % Set Timer
-s.TimeElapsed.PrepModel = toc();
+s.TimeElapsed.(Action) = toc();
 
 %% -------------------------------------------------------------------
 
@@ -39,9 +41,9 @@ s.TimeElapsed.PrepModel = toc();
 %% Finish up
 
 % Record Model as prepared
-s.Done.PrepModel = 1;
+s.Status.(Action) = 1;
 
 % Time Elapsed
-s.TimeElapsed.PrepModel = toc-TimeElapsed.GenSymVars;
+s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
 
 %% -------------------------------------------------------------------

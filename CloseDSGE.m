@@ -19,7 +19,7 @@ function s = CloseDSGE(s,BaseFolder)
 
 %% -------------------------------------------------------------------
 
-fprintf('Saving workspace and exiting DSGE folder\n')
+fprintf('Saving workspace and exiting spec folder\n')
 save(s.Spec,'-struct','s')
 if nargin>1
     cd(BaseFolder)
