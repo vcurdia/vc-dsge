@@ -99,7 +99,7 @@ syms one
 % AuxVar
 s.nAuxVar = size(Model.AuxVar,1);
 for j=1:s.nAuxVar
-    eval([Model.AuxVar{j,1},'_t = ',Model.AuxVar{j,2},';']);
+    eval([Model.AuxVar{j,1},'_t = sym(',Model.AuxVar{j,2},');']);
 end
 check for tF var in definition. If not, create tF variable.
 check for tL var in definition. If not, create tL variable.
