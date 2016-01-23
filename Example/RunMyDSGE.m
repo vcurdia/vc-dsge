@@ -18,8 +18,6 @@
 clear all
 tic
 
-BaseFolder = pwd;
-
 % diary('MyDSGE.log')
 % diary on
 
@@ -30,6 +28,7 @@ BaseFolder = pwd;
 %% Initiate DSGE
 s = OpenDSGE('MyDSGE');
 
+s.Status.PrepModel = 0; % force PrepModel to be redone
 
 %% Setup the model
 
@@ -62,6 +61,8 @@ Model.AuxParam = {...
     'phigamma','phigammatil*etagammatil','\phi_\gamma';
     'etagamma','eta/exp(gamma)','\eta_\gamma';
     };
+
+Model.AuxVar = {'pima','(pi_t+pi_tL)/2'};
 
 Model.ObsVar = {'DGDP';'PI';'FFR'};
 
@@ -115,7 +116,7 @@ s = PrepModel(s,Model);
 %% -------------------------------------------------------------------
 
 %% Finish up
-s = CloseDSGE(s,BaseFolder);
+s = CloseDSGE(s);
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)
