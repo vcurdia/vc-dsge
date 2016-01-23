@@ -1,4 +1,4 @@
-% DSGESetup
+% RunMyDSGE
 %
 % This file gives an example of how to use the VC_DSGE package
 %
@@ -9,6 +9,7 @@
 %
 %   
 % See also:
+% OpenDSGE, CloseDSGE, PrepModel
 %
 % ...........................................................................
 %
@@ -112,9 +113,7 @@ Model.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-s = ModelAnalysis(s);
-
-s.Model = Model;
+s = PrepModel(s,Model);
 
 
 
