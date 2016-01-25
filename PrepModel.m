@@ -28,14 +28,16 @@ Action = 'PrepModel';
 % check if model already prepared
 if isfield(s.Status,Action) && s.Status.(Action), return, end
 
-fprintf('Analyzing DSGE model...\n')
+fprintf('\n*** Analyzing DSGE model\n')
 
 % Set Timer
 s.TimeElapsed.(Action) = toc();
 
 %% -------------------------------------------------------------------
 
-%% Prepare variables
+%% Prepare variables and equations
+
+fprintf('Generating symbolic variables and systems of equations...\n')
 
 % Check for non-specified model fields
 if ~isfield(Model,'AuxParam'), Model.AuxParam = cell(0,2); end
@@ -54,9 +56,9 @@ Param.PriorMean = [Model.Param{:,3}]';
 Param.PriorSE = [Model.Param{:,4}]';
 s.Param = Param;
 s.nParam = length(Param.Names);
-% for j=1:nParam
-%     m.(Param.Names{j}) = sym(Param.Names{j});
-% end
+for j=1:s.nParam
+    eval(['syms ',Param.Names{j}]);
+end
 
 % Auxiliary Parameters
 AuxParam.Names = {Model.AuxParam{:,1}}';
@@ -67,52 +69,65 @@ else
 end
 s.AuxParam = AuxParam;
 s.nAuxParam = length(AuxParam.Names);
-% for j=1:nAuxParam
-%     m.(AuxParam.Names{j}) = sym(AuxParam.Names{j});
-% end
+for j=1:s.nAuxParam
+    eval(['syms ',AuxParam.Names{j}]);
+end
 
 % Observation variables
 s.nObsVar = length(Model.ObsVar);
-ObsVar.t = sym(zeros(1,s.nObsVar));
+ObsVar_t = sym(zeros(1,s.nObsVar));
 for j=1:s.nObsVar
     jv = [Model.ObsVar{j},'_t'];
-    m.(jv) = sym(jv);
-    ObsVar.t(j) = m.(jv);
-%     eval(sprintf('syms %s_t',Model.ObsVar{j}))
-%     ObsVar_t(j) = eval([Model.ObsVar{j},'_t']);
+    eval(['syms ',jv]);
+    ObsVar_t(j) = eval(jv);
 end
 
 % State space variables
 s.nStateVar = length(Model.StateVar);
-StateVar.t = sym(zeros(1,s.nStateVar)); 
-StateVar.tF = sym(zeros(1,s.nStateVar)); 
-StateVar.tL = sym(zeros(1,s.nStateVar));
-tList = {'t','tF','tL'};
+StateVar_t = sym(zeros(1,s.nStateVar)); 
+StateVar_tF = sym(zeros(1,s.nStateVar)); 
+StateVar_tL = sym(zeros(1,s.nStateVar));
 for j=1:s.nStateVar
-    for t=1:length(tList)
-        jv = [Model.StateVar{j},'_',tList{t}];
-        m.(jv) = sym(jv);
-        StateVar.(tList{t})(j) = m.(jv);
-    end
-%     eval(sprintf('syms %1$s_t %1$s_tF %1$s_tL',Model.StateVar{j}))
-%     StateVar_t(j) = eval([Model.StateVar{j},'_t']);
-%     StateVar_tF(j) = eval([Model.StateVar{j},'_tF']);
-%     StateVar_tL(j) = eval([Model.StateVar{j},'_tL']);
+    jv = [Model.StateVar{j},'_t'];
+    eval(sprintf('syms %1$s %1$sF %1$sL',jv))
+    StateVar_t(j) = eval(jv);
+    StateVar_tF(j) = eval([jv,'F']);
+    StateVar_tL(j) = eval([jv,'L']);
 end
 
 % Shocks
 s.nShockVar = length(Model.ShockVar);
-ShockVar.t = sym(zeros(1,s.nShockVar));
+ShockVar_t = sym(zeros(1,s.nShockVar));
 for j=1:s.nShockVar
     jv = [Model.ShockVar{j},'_t'];
-    m.(jv) = sym(jv);
-    ShockVar.t(j) = m.(jv);
-%     eval(['syms ',Model.ShockVar{j},'_t'])
-%     ShockVar_t(j) = eval([Model.ShockVar{j},'_t']);
+    eval(['syms ',jv]);
+    ShockVar_t(j) = eval(jv);
 end
 
 % constant variable
 syms one
+
+% Auxiliary variables
+s.nAuxVar = size(Model.AuxVar,1);
+AuxVar_t = sym(zeros(s.nAuxVar,1));
+for j=1:s.nAuxVar
+    jv = [Model.AuxVar{j,1},'_t'];
+    eval([jv,' = ',Model.AuxVar{j,2},';'])
+    AuxVar_t(j) = eval(jv);
+    % if the expression has no leads then can define a lead for it
+    if all(jacobian(AuxVar_t(j),StateVar_tF)==0)
+        eval([jv,'F = subs(',jv,',[StateVar_t,StateVar_tL]',...
+              ',[StateVar_tF,StateVar_t]);'])
+        % if expreassion has no leads or lags then can define lag for it. 
+        % notice that it does not make sense to define a lag if there are 
+        % leads in it, and that's why the check for lags is inside the check 
+        % for leads
+        if all(jacobian(AuxVar_t(j),StateVar_tL)==0)
+            eval([jv,'L = subs(',jv,',[StateVar_tF,StateVar_t]',...
+                  ',[StateVar_t,StateVar_tL]);'])
+        end
+    end
+end
 
 % Build Observation equations
 s.nObsEq = length(Model.ObsEq);
@@ -124,9 +139,6 @@ ObsEq = sym(zeros(s.nObsEq,1));
 for j=1:s.nObsEq
     ObsEq(j) = sym(Model.ObsEq{j});
 end
-H0 = -jacobian(ObsEq,ObsVar.t);
-SymMat.ObsEq.HBar = H0\jacobian(ObsEq,one);
-SymMat.ObsEq.H = H0\jacobian(ObsEq,StateVar.t);
 
 % Build State equations
 s.nStateEq = length(Model.StateEq);
@@ -139,40 +151,8 @@ for j=1:s.nStateEq
     StateEq(j) = sym(Model.StateEq{j});
 end
 
-% Apply Auxiliary variables
-s.nAuxVar = size(Model.AuxVar,1);
-for j=1:s.nAuxVar
-    StateEq = subs(StateEq,[Model.AuxVar{j,1}],['(',Model.AuxVar{j,2},')']);
-end
 
-% AuxVar
-% s.nAuxVar = size(Model.AuxVar,1);
-% AuxVar.t = sym(zeros(s.nAuxVar,1));
-% for j=1:s.nAuxVar
-%     jv = [Model.AuxVar{j,1},'_t'];
-%     m.(jv) = sym(Model.AuxVar{j,1});
-%     
-%     eval([jv,' = sym(',Model.AuxVar{j,2},');']);
-%     AuxVar.t(j) = ;
-%     if all(jacobian(AuxVar.t(j),StateVar.tF)==0)
-%         eval([jv,'F = ',char(...
-%             subs(Model.AuxVar{j,2},...
-%                  [StateVar.t,StateVar.tL],[StateVar.tF,StateVar.t])),...
-%               ';']);
-%     end
-%     if all(jacobian(AuxVar.t(j),StateVar.tL)==0)
-%         eval([jv,'F = ',char(...
-%             subs(Model.AuxVar{j,2},...
-%                  [StateVar.tF,StateVar.t],[StateVar.t,StateVar.tL])),...
-%               ';']);
-%     end
-% end
-% D_AuxVar_StateVar_tF = jacobian(AuxVar_t,StateVar_tF);
-% D_AuxVar_StateVar_t = jacobian(AuxVar_t,StateVar_t);
-% D_AuxVar_StateVar_tL = jacobian(AuxVar_t,StateVar_tL);
-% if
-% check for tF var in definition. If not, create tF variable.
-% check for tL var in definition. If not, create tL variable.
+%% Generate matrices and MakeMats
 
 keyboard
 
