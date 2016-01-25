@@ -1,4 +1,4 @@
-function s = PrepModel(s,Model)
+function s = PrepModel(s,Model,GensysAuthor)
 
 % PrepModel
 %
@@ -8,7 +8,6 @@ function s = PrepModel(s,Model)
 % Convention: x_t refers to x(t)
 %             x_tF refers to x(t+1)
 %             x_tL refers to x(t-1)
-%             x_ss refers to steady state of x(t)
 %
 % See also:
 % RunMyDSGE
@@ -154,7 +153,20 @@ end
 
 %% Generate matrices and MakeMats
 
-keyboard
+if ~exist('GensysAuthor','var'),GensysAuthor='CS';end
+
+fprintf('Generating Mats for model evaluation\n')
+s.FileName.Mats = sprintf('%sMats',s.Spec);
+
+% Initiate file
+fidMats = fopen([s.FileName.Mats,'.m'],'wt');
+fprintf(fidMats,...
+        'function Mats=%s(x,fid,verbose,varargin)\n\n',...
+        s.FileName.Mats);
+fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs \n\n',clock);
+
+% close file
+fclose(fidMats);
 
     
 
