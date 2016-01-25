@@ -54,6 +54,9 @@ Param.PriorMean = [Model.Param{:,3}]';
 Param.PriorSE = [Model.Param{:,4}]';
 s.Param = Param;
 s.nParam = length(Param.Names);
+% for j=1:nParam
+%     m.(Param.Names{j}) = sym(Param.Names{j});
+% end
 
 % Auxiliary Parameters
 AuxParam.Names = {Model.AuxParam{:,1}}';
@@ -64,57 +67,115 @@ else
 end
 s.AuxParam = AuxParam;
 s.nAuxParam = length(AuxParam.Names);
+% for j=1:nAuxParam
+%     m.(AuxParam.Names{j}) = sym(AuxParam.Names{j});
+% end
 
 % Observation variables
 s.nObsVar = length(Model.ObsVar);
-ObsVar_t = sym(zeros(1,s.nObsVar));
+ObsVar.t = sym(zeros(1,s.nObsVar));
 for j=1:s.nObsVar
-    eval(sprintf('syms %s_t',Model.ObsVar{j}))
-    ObsVar_t(j) = eval([Model.ObsVar{j},'_t']);
+    jv = [Model.ObsVar{j},'_t'];
+    m.(jv) = sym(jv);
+    ObsVar.t(j) = m.(jv);
+%     eval(sprintf('syms %s_t',Model.ObsVar{j}))
+%     ObsVar_t(j) = eval([Model.ObsVar{j},'_t']);
 end
 
 % State space variables
 s.nStateVar = length(Model.StateVar);
-StateVar_t = sym(zeros(1,s.nStateVar)); 
-StateVar_tF = sym(zeros(1,s.nStateVar)); 
-StateVar_tL = sym(zeros(1,s.nStateVar));
+StateVar.t = sym(zeros(1,s.nStateVar)); 
+StateVar.tF = sym(zeros(1,s.nStateVar)); 
+StateVar.tL = sym(zeros(1,s.nStateVar));
+tList = {'t','tF','tL'};
 for j=1:s.nStateVar
-    eval(sprintf('syms %1$s_t %1$s_tF %1$s_tL',Model.StateVar{j}))
-    StateVar_t(j) = eval([Model.StateVar{j},'_t']);
-    StateVar_tF(j) = eval([Model.StateVar{j},'_tF']);
-    StateVar_tL(j) = eval([Model.StateVar{j},'_tL']);
+    for t=1:length(tList)
+        jv = [Model.StateVar{j},'_',tList{t}];
+        m.(jv) = sym(jv);
+        StateVar.(tList{t})(j) = m.(jv);
+    end
+%     eval(sprintf('syms %1$s_t %1$s_tF %1$s_tL',Model.StateVar{j}))
+%     StateVar_t(j) = eval([Model.StateVar{j},'_t']);
+%     StateVar_tF(j) = eval([Model.StateVar{j},'_tF']);
+%     StateVar_tL(j) = eval([Model.StateVar{j},'_tL']);
 end
 
 % Shocks
 s.nShockVar = length(Model.ShockVar);
-ShockVar_t = sym(zeros(1,s.nShockVar));
+ShockVar.t = sym(zeros(1,s.nShockVar));
 for j=1:s.nShockVar
-    eval(['syms ',Model.ShockVar{j},'_t'])
-    ShockVar_t(j) = eval([Model.ShockVar{j},'_t']);
+    jv = [Model.ShockVar{j},'_t'];
+    m.(jv) = sym(jv);
+    ShockVar.t(j) = m.(jv);
+%     eval(['syms ',Model.ShockVar{j},'_t'])
+%     ShockVar_t(j) = eval([Model.ShockVar{j},'_t']);
 end
 
 % constant variable
 syms one
 
-% AuxVar
-s.nAuxVar = size(Model.AuxVar,1);
-AuxVar_t = sym(zeros(1,s.nAuxVar));
-for j=1:s.nAuxVar
-    eval([Model.AuxVar{j,1},'_t = sym(',Model.AuxVar{j,2},');']);
-    AuxVar_t(j) = eval([Model.AuxVar{j},'_t']);
-    if all(jacobian(AuxVar_t,StateVar_tF)==0)
-        eval([Model.AuxVar{j,1},'_tF = sym(',Model.AuxVar{j,2},');']);
-    end
+% Build Observation equations
+s.nObsEq = length(Model.ObsEq);
+if s.nObsEq~=s.nObsVar
+    error(['Number of observables (%\.0f) is different from number of ' ...
+           'observation equations (%.0f).'],s.nObsVar,s.nObsEq)
 end
-D_AuxVar_StateVar_tF = jacobian(AuxVar_t,StateVar_tF);
-D_AuxVar_StateVar_t = jacobian(AuxVar_t,StateVar_t);
-D_AuxVar_StateVar_tL = jacobian(AuxVar_t,StateVar_tL);
-if
+ObsEq = sym(zeros(s.nObsEq,1));
+for j=1:s.nObsEq
+    ObsEq(j) = sym(Model.ObsEq{j});
+end
+H0 = -jacobian(ObsEq,ObsVar.t);
+SymMat.ObsEq.HBar = H0\jacobian(ObsEq,one);
+SymMat.ObsEq.H = H0\jacobian(ObsEq,StateVar.t);
+
+% Build State equations
+s.nStateEq = length(Model.StateEq);
+if s.nStateEq~=s.nStateVar
+    error(['Number of state variables (%\.0f) is different from number of ' ...
+           'state equations (%.0f).'],s.nStateVar,s.nStateEq)
+end
+StateEq = sym(zeros(s.nStateEq,1));
+for j=1:s.nStateEq
+    StateEq(j) = sym(Model.StateEq{j});
+end
+
+% Apply Auxiliary variables
+s.nAuxVar = size(Model.AuxVar,1);
+for j=1:s.nAuxVar
+    StateEq = subs(StateEq,[Model.AuxVar{j,1}],['(',Model.AuxVar{j,2},')']);
+end
+
+% AuxVar
+% s.nAuxVar = size(Model.AuxVar,1);
+% AuxVar.t = sym(zeros(s.nAuxVar,1));
+% for j=1:s.nAuxVar
+%     jv = [Model.AuxVar{j,1},'_t'];
+%     m.(jv) = sym(Model.AuxVar{j,1});
+%     
+%     eval([jv,' = sym(',Model.AuxVar{j,2},');']);
+%     AuxVar.t(j) = ;
+%     if all(jacobian(AuxVar.t(j),StateVar.tF)==0)
+%         eval([jv,'F = ',char(...
+%             subs(Model.AuxVar{j,2},...
+%                  [StateVar.t,StateVar.tL],[StateVar.tF,StateVar.t])),...
+%               ';']);
+%     end
+%     if all(jacobian(AuxVar.t(j),StateVar.tL)==0)
+%         eval([jv,'F = ',char(...
+%             subs(Model.AuxVar{j,2},...
+%                  [StateVar.tF,StateVar.t],[StateVar.t,StateVar.tL])),...
+%               ';']);
+%     end
+% end
+% D_AuxVar_StateVar_tF = jacobian(AuxVar_t,StateVar_tF);
+% D_AuxVar_StateVar_t = jacobian(AuxVar_t,StateVar_t);
+% D_AuxVar_StateVar_tL = jacobian(AuxVar_t,StateVar_tL);
+% if
+% check for tF var in definition. If not, create tF variable.
+% check for tL var in definition. If not, create tL variable.
 
 keyboard
 
-check for tF var in definition. If not, create tF variable.
-check for tL var in definition. If not, create tL variable.
     
 
 
