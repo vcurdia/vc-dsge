@@ -33,6 +33,10 @@ fprintf('\n*** Analyzing DSGE model\n')
 % Set Timer
 s.TimeElapsed.(Action) = toc();
 
+% Check settings
+if ~exist('GensysAuthor','var'),GensysAuthor='CS';end
+
+
 %% -------------------------------------------------------------------
 
 %% Prepare variables and equations
@@ -154,28 +158,130 @@ end
 
 %% Generate matrices and MakeMats
 
-if ~exist('GensysAuthor','var'),GensysAuthor='CS';end
-
 fprintf('Generating Mats for model evaluation\n')
 s.FileName.Mats = sprintf('%sMats',s.Spec);
 
 % Initiate file
 fidMats = fopen([s.FileName.Mats,'.m'],'wt');
 fprintf(fidMats,...
-        'function o = %s(x,fid,verbose,varargin)\n\n',...
+        'function Mats = %s(x,varargin)\n\n',...
         s.FileName.Mats);
-fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs \n\n',clock);
+fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
-% map parameters
-fprintf(fidMats,'%% Map parameters\n');
+
+fprintf(fidMats,'\n%% Default options\n');
+fprintf(fidMats,'op.StoreParam = 0;\n');
+fprintf(fidMats,'op.StoreStateEq = 1;\n');
+fprintf(fidMats,'op.StoreObsEq = 1;\n');
+fprintf(fidMats,'op.StoreKF = 1;\n');
+fprintf(fidMats,'op.SolveREE = 1;\n');
+fprintf(fidMats,'op.fid = 1;\n');
+fprintf(fidMats,'op.verbose = 0;\n');
+
+fprintf(fidMats,'\n%% Update options\n');
+fprintf(fidMats,'if length(varargin)>0 && isstruct(varargin{1})\n');
+fprintf(fidMats,'    op = varargin{1};\n');
+fprintf(fidMats,'    varargin(1) = [];\n');
+fprintf(fidMats,'end\n');
+fprintf(fidMats,'for jop=1:(length(varargin)/2)\n'); 
+fprintf(fidMats,'    op.(varargin{(jo-1)*2+1}) = varargin{jo*2};\n');
+fprintf(fidMats,'end\n');
+
+fprintf(fidMats,'\n%% Map parameters\n');
 for j=1:s.nParam
-    fprintf(fidMats,'%s = x(%.0f);\n',Params.Names{j},j);
+    fprintf(fidMats,'%s = x(%.0f);\n',Param.Names{j},j);
 end
+fprintf(fidMats,'if op.StoreParam\n');
+for j=1:s.nParam
+    fprintf(fidMats,'    Mats.Param.%s = x(%.0f);\n',Param.Names{j},j);
+end
+fprintf(fidMats,'end\n');
+
+fprintf(fidMats,'\n%% Map auxiliary parameters\n');
 for j=1:s.nAuxParam
-    fprintf(fidMats,'%s = %s;\n',AuxParams.Names{j,1:2});
+    fprintf(fidMats,'%s = %s;\n',Model.AuxParam{j,1:2});
 end
+fprintf(fidMats,'if op.StoreParam\n');
+for j=1:s.nAuxParam
+    fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
+            AuxParam.Names{j});
+end
+fprintf(fidMats,'end\n');
 
+fprintf(fidMats,'\n%% Observation equations\n');
+H0 = -jacobian(ObsEq,ObsVar_t);
+SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
+SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
+MatNames = fieldnames(SymMats.ObsEq);
+nCols = [1,s.nStateVar];
+fprintf(fidMats,'if op.StoreObsEq || op.StoreKF\n');
+for jM=1:length(MatNames)
+    fprintf(fidMats,'    ObsEq.%s = [...\n',MatNames{jM});
+    for jeq=1:s.nObsVar
+        fprintf(fidMats,'       ');
+        for jc=1:nCols(jM)
+            fprintf(fidMats,' %s',...
+                    char(eval(sprintf('SymMats.ObsEq.%s(jeq,jc)',...
+                                      MatNames{jM}))));
+            if jc==nCols(jM)
+                fprintf(fidMats,';\n');
+            else
+                fprintf(fidMats,',');
+            end
+        end
+    end
+    fprintf(fidMats,'        ];\n');
+end
+fprintf(fidMats,'end\n');
+fprintf(fidMats,'if op.StoreObsEq\n');
+fprintf(fidMats,'    Mats.ObsEq = ObsEq;\n');
+fprintf(fidMats,'end\n');
 
+fprintf(fidMats,'\n%% State equation matrices\n');
+SymMats.StateEq.GammaBar = jacobian(StateEq,one);
+SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
+SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
+SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
+SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
+MatNames = fieldnames(SymMats.StateEq);
+nCols = [1,s.nStateVar,s.nStateVar,s.nStateVar,s.nShockVar];
+for jM=1:length(MatNames)
+    fprintf(fidMats,'StateEq.%s = [...\n',MatNames{jM});
+    for jeq=1:s.nStateVar
+        fprintf(fidMats,'   ');
+        for jc=1:nCols(jM)
+            fprintf(fidMats,' %s',...
+                    char(eval(sprintf('SymMats.StateEq.%s(jeq,jc)',...
+                                      MatNames{jM}))));
+            if jc==nCols(jM)
+                fprintf(fidMats,';\n');
+            else
+                fprintf(fidMats,',');
+            end
+        end
+    end
+    fprintf(fidMats,'    ];\n\n');
+end
+fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',s.nStateVar);
+fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',s.nStateVar);
+fprintf(fidMats,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
+fprintf(fidMats,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
+fprintf(fidMats,'StateEq.Gamma3(:,cv) = [];\n');
+fprintf(fidMats,'StateEq = rmfield(StateEq,''Gamma4'');\n');
+fprintf(fidMats,'if ~all(all(StateEq.Gamma4(~cv,:)==0,2))\n');
+fprintf(fidMats,'    error(''Incorrect system reduction'')\n');
+fprintf(fidMats,'end\n\n');
+fprintf(fidMats,'if op.StoreStateEq\n');
+fprintf(fidMats,'    Mats.StateEq = StateEq;\n');
+fprintf(fidMats,'end\n');
+
+fprintf(fidMats,'\n%% Solve REE\n');
+fprintf(fidMats,'if op.SolveREE\n');
+fprintf(fidMats,...
+        '    [Mats.REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
+fprintf(fidMats,...
+        '        ''%s'',op.fid,op.verbose,varargin{:});\n',GensysAuthor);
+fprintf(fidMats,'end\n');
 
 % close file
 fclose(fidMats);
