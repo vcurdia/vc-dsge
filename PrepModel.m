@@ -15,6 +15,7 @@ function s = PrepModel(s,Model,GensysAuthor)
 % ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
+% Created: January 25, 2016 by Vasco Curdia
 % 
 % Copyright (C) 2016 Vasco Curdia
 
@@ -161,9 +162,20 @@ s.FileName.Mats = sprintf('%sMats',s.Spec);
 % Initiate file
 fidMats = fopen([s.FileName.Mats,'.m'],'wt');
 fprintf(fidMats,...
-        'function Mats=%s(x,fid,verbose,varargin)\n\n',...
+        'function o = %s(x,fid,verbose,varargin)\n\n',...
         s.FileName.Mats);
 fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs \n\n',clock);
+
+% map parameters
+fprintf(fidMats,'%% Map parameters\n');
+for j=1:s.nParam
+    fprintf(fidMats,'%s = x(%.0f);\n',Params.Names{j},j);
+end
+for j=1:s.nAuxParam
+    fprintf(fidMats,'%s = %s;\n',AuxParams.Names{j,1:2});
+end
+
+
 
 % close file
 fclose(fidMats);
