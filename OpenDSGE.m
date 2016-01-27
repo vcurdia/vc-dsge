@@ -40,8 +40,9 @@ else
     s.Spec = Spec;
     s.SpecPath = SpecPath;
     s.FileName = struct;
-    s.Status = struct;
     s.Options = struct;
+    s.Status = struct;
+    s.TimeElapsed = struct;
     save(Spec,'-struct','s')
 end
 

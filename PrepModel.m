@@ -58,8 +58,8 @@ Param.PriorDist = {s.Param{:,2}}';
 Param.PriorMean = [s.Param{:,3}]';
 Param.PriorSE = [s.Param{:,4}]';
 s.Param = Param;
-s.nParam = length(Param.Names);
-for j=1:s.nParam
+n.Param = length(Param.Names);
+for j=1:n.Param
     eval(['syms ',Param.Names{j}]);
 end
 
@@ -72,26 +72,26 @@ else
 end
 AuxParam.Expressions = {s.AuxParam{:,2}}';
 s.AuxParam = AuxParam;
-s.nAuxParam = length(AuxParam.Names);
-for j=1:s.nAuxParam
+n.AuxParam = length(AuxParam.Names);
+for j=1:n.AuxParam
     eval(['syms ',AuxParam.Names{j}]);
 end
 
 % Observation variables
-s.nObsVar = length(s.ObsVar);
-ObsVar_t = sym(zeros(1,s.nObsVar));
-for j=1:s.nObsVar
+n.ObsVar = length(s.ObsVar);
+ObsVar_t = sym(zeros(1,n.ObsVar));
+for j=1:n.ObsVar
     jv = [s.ObsVar{j},'_t'];
     eval(['syms ',jv]);
     ObsVar_t(j) = eval(jv);
 end
 
 % State space variables
-s.nStateVar = length(s.StateVar);
-StateVar_t = sym(zeros(1,s.nStateVar)); 
-StateVar_tF = sym(zeros(1,s.nStateVar)); 
-StateVar_tL = sym(zeros(1,s.nStateVar));
-for j=1:s.nStateVar
+n.StateVar = length(s.StateVar);
+StateVar_t = sym(zeros(1,n.StateVar)); 
+StateVar_tF = sym(zeros(1,n.StateVar)); 
+StateVar_tL = sym(zeros(1,n.StateVar));
+for j=1:n.StateVar
     jv = [s.StateVar{j},'_t'];
     eval(sprintf('syms %1$s %1$sF %1$sL',jv))
     StateVar_t(j) = eval(jv);
@@ -100,9 +100,9 @@ for j=1:s.nStateVar
 end
 
 % Shocks
-s.nShockVar = length(s.ShockVar);
-ShockVar_t = sym(zeros(1,s.nShockVar));
-for j=1:s.nShockVar
+n.ShockVar = length(s.ShockVar);
+ShockVar_t = sym(zeros(1,n.ShockVar));
+for j=1:n.ShockVar
     jv = [s.ShockVar{j},'_t'];
     eval(['syms ',jv]);
     ShockVar_t(j) = eval(jv);
@@ -114,9 +114,9 @@ syms one
 % Auxiliary variables
 s.AuxEq = {s.AuxVar{:,2}}.';
 s.AuxVar = {s.AuxVar{:,1}}.';
-s.nAuxVar = length(s.AuxVar);
-AuxEq = sym(zeros(s.nAuxVar,1));
-for j=1:s.nAuxVar
+n.AuxVar = length(s.AuxVar);
+AuxEq = sym(zeros(n.AuxVar,1));
+for j=1:n.AuxVar
     jv = [s.AuxVar{j},'_t'];
     eval([jv,' = ',s.AuxEq{j},';'])
     AuxEq(j) = eval(jv);
@@ -136,26 +136,28 @@ for j=1:s.nAuxVar
 end
 
 % Build Observation equations
-s.nObsEq = length(s.ObsEq);
-if s.nObsEq~=s.nObsVar
+n.ObsEq = length(s.ObsEq);
+if n.ObsEq~=n.ObsVar
     error(['Number of observables (%\.0f) is different from number of ' ...
-           'observation equations (%.0f).'],s.nObsVar,s.nObsEq)
+           'observation equations (%.0f).'],n.ObsVar,n.ObsEq)
 end
-ObsEq = sym(zeros(s.nObsEq,1));
-for j=1:s.nObsEq
+ObsEq = sym(zeros(n.ObsEq,1));
+for j=1:n.ObsEq
     ObsEq(j) = sym(s.ObsEq{j});
 end
 
 % Build State equations
-s.nStateEq = length(s.StateEq);
-if s.nStateEq~=s.nStateVar
+n.StateEq = length(s.StateEq);
+if n.StateEq~=n.StateVar
     error(['Number of state variables (%\.0f) is different from number of ' ...
-           'state equations (%.0f).'],s.nStateVar,s.nStateEq)
+           'state equations (%.0f).'],n.StateVar,n.StateEq)
 end
-StateEq = sym(zeros(s.nStateEq,1));
-for j=1:s.nStateEq
+StateEq = sym(zeros(n.StateEq,1));
+for j=1:n.StateEq
     StateEq(j) = sym(s.StateEq{j});
 end
+
+s.n = n;
 
 
 %% Generate matrices
@@ -194,21 +196,21 @@ fprintf(fidMats,'\n%% Verify options\n');
 fprintf(fidMats,'if op.StoreKF, op.SolveREE = 1; end\n');
 
 fprintf(fidMats,'\n%% Map parameters\n');
-for j=1:s.nParam
+for j=1:n.Param
     fprintf(fidMats,'%s = x(%.0f);\n',Param.Names{j},j);
 end
 fprintf(fidMats,'if op.StoreParam\n');
-for j=1:s.nParam
+for j=1:n.Param
     fprintf(fidMats,'    Mats.Param.%s = x(%.0f);\n',Param.Names{j},j);
 end
 fprintf(fidMats,'end\n');
 
 fprintf(fidMats,'\n%% Map auxiliary parameters\n');
-for j=1:s.nAuxParam
+for j=1:n.AuxParam
     fprintf(fidMats,'%s = %s;\n',AuxParam.Names{j},AuxParam.Expressions{j});
 end
 fprintf(fidMats,'if op.StoreParam\n');
-for j=1:s.nAuxParam
+for j=1:n.AuxParam
     fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',AuxParam.Names{j});
 end
 fprintf(fidMats,'end\n');
@@ -218,11 +220,11 @@ H0 = -jacobian(ObsEq,ObsVar_t);
 SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
 SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
 MatNames = fieldnames(SymMats.ObsEq);
-nCols = [1,s.nStateVar];
+nCols = [1,n.StateVar];
 fprintf(fidMats,'if op.StoreObsEq || op.StoreKF\n');
 for jM=1:length(MatNames)
     fprintf(fidMats,'    ObsEq.%s = [...\n',MatNames{jM});
-    for jeq=1:s.nObsVar
+    for jeq=1:n.ObsVar
         fprintf(fidMats,'       ');
         for jc=1:nCols(jM)
             fprintf(fidMats,' %s',...
@@ -249,10 +251,10 @@ SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
 MatNames = fieldnames(SymMats.StateEq);
-nCols = [1,s.nStateVar,s.nStateVar,s.nStateVar,s.nShockVar];
+nCols = [1,n.StateVar,n.StateVar,n.StateVar,n.ShockVar];
 for jM=1:length(MatNames)
     fprintf(fidMats,'StateEq.%s = [...\n',MatNames{jM});
-    for jeq=1:s.nStateVar
+    for jeq=1:n.StateVar
         fprintf(fidMats,'   ');
         for jc=1:nCols(jM)
             fprintf(fidMats,' %s',...
@@ -267,8 +269,8 @@ for jM=1:length(MatNames)
     end
     fprintf(fidMats,'    ];\n\n');
 end
-fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',s.nStateVar);
-fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',s.nStateVar);
+fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',n.StateVar);
+fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',n.StateVar);
 fprintf(fidMats,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma3(:,cv) = [];\n');
@@ -293,30 +295,30 @@ fprintf(fidMats,'end\n');
 fprintf(fidMats,'\n%% Kalman Filter matrices\n');
 fprintf(fidMats,'if op.StoreKF\n');
 fprintf(fidMats,'    if all(Mats.REE.GBar(:)==0)\n');
-fprintf(fidMats,'        KF.StateVarBar = zeros(%.0f,1);\n',s.nStateVar);
+fprintf(fidMats,'        KF.StateVarBar = zeros(%.0f,1);\n',n.StateVar);
 fprintf(fidMats,'    else\n');
 fprintf(fidMats,'        KF.StateVarBar = (eye(%.0f)-REE.G1)\\REE.GBar;\n',...
-        s.nStateVar);
+        n.StateVar);
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
 
 if isfield(s,'KFinit') && isfield(s.KFinit,'State')
     fprintf(fidMats,'    s00 = [...\n');
-    for jeq=1:s.nStateVar
+    for jeq=1:n.StateVar
         fprintf(fidMats,'        %.16f;\n',s.KFinit.State(jeq));
     end
     fprintf(fidMats,'        ];\n\n');
 else
-    fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',s.nStateVar);
+    fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',n.StateVar);
 end
 
 if isfield(s,'KFinit') && isfield(s.KFinit,'Variance')
     fprintf(fidMats,'    sig00 = [...\n');
-    for jeq=1:s.nStateVar
+    for jeq=1:n.StateVar
         fprintf(fidMats,'       ');
-        for jc=1:s.nStateVar
+        for jc=1:n.StateVar
             fprintf(fidMats,' %0.16f',s.KFinit.Variance(jeq,jc));
-            if jc==s.nStateVar
+            if jc==n.StateVar
                 fprintf(fidMats,';\n');
             else
                 fprintf(fidMats,',');
@@ -343,13 +345,13 @@ fprintf(fidMats,'end\n');
 
 fprintf(fidMats,'\n%% Auxiliary equations matrices\n');
 MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
-nCols = [1,s.nStateVar,s.nStateVar,s.nStateVar,s.nShockVar];
+nCols = [1,n.StateVar,n.StateVar,n.StateVar,n.ShockVar];
 fprintf(fidMats,'if op.StoreAuxEq\n');
 for jM=1:length(MatNames)
     Mj = MatNames{jM};
     SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
     fprintf(fidMats,'    AuxEq.%s = [...\n',Mj);
-    for jeq=1:s.nAuxVar
+    for jeq=1:n.AuxVar
         fprintf(fidMats,'       ');
         for jc=1:nCols(jM)
             fprintf(fidMats,' %s',...
