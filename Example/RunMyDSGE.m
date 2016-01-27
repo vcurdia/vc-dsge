@@ -60,13 +60,13 @@ s.AuxParam = {...
     'etagamma','eta/exp(gamma)','\eta_\gamma';
     };
 
-s.AuxVar = {'pima','(pi_t+pi_tL)/2'};
+s.AuxVar = {'r','ir_t-pi_tF'};
 
 s.ObsVar = {'DGDP';'PI';'FFR'};
 
 s.StateVar = {...
     % Regular variables
-    'xtil';'YA';'pitil';'pi';'ir';'r';
+    'xtil';'YA';'pitil';'pi';'ir';
     'xe';'re';'YAe';
     'delta';'gamma';'u';
     % a couple of artificial variables
@@ -86,7 +86,6 @@ s.StateEq = {...
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
      '-xtil_t'];
-    'ir_t-pi_tF - r_t';
     % Efficient Rates
     'YA_t-YAe_t-xe_t';
     'YAe_tF-omega^(-1)*(gamma_tF-re_t+delta_tF)-YAe_t';

@@ -15,7 +15,7 @@ function s = PrepModel(s)
 % ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% Created: January 26, 2016 by Vasco Curdia
+% Created: January 27, 2016 by Vasco Curdia
 % 
 % Copyright (C) 2016 Vasco Curdia
 
@@ -112,21 +112,23 @@ end
 syms one
 
 % Auxiliary variables
-s.nAuxVar = size(s.AuxVar,1);
-AuxVar_t = sym(zeros(s.nAuxVar,1));
+s.AuxEq = {s.AuxVar{:,2}}.';
+s.AuxVar = {s.AuxVar{:,1}}.';
+s.nAuxVar = length(s.AuxVar);
+AuxEq = sym(zeros(s.nAuxVar,1));
 for j=1:s.nAuxVar
-    jv = [s.AuxVar{j,1},'_t'];
-    eval([jv,' = ',s.AuxVar{j,2},';'])
-    AuxVar_t(j) = eval(jv);
+    jv = [s.AuxVar{j},'_t'];
+    eval([jv,' = ',s.AuxEq{j},';'])
+    AuxEq(j) = eval(jv);
     % if the expression has no leads then can define a lead for it
-    if all(jacobian(AuxVar_t(j),StateVar_tF)==0)
+    if all(jacobian(AuxEq(j),StateVar_tF)==0)
         eval([jv,'F = subs(',jv,',[StateVar_t,StateVar_tL]',...
               ',[StateVar_tF,StateVar_t]);'])
         % if expreassion has no leads or lags then can define lag for it. 
         % notice that it does not make sense to define a lag if there are 
         % leads in it, and that's why the check for lags is inside the check 
         % for leads
-        if all(jacobian(AuxVar_t(j),StateVar_tL)==0)
+        if all(jacobian(AuxEq(j),StateVar_tL)==0)
             eval([jv,'L = subs(',jv,',[StateVar_tF,StateVar_t]',...
                   ',[StateVar_t,StateVar_tL]);'])
         end
@@ -174,6 +176,7 @@ fprintf(fidMats,'op.StoreParam = 1;\n');
 fprintf(fidMats,'op.StoreStateEq = 1;\n');
 fprintf(fidMats,'op.StoreObsEq = 1;\n');
 fprintf(fidMats,'op.StoreKF = 1;\n');
+fprintf(fidMats,'op.StoreAuxEq = 1;\n');
 fprintf(fidMats,'op.SolveREE = 1;\n');
 fprintf(fidMats,'op.fid = 1;\n');
 fprintf(fidMats,'op.verbose = 0;\n');
@@ -336,6 +339,43 @@ fprintf(fidMats,'    KF.sig00 = sig00;\n');
 fprintf(fidMats,'    KF.sig00rc = sig00rc;\n');
 fprintf(fidMats,'    Mats.KF = KF;\n');
 fprintf(fidMats,'end\n');
+
+
+fprintf(fidMats,'\n%% Auxiliary equations matrices\n');
+MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
+nCols = [1,s.nStateVar,s.nStateVar,s.nStateVar,s.nShockVar];
+fprintf(fidMats,'if op.StoreAuxEq\n');
+for jM=1:length(MatNames)
+    Mj = MatNames{jM};
+    SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
+    fprintf(fidMats,'    AuxEq.%s = [...\n',Mj);
+    for jeq=1:s.nAuxVar
+        fprintf(fidMats,'       ');
+        for jc=1:nCols(jM)
+            fprintf(fidMats,' %s',...
+                    char(eval(sprintf('SymMats.AuxEq.%s(jeq,jc)',Mj))));
+            if jc==nCols(jM)
+                fprintf(fidMats,';\n');
+            else
+                fprintf(fidMats,',');
+            end
+        end
+    end
+    fprintf(fidMats,'        ];\n\n');
+end
+fprintf(fidMats,'    if op.SolveREE\n');
+fprintf(fidMats,['        AuxEq.REE.GBar = ',...
+                 'AuxEq.one+AuxEq.StateVar_tF*REE.GBar;\n']);
+fprintf(fidMats,['        AuxEq.REE.G0 = ',...
+                 'AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1;\n']);
+fprintf(fidMats,['        AuxEq.REE.G1 = AuxEq.StateVar_tL;\n']);
+fprintf(fidMats,['        AuxEq.REE.G2 = AuxEq.ShockVar_t;\n']);
+fprintf(fidMats,'    end\n');
+fprintf(fidMats,'end\n');
+fprintf(fidMats,'if op.StoreAuxEq\n');
+fprintf(fidMats,'    Mats.AuxEq = AuxEq;\n');
+fprintf(fidMats,'end\n');
+
 
 % close file
 fclose(fidMats);
