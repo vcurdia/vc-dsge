@@ -25,8 +25,8 @@ function s = PrepModel(s)
 
 Action = 'PrepModel';
 
-% check if model already prepared
-if isfield(s.Status,Action) && s.Status.(Action), return, end
+% % check if model already prepared
+% if isfield(s.Status,Action) && s.Status.(Action), return, end
 
 fprintf('\n*** Analyzing DSGE model\n')
 

@@ -28,8 +28,6 @@ tic
 %% Initiate DSGE
 s = OpenDSGE('MyDSGE');
 
-s.Status.PrepModel = 0; % force PrepModel to be redone
-
 %% Setup the model
 
 s.Param = {...
