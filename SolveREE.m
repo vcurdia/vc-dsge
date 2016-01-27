@@ -32,7 +32,7 @@ if strcmp(Author,'JW')
 end
 
 %% Run CS
-if all(eu(:)==1), return, end
+if all(REE.eu(:)==1), return, end
     [REE.G1,REE.GBar,REE.G2,fmat,fwt,ywt,gev,REE.eu] = ...
         gensysvb(StateEq.Gamma0,StateEq.Gamma1,StateEq.GammaBar,...
                  StateEq.Gamma2,StateEq.Gamma3,varargin{:});
