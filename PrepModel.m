@@ -1,4 +1,4 @@
-function s = PrepModel(s,Model,GensysAuthor)
+function s = PrepModel(s,Model)
 
 % PrepModel
 %
@@ -15,7 +15,7 @@ function s = PrepModel(s,Model,GensysAuthor)
 % ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% Created: January 25, 2016 by Vasco Curdia
+% Created: January 26, 2016 by Vasco Curdia
 % 
 % Copyright (C) 2016 Vasco Curdia
 
@@ -34,7 +34,7 @@ fprintf('\n*** Analyzing DSGE model\n')
 s.TimeElapsed.(Action) = toc();
 
 % Check settings
-if ~exist('GensysAuthor','var'),GensysAuthor='CS';end
+if ~isfield(s,'GensysAuthor'), s.GensysAuthor = 'CS';end
 
 
 %% -------------------------------------------------------------------
@@ -156,7 +156,7 @@ for j=1:s.nStateEq
 end
 
 
-%% Generate matrices and MakeMats
+%% Generate matrices
 
 fprintf('Generating Mats for model evaluation\n')
 s.FileName.Mats = sprintf('%sMats',s.Spec);
@@ -186,6 +186,9 @@ fprintf(fidMats,'end\n');
 fprintf(fidMats,'for jop=1:(length(varargin)/2)\n'); 
 fprintf(fidMats,'    op.(varargin{(jo-1)*2+1}) = varargin{jo*2};\n');
 fprintf(fidMats,'end\n');
+
+fprintf(fidMats,'\n%% Verify options\n');
+fprintf(fidMats,'if op.StoreKF, op.SolveREE = 1; end\n');
 
 fprintf(fidMats,'\n%% Map parameters\n');
 for j=1:s.nParam
@@ -278,10 +281,63 @@ fprintf(fidMats,'end\n');
 fprintf(fidMats,'\n%% Solve REE\n');
 fprintf(fidMats,'if op.SolveREE\n');
 fprintf(fidMats,...
-        '    [Mats.REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
+        '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fidMats,...
-        '        ''%s'',op.fid,op.verbose,varargin{:});\n',GensysAuthor);
+        '        ''%s'',op.fid,op.verbose,varargin{:});\n',s.GensysAuthor);
+fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'end\n');
+
+
+fprintf(fidMats,'\n%% Kalman Filter matrices\n');
+fprintf(fidMats,'if op.StoreKF\n');
+fprintf(fidMats,'    if all(Mats.REE.GBar(:)==0)\n');
+fprintf(fidMats,'        KF.StateVarBar = zeros(%.0f,1);\n',s.nStateVar);
+fprintf(fidMats,'    else\n');
+fprintf(fidMats,'        KF.StateVarBar = (eye(%.0f)-REE.G1)\\REE.GBar;\n',...
+        s.nStateVar);
+fprintf(fidMats,'    end\n');
+fprintf(fidMats,'    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
+
+if isfield(s,'KFinit') && isfield(s.KFinit,'State')
+    fprintf(fidMats,'    s00 = [...\n');
+    for jeq=1:s.nStateVar
+        fprintf(fidMats,'        %.16f;\n',s.KFinit.State(jeq));
+    end
+    fprintf(fidMats,'        ];\n\n');
+else
+    fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',s.nStateVar);
+end
+
+if isfield(s,'KFinit') && isfield(s.KFinit,'Variance')
+    fprintf(fidMats,'    sig00 = [...\n');
+    for jeq=1:s.nStateVar
+        fprintf(fidMats,'       ');
+        for jc=1:s.nStateVar
+            fprintf(fidMats,' %0.16f',s.KFinit.Variance(jeq,jc));
+            if jc==s.nStateVar
+                fprintf(fidMats,';\n');
+            else
+                fprintf(fidMats,',');
+            end
+        end
+    end
+    fprintf(fidMats,'    ];\n\n');
+    fprintf(fidMats,'    sig00rc = 0;\n');
+else
+    fprintf(fidMats,'    [sig00,sig00rc] = lyapcsd(REE.G1,REE.G2*REE.G2'');\n');
+    fprintf(fidMats,'    sig00 = real(sig00); sig00 = (sig00+sig00'')/2;\n');
+    fprintf(fidMats,'    if sig00rc~=0\n');
+    fprintf(fidMats,'        if verbose\n');
+    fprintf(fidMats,['            fprintf(fid,''Warning: Could not find ',...
+                     'unconditional variance!\\n'');\n']);
+    fprintf(fidMats,'        end\n\n');
+    fprintf(fidMats,'    end\n\n');
+end
+fprintf(fidMats,'    KF.sig00 = sig00;\n');
+fprintf(fidMats,'    KF.sig00rc = sig00rc;\n');
+fprintf(fidMats,'end\n');
+
+
 
 % close file
 fclose(fidMats);

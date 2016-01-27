@@ -31,6 +31,7 @@ else
     fprintf('Initiating DSGE: %s\n',Spec);
     s.Spec = Spec;
     s.Status = struct;
+    s.Options = struct;
     save(Spec,'-struct','s')
 end
 
