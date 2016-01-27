@@ -32,7 +32,7 @@ s.Status.PrepModel = 0; % force PrepModel to be redone
 
 %% Setup the model
 
-Model.Param = {...
+s.Param = {...
     'omega', 'G', 1, 0.2,'\omega';
     'xi', 'G', 0.1, 0.05,'\xi';
     'eta', 'B', 0.6, 0.2,'\eta';
@@ -52,7 +52,7 @@ Model.Param = {...
     'sigmai', 'IG1', 0.5, 2,'\sigma_i';
     };
 
-Model.AuxParam = {...
+s.AuxParam = {...
     'beta','0.99','\beta';
     'gamma','gammaa/400','\gamma';
     'r','ra/400','r';
@@ -62,11 +62,11 @@ Model.AuxParam = {...
     'etagamma','eta/exp(gamma)','\eta_\gamma';
     };
 
-Model.AuxVar = {'pima','(pi_t+pi_tL)/2'};
+s.AuxVar = {'pima','(pi_t+pi_tL)/2'};
 
-Model.ObsVar = {'DGDP';'PI';'FFR'};
+s.ObsVar = {'DGDP';'PI';'FFR'};
 
-Model.StateVar = {...
+s.StateVar = {...
     % Regular variables
     'xtil';'YA';'pitil';'pi';'ir';'r';
     'xe';'re';'YAe';
@@ -75,15 +75,15 @@ Model.StateVar = {...
     'YAL';'YAeL';
     };
 
-Model.ShockVar = {'edelta';'egamma';'eu';'ei'}; 
+s.ShockVar = {'edelta';'egamma';'eu';'ei'}; 
 
-Model.ObsEq = {...
+s.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
     };
 
-Model.StateEq = {...
+s.StateEq = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -109,7 +109,7 @@ Model.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-s = PrepModel(s,Model);
+s = PrepModel(s);
 
 
 

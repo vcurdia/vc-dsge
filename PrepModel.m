@@ -1,4 +1,4 @@
-function s = PrepModel(s,Model)
+function s = PrepModel(s)
 
 % PrepModel
 %
@@ -44,20 +44,19 @@ if ~isfield(s,'GensysAuthor'), s.GensysAuthor = 'CS';end
 fprintf('Generating symbolic variables and systems of equations...\n')
 
 % Check for non-specified model fields
-if ~isfield(Model,'AuxParam'), Model.AuxParam = cell(0,2); end
-if ~isfield(Model,'AuxVar'), Model.AuxVar = cell(0,2); end
-s.Model = Model;
+if ~isfield(s,'AuxParam'), s.AuxParam = cell(0,2); end
+if ~isfield(s,'AuxVar'), s.AuxVar = cell(0,2); end
 
 % Parameters
-Param.Names = {Model.Param{:,1}}';
-if size(Param,2)==4
+Param.Names = {s.Param{:,1}}';
+if size(s.Param,2)==4
     Param.PrettyNames = Param.Names;
 else
-    Param.PrettyNames = {Model.Param{:,5}}';
+    Param.PrettyNames = {s.Param{:,5}}';
 end
-Param.PriorDist = {Model.Param{:,2}}';
-Param.PriorMean = [Model.Param{:,3}]';
-Param.PriorSE = [Model.Param{:,4}]';
+Param.PriorDist = {s.Param{:,2}}';
+Param.PriorMean = [s.Param{:,3}]';
+Param.PriorSE = [s.Param{:,4}]';
 s.Param = Param;
 s.nParam = length(Param.Names);
 for j=1:s.nParam
@@ -65,12 +64,13 @@ for j=1:s.nParam
 end
 
 % Auxiliary Parameters
-AuxParam.Names = {Model.AuxParam{:,1}}';
-if size(AuxParam,2)==2
+AuxParam.Names = {s.AuxParam{:,1}}';
+if size(s.AuxParam,2)==2
     AuxParam.PrettyNames = AuxParam.Names;
 else
-    AuxParam.PrettyNames = {Model.AuxParam{:,3}}';
+    AuxParam.PrettyNames = {s.AuxParam{:,3}}';
 end
+AuxParam.Expressions = {s.AuxParam{:,2}}';
 s.AuxParam = AuxParam;
 s.nAuxParam = length(AuxParam.Names);
 for j=1:s.nAuxParam
@@ -78,21 +78,21 @@ for j=1:s.nAuxParam
 end
 
 % Observation variables
-s.nObsVar = length(Model.ObsVar);
+s.nObsVar = length(s.ObsVar);
 ObsVar_t = sym(zeros(1,s.nObsVar));
 for j=1:s.nObsVar
-    jv = [Model.ObsVar{j},'_t'];
+    jv = [s.ObsVar{j},'_t'];
     eval(['syms ',jv]);
     ObsVar_t(j) = eval(jv);
 end
 
 % State space variables
-s.nStateVar = length(Model.StateVar);
+s.nStateVar = length(s.StateVar);
 StateVar_t = sym(zeros(1,s.nStateVar)); 
 StateVar_tF = sym(zeros(1,s.nStateVar)); 
 StateVar_tL = sym(zeros(1,s.nStateVar));
 for j=1:s.nStateVar
-    jv = [Model.StateVar{j},'_t'];
+    jv = [s.StateVar{j},'_t'];
     eval(sprintf('syms %1$s %1$sF %1$sL',jv))
     StateVar_t(j) = eval(jv);
     StateVar_tF(j) = eval([jv,'F']);
@@ -100,10 +100,10 @@ for j=1:s.nStateVar
 end
 
 % Shocks
-s.nShockVar = length(Model.ShockVar);
+s.nShockVar = length(s.ShockVar);
 ShockVar_t = sym(zeros(1,s.nShockVar));
 for j=1:s.nShockVar
-    jv = [Model.ShockVar{j},'_t'];
+    jv = [s.ShockVar{j},'_t'];
     eval(['syms ',jv]);
     ShockVar_t(j) = eval(jv);
 end
@@ -112,11 +112,11 @@ end
 syms one
 
 % Auxiliary variables
-s.nAuxVar = size(Model.AuxVar,1);
+s.nAuxVar = size(s.AuxVar,1);
 AuxVar_t = sym(zeros(s.nAuxVar,1));
 for j=1:s.nAuxVar
-    jv = [Model.AuxVar{j,1},'_t'];
-    eval([jv,' = ',Model.AuxVar{j,2},';'])
+    jv = [s.AuxVar{j,1},'_t'];
+    eval([jv,' = ',s.AuxVar{j,2},';'])
     AuxVar_t(j) = eval(jv);
     % if the expression has no leads then can define a lead for it
     if all(jacobian(AuxVar_t(j),StateVar_tF)==0)
@@ -134,25 +134,25 @@ for j=1:s.nAuxVar
 end
 
 % Build Observation equations
-s.nObsEq = length(Model.ObsEq);
+s.nObsEq = length(s.ObsEq);
 if s.nObsEq~=s.nObsVar
     error(['Number of observables (%\.0f) is different from number of ' ...
            'observation equations (%.0f).'],s.nObsVar,s.nObsEq)
 end
 ObsEq = sym(zeros(s.nObsEq,1));
 for j=1:s.nObsEq
-    ObsEq(j) = sym(Model.ObsEq{j});
+    ObsEq(j) = sym(s.ObsEq{j});
 end
 
 % Build State equations
-s.nStateEq = length(Model.StateEq);
+s.nStateEq = length(s.StateEq);
 if s.nStateEq~=s.nStateVar
     error(['Number of state variables (%\.0f) is different from number of ' ...
            'state equations (%.0f).'],s.nStateVar,s.nStateEq)
 end
 StateEq = sym(zeros(s.nStateEq,1));
 for j=1:s.nStateEq
-    StateEq(j) = sym(Model.StateEq{j});
+    StateEq(j) = sym(s.StateEq{j});
 end
 
 
@@ -170,7 +170,7 @@ fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
 
 fprintf(fidMats,'\n%% Default options\n');
-fprintf(fidMats,'op.StoreParam = 0;\n');
+fprintf(fidMats,'op.StoreParam = 1;\n');
 fprintf(fidMats,'op.StoreStateEq = 1;\n');
 fprintf(fidMats,'op.StoreObsEq = 1;\n');
 fprintf(fidMats,'op.StoreKF = 1;\n');
@@ -184,7 +184,7 @@ fprintf(fidMats,'    op = varargin{1};\n');
 fprintf(fidMats,'    varargin(1) = [];\n');
 fprintf(fidMats,'end\n');
 fprintf(fidMats,'for jop=1:(length(varargin)/2)\n'); 
-fprintf(fidMats,'    op.(varargin{(jo-1)*2+1}) = varargin{jo*2};\n');
+fprintf(fidMats,'    op.(varargin{(jop-1)*2+1}) = varargin{jop*2};\n');
 fprintf(fidMats,'end\n');
 
 fprintf(fidMats,'\n%% Verify options\n');
@@ -202,12 +202,11 @@ fprintf(fidMats,'end\n');
 
 fprintf(fidMats,'\n%% Map auxiliary parameters\n');
 for j=1:s.nAuxParam
-    fprintf(fidMats,'%s = %s;\n',Model.AuxParam{j,1:2});
+    fprintf(fidMats,'%s = %s;\n',AuxParam.Names{j},AuxParam.Expressions{j});
 end
 fprintf(fidMats,'if op.StoreParam\n');
 for j=1:s.nAuxParam
-    fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
-            AuxParam.Names{j});
+    fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',AuxParam.Names{j});
 end
 fprintf(fidMats,'end\n');
 
@@ -270,10 +269,10 @@ fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',s.nStateVar);
 fprintf(fidMats,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma3(:,cv) = [];\n');
-fprintf(fidMats,'StateEq = rmfield(StateEq,''Gamma4'');\n');
 fprintf(fidMats,'if ~all(all(StateEq.Gamma4(~cv,:)==0,2))\n');
 fprintf(fidMats,'    error(''Incorrect system reduction'')\n');
 fprintf(fidMats,'end\n\n');
+fprintf(fidMats,'StateEq = rmfield(StateEq,''Gamma4'');\n');
 fprintf(fidMats,'if op.StoreStateEq\n');
 fprintf(fidMats,'    Mats.StateEq = StateEq;\n');
 fprintf(fidMats,'end\n');
@@ -335,9 +334,8 @@ else
 end
 fprintf(fidMats,'    KF.sig00 = sig00;\n');
 fprintf(fidMats,'    KF.sig00rc = sig00rc;\n');
+fprintf(fidMats,'    Mats.KF = KF;\n');
 fprintf(fidMats,'end\n');
-
-
 
 % close file
 fclose(fidMats);
@@ -348,11 +346,7 @@ fclose(fidMats);
 %% -------------------------------------------------------------------
 
 %% Finish up
-
-% Record Model as prepared
 s.Status.(Action) = 1;
-
-% Time Elapsed
 s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
 
 %% -------------------------------------------------------------------
