@@ -367,11 +367,12 @@ for jM=1:length(MatNames)
 end
 fprintf(fidMats,'    if op.SolveREE\n');
 fprintf(fidMats,['        AuxEq.REE.GBar = ',...
-                 'AuxEq.one+AuxEq.StateVar_tF*REE.GBar;\n']);
-fprintf(fidMats,['        AuxEq.REE.G0 = ',...
-                 'AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1;\n']);
-fprintf(fidMats,['        AuxEq.REE.G1 = AuxEq.StateVar_tL;\n']);
-fprintf(fidMats,['        AuxEq.REE.G2 = AuxEq.ShockVar_t;\n']);
+                 'AuxEq.one+AuxEq.StateVar_tF*REE.GBar',...
+                 '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.GBar;\n']);
+fprintf(fidMats,['        AuxEq.REE.G1 = AuxEq.StateVar_tL',...
+                 '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G1;\n']);
+fprintf(fidMats,['        AuxEq.REE.G2 = AuxEq.ShockVar_t',...
+                 '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G2;\n']);
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 fprintf(fidMats,'if op.StoreAuxEq\n');
