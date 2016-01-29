@@ -34,7 +34,7 @@ fprintf('\n*** Analyzing DSGE model\n')
 s.TimeElapsed.(Action) = toc();
 
 % Check settings
-if ~isfield(s,'GensysAuthor'), s.GensysAuthor = 'CS';end
+if ~isfield(s.Options,'GensysAuthor'), s.Options.GensysAuthor = 'CS';end
 
 
 %% -------------------------------------------------------------------
@@ -287,7 +287,8 @@ fprintf(fidMats,'if op.SolveREE\n');
 fprintf(fidMats,...
         '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fidMats,...
-        '        ''%s'',op.fid,op.verbose,varargin{:});\n',s.GensysAuthor);
+        '        ''%s'',op.fid,op.verbose,varargin{:});\n',...
+        s.Options.GensysAuthor);
 fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'end\n');
 
