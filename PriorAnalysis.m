@@ -39,7 +39,8 @@ if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
 s.Options.Prior = op;
-s.FileName.PriorDraws = [s.Spec,'PriorDraws'];
+s.FileName.PriorDraw = [s.Spec,'PriorDraw'];
+s.FileName.PriorSample = [s.Spec,'PriorSample'];
 
 %% -------------------------------------------------------------------
 
@@ -215,29 +216,27 @@ if op.ShowTable
     fprintf('\n------------------\n')
     namelength = [cellfun('length',p.Names)];
     namelengthmax = max(namelength);
-    DispList = {'','','Names';
-                'Prior','dist','PriorDist';
-                '','  mode','PriorMode';
-                '','  mean','PriorMean';
-                '','   se','PriorSE';
-                '','   5%','PriorPrc050';
-                '',' median','PriorPrc500';
-                '','   95%','PriorPrc950';
+    DispList = {'','Names';
+                'dist','PriorDist';
+                '  mode','PriorMode';
+                '  mean','PriorMean';
+                '   se','PriorSE';
+                '   5%','PriorPrc050';
+                ' median','PriorPrc500';
+                '   95%','PriorPrc950';
                }';
     nc = size(DispList,2);
-    for jr=1:2
-        fprintf(['%-',int2str(namelengthmax),'s'],DispList{jr,1});
-        fprintf('  %-4s',DispList{jr,2});
-        for jc=3:nc
-            fprintf('  %-7s',DispList{jr,jc});
-        end
-        fprintf('\n');
+    fprintf(['%-',int2str(namelengthmax),'s'],DispList{1,1});
+    fprintf('  %-4s',DispList{1,2});
+    for jc=3:nc
+        fprintf('  %-8s',DispList{1,jc});
     end
+    fprintf('\n');
     for j=1:np
-        fprintf(['%',int2str(namelengthmax),'s'],p.(DispList{3,1}){j});
-        fprintf('  %4s',p.(DispList{3,2}){j});
+        fprintf(['%',int2str(namelengthmax),'s'],p.(DispList{2,1}){j});
+        fprintf('  %4s',p.(DispList{2,2}){j});
         for jc=3:nc
-            fprintf('  %7.4f',p.(DispList{3,jc})(j));
+            fprintf('  %8.4f',p.(DispList{2,jc})(j));
         end
         fprintf('\n');
     end
@@ -246,9 +245,93 @@ end
 
 
 %% Generate prior draws
-fprintf('Generating function to draw from prior...\n')
-s.FileName.PriorDraw = [s.Spec,'PriorDraw'];
 
+fprintf('Generating function to draw from prior...\n')
+
+fid = fopen([s.FileName.PriorDraw,'.m'],'wt');
+fprintf(fid,'function x=%s(nDraws)\n\n',s.FileName.PriorDraw);
+fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n\n',clock);
+fprintf(fid,'if ~exist(''nDraws'',''var''), nDraws = 1; end\n');
+fprintf(fid,'x = zeros(%.0f,nDraws);\n',np);
+fprintf(fid,'for jd=1:nDraws\n');
+for j=1:np
+    fprintf(fid,'    x(%.0f,jd) = %s;\n',j,p.PriorRndCmd{j});
+end
+fprintf(fid,'end\n');
+fclose(fid);
+
+if op.nDrawsSample>0
+    fprintf('\nPrior Sample:')
+    fprintf('\n-------------\n\n')
+    ps.nDraws = op.nDrawsSample;
+    xd = zeros(np,ps.nDraws);
+    xdAux = zeros(s.n.AuxParam,ps.nDraws);
+    xj = zeros(np,1);
+    BadDraws = false(1,ps.nDraws);
+    xd = feval(s.FileName.PriorDraw,ps.nDraws);
+    fn = s.FileName.Mats;
+    nAux = s.n.AuxParam;
+    ListAux = s.AuxParam.Names;
+    parfor jd=1:ps.nDraws
+        Matsj = feval(fn,xd(:,jd));
+        BadDraws(jd) = ~all(Matsj.REE.eu==1) || Matsj.KF.sig00rc~=0;
+        for jp=1:nAux
+            xdAux(jp,jd) = Matsj.AuxParam.(ListAux{jp});
+        end
+    end
+    clear fn
+    ps.nBadDraws = sum(BadDraws);
+    ps.FractionBadDraws = ps.nBadDraws/ps.nDraws;
+    ps.LogTruncationCorrection = -log(1-ps.FractionBadDraws);
+    xd(:,BadDraws) = [];
+    ps.nDraws = size(xd,2);
+    fprintf('Number of accepted draws: %.0f\n',ps.nDraws);
+    fprintf(...
+        'Percent of rejected draws: %.2f%%\n',...
+        ps.FractionBadDraws*100);
+    fprintf('log-prior correction: %.6f\n',ps.LogTruncationCorrection);
+    ps.Param.Mean = mean(xd,2);
+    ps.Param.SE = std(xd,0,2);
+    ps.Param.Prc050 = prctile(xd,5,2);
+    ps.Param.Prc500 = prctile(xd,50,2);
+    ps.Param.Prc950 = prctile(xd,95,2);
+    xdAux(:,BadDraws) = [];
+    ps.AuxParam.Mean = mean(xdAux,2);
+    ps.AuxParam.SE = std(xdAux,0,2);
+    ps.AuxParam.Prc050 = prctile(xdAux,5,2);
+    ps.AuxParam.Prc500 = prctile(xdAux,50,2);
+    ps.AuxParam.Prc950 = prctile(xdAux,95,2);
+    s.PriorSample = ps;
+    if op.ShowTableSample
+        pList = {'Param','AuxParam'};
+        DispList = {'  mean','Mean';
+                    '   se','SE';
+                    '   5%','Prc050';
+                    ' median','Prc500';
+                    '   95%','Prc950';
+                   }';
+        nc = size(DispList,2);
+        for jP=1:length(pList)
+            Pj = pList{jP};
+            psj = ps.(Pj);
+            namelength = [cellfun('length',s.(Pj).Names)];
+            namelengthmax = max(namelength);
+            fprintf(['\n%-',int2str(namelengthmax),'s'],'');
+            for jc=1:nc
+                fprintf('  %-8s',DispList{1,jc});
+            end
+            fprintf('\n');
+            for jp=1:s.n.(Pj)
+                fprintf(['%',int2str(namelengthmax),'s'],s.(Pj).Names{jp});
+                for jc=1:nc
+                    fprintf('  %8.4f',ps.(Pj).(DispList{2,jc})(jp));
+                end
+                fprintf('\n');
+            end
+        end
+    end
+    save(s.FileName.PriorSample,'xd')
+end
 
 %% -------------------------------------------------------------------
 
