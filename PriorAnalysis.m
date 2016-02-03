@@ -152,7 +152,7 @@ for j=1:np
                      '-pmean^2-pvar;\n']);
             fprintf(fid,'end\n');
             fclose(fid);
-            [a,rc] = csolve(fname,5,[],1e-10,1000);
+            [a,rc] = csolvevb(fname,5,[],1e-10,1000);
             if rc~=0, 
                 error('Search for iGam parameters failed, rc=%.0f',rc), 
             end
@@ -211,8 +211,8 @@ s.Param = p;
 
 %% display results on screen
 if op.ShowTable
-    fprintf('\nPrior analysis:')
-    fprintf('\n===============\n')
+    fprintf('\nPrior Information:')
+    fprintf('\n------------------\n')
     namelength = [cellfun('length',p.Names)];
     namelengthmax = max(namelength);
     DispList = {'','','Names';
@@ -226,24 +226,29 @@ if op.ShowTable
                }';
     nc = size(DispList,2);
     for jr=1:2
-        str2show = sprintf(['%-',int2str(namelengthmax),'s'],DispList{jr,1});
-        str2show = sprintf('%s  %-4s',str2show,DispList{jr,2});
+        fprintf(['%-',int2str(namelengthmax),'s'],DispList{jr,1});
+        fprintf('  %-4s',DispList{jr,2});
         for jc=3:nc
-            str2show = sprintf('%s  %-7s',str2show,DispList{jr,jc});
+            fprintf('  %-7s',DispList{jr,jc});
         end
-        disp(str2show)
+        fprintf('\n');
     end
     for j=1:np
-        str2show = sprintf(['%',int2str(namelengthmax),'s'],...
-                           p.(DispList{3,1}){j});
-        str2show = sprintf('%s  %4s',str2show,p.(DispList{3,2}){j});
+        fprintf(['%',int2str(namelengthmax),'s'],p.(DispList{3,1}){j});
+        fprintf('  %4s',p.(DispList{3,2}){j});
         for jc=3:nc
-            str2show = sprintf('%s  %7.4f',str2show,p.(DispList{3,jc})(j));
+            fprintf('  %7.4f',p.(DispList{3,jc})(j));
         end
-        disp(str2show)
+        fprintf('\n');
     end
-    disp(' ')
+    fprintf('\n');
 end
+
+
+%% Generate prior draws
+fprintf('Generating function to draw from prior...\n')
+s.FileName.PriorDraw = [s.Spec,'PriorDraw'];
+
 
 %% -------------------------------------------------------------------
 
