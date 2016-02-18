@@ -19,12 +19,13 @@ function s = MakeIRF(s)
 
 Action = 'IRF';
 
-fprintf('\n*** Making Simulations\n')
+fprintf('\n*** Making IRF\n')
 
 % Set Timer
 s.TimeElapsed.(Action) = toc();
 
 %% Options
+
 if isfield(s.Options,'IRF')
     op = s.Options.IRF;
 else
@@ -64,25 +65,18 @@ if ~isfield(op,'yMaxSlack'), op.yMaxSlack = []; end
 if ~isfield(op,'yMinScale'), op.yMinScale = 0; end
 
 if ~isfield(op,'ShowFig'), op.ShowFig = 0; end
-if ~isfield(op,'KeepData'), op.KeepData = 0; end
-
-if ~isfield(s,'KeepData'), op.KeepData = 0; end
 
 if ~isfield(s,'PlotDir') || ~isfield(s.PlotDir,'IRF')
     s.PlotDir.IRF = 'Plots_IRF/';
 end
-if ~isdir(PlotDir.IRF), mkdir(PlotDir.IRF), end
-if ~isfield(FileName,'PlotsIRF'), 
-    FileName.PlotsIRF = sprintf('%sIRF',FileName.Output); 
+if ~isdir(s.PlotDir.IRF), mkdir(s.PlotDir.IRF), end
+if ~isfield(s.FileName,'PlotsIRF'), 
+    s.FileName.PlotsIRF = sprintf('%sIRF',s.Spec); 
 end
 
-s.Options.IRF = op;
-
-%% -------------------------------------------------------------------
-
-%% Check options
-nVars2Show = length(op.Vars2Show);
-for jP=1:nVars2Show
+% Check options
+nPanels = length(op.Vars2Show);
+for jP=1:nPanels
     if ~isfield(op.Vars2Show(jP),'NamesPretty')
         op.Vars2Show(jP).NamesPretty = op.Vars2Show(jP).Names;
     end
@@ -90,7 +84,28 @@ for jP=1:nVars2Show
         op.Vars2Show(jP).Scale = 1;
     end
 end
-s.Options.Sim = op;
+nShocks2Show = length(op.Shocks2Show);
+if ~isfield(op,'ShockSize'), op.ShockSize = ones(1,nShocks2Show); end
+
+% Save options
+s.Options.IRF = op;
+
+%% -------------------------------------------------------------------
+
+%% Prepare Draws
+if strcmp(op.UseDist,'PriorDraws')
+    xd = feval(s.FileName.PriorDraw,op.nDraws);
+elseif strcmp(op.UseDist,'PostDraws')
+    load(FileName.MCMCDrawsRedux,'xd')
+    xd = xd(:,1:op.nDraws);
+else
+    if ~isfield(s.Params,op.UseDist)
+        fprintf(2,'Did not recognize distribution to use. Cannot proceed.\n');
+        return
+    end
+    xd = s.Param.(op.UseDist);
+end
+
 
 
 %% -------------------------------------------------------------------
@@ -115,22 +130,9 @@ if any(ismember(TempVars,ObsVar))
 else
     isObsMats=0;
 end
-if ~exist('Vars2ShowScale','var')
-  for j=1:nPanels
-    Vars2ShowScale{j} = ones(1,length(Vars2Show{j}));
-  end
-end
 
 %% ------------------------------------------------------------------------
 
-%% Display
-fprintf('\n*******')
-fprintf('\n* IRF *')
-fprintf('\n*******\n')
-
-%% Set Timer
-TimeStr = 'MakeIRF';
-TimeElapsed.(TimeStr) = toc;
 
 %% Prepare Draws
 if strcmp(UseDist,'priordraws')
@@ -239,17 +241,6 @@ for js=1:length(Shocks2Show)
     end
 end
 
-%% Clean up
-if ~KeepData
-  clear xd postd irf IRF TempVars XTicks XTickLabels 
-  clear PlotIRF yl ySlack
-end
-
 %% close figures
 if ~ShowFig, close all, end
 
-%% Show time taken
-TimeElapsed.(TimeStr) = toc-TimeElapsed.(TimeStr);
-fprintf('\n%s %s\n\n',TimeStr,vctoc([],TimeElapsed.(TimeStr)))
-
-%% ------------------------------------------------------------------------
