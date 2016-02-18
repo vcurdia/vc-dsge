@@ -60,8 +60,6 @@ s.AuxParam = {...
     'etagamma','eta/exp(gamma)','\eta_\gamma';
     };
 
-s.AuxVar = {'r','ir_t-pi_tF'};
-
 s.ObsVar = {'DGDP';'PI';'FFR'};
 
 s.StateVar = {...
@@ -74,6 +72,8 @@ s.StateVar = {...
     };
 
 s.ShockVar = {'edelta';'egamma';'eu';'ei'}; 
+
+s.AuxVar = {'r','ir_t-pi_tF'};
 
 s.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
@@ -110,6 +110,7 @@ s = PrepModel(s);
 Mats = feval('MyDSGEMats',s.Param.PriorMean);
 
 s = PriorAnalysis(s);
+
 
 
 %% -------------------------------------------------------------------
