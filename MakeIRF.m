@@ -74,7 +74,7 @@ if ~isfield(s.FileName,'PlotsIRF'),
     s.FileName.PlotsIRF = sprintf('%sIRF',s.Spec); 
 end
 
-% Check options
+%% Check options
 nPanels = length(op.Vars2Show);
 for jP=1:nPanels
     if ~isfield(op.Vars2Show(jP),'NamesPretty')
@@ -110,19 +110,19 @@ end
 fprintf('Generating IRFs...\n');
 fnMats = @(x)feval(s.FileName.Mats,x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
-IRF.Check = ones(1,op.nDraws);
-IRF.ObsVar = nan(s.n.ObsVar,op.nSteps,nShocks2Show,op.nDraws);
-IRF.StateVar = nan(s.n.StateVar,op.nSteps,nShocks2Show,op.nDraws);
-IRF.AuxVar = nan(s.n.AuxVar,op.nSteps,nShocks2Show,op.nDraws);
+IRFCheck = ones(1,op.nDraws);
+IRFObsVar = nan(s.n.ObsVar,op.nSteps,nShocks2Show,op.nDraws);
+IRFStateVar = nan(s.n.StateVar,op.nSteps,nShocks2Show,op.nDraws);
+IRFAuxVar = nan(s.n.AuxVar,op.nSteps,nShocks2Show,op.nDraws);
 ShockIdx = zeros(nShocks2Show,1);
 for j = 1:nShocks2Show
     ShockIdx(j) = find(ismember(s.ShockVar,op.Shocks2Show(j)));
 end    
-for jd=1:op.nDraws
+parfor jd=1:op.nDraws
     matj = fnMats(xd(:,jd));
     checkj = all(matj.REE.eu==1);
     if ~checkj
-        IRF.Check(jd) = 0;
+        IRFCheck(jd) = 0;
         continue
     end
     irf = zeros(s.n.StateVar,nShocks2Show,op.nSteps);
@@ -130,25 +130,27 @@ for jd=1:op.nDraws
     for t=2:op.nSteps
         irf(:,:,t) = matj.REE.G1*irf(:,:,t-1);
     end
-    IRF.StateVar(:,:,:,jd) = permute(irf,[1,3,2]);
+    IRFStateVar(:,:,:,jd) = permute(irf,[1,3,2]);
     irfObs = zeros(s.n.ObsVar,nShocks2Show,op.nSteps);
     for t=1:op.nSteps
         irfObs(:,:,t) = matj.ObsEq.H*irf(:,:,t);
     end
-    IRF.ObsVar(:,:,:,jd) = permute(irfObs,[1,3,2]);
+    IRFObsVar(:,:,:,jd) = permute(irfObs,[1,3,2]);
     irfAux = zeros(s.n.AuxVar,nShocks2Show,op.nSteps);
     irfAux(:,:,1) = matj.AuxREE.G2(:,ShockIdx);
     for t=2:op.nSteps
         irfAux(:,:,t) = matj.AuxREE.G1*irf(:,:,t-1);
     end
-    IRF.AuxVar(:,:,:,jd) = permute(irfAux,[1,3,2]);
+    IRFAuxVar(:,:,:,jd) = permute(irfAux,[1,3,2]);
 end
-IRF.ObsVar(:,:,:,~IRF.Check) = [];
-IRF.StateVar(:,:,:,~IRF.Check) = [];
-IRF.AuxVar(:,:,:,~IRF.Check) = [];
-IRF.Check(:,:,:,~IRF.Check) = [];
-nDrawsUsed = length(IRF.Check);
+keyboard
+IRFObsVar(:,:,:,~IRFCheck) = [];
+IRFStateVar(:,:,:,~IRFCheck) = [];
+IRFAuxVar(:,:,:,~IRFCheck) = [];
+IRFCheck(~IRFCheck) = [];
+nDrawsUsed = length(IRFCheck);
 
+keyboard
 
 
 %% -------------------------------------------------------------------
