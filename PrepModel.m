@@ -397,5 +397,6 @@ fclose(fidMats);
 %% Finish up
 s.Status.(Action) = 1;
 s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
+fprintf('\n%s %s\n\n',Action,vctoc([],s.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------
