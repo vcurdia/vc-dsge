@@ -106,6 +106,48 @@ else
     xd = s.Param.(op.UseDist);
 end
 
+%% Generate IRF
+fprintf('Generating IRFs...\n');
+fnMats = @(x)feval(s.FileName.Mats,x,...
+               'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
+IRF.Check = ones(1,op.nDraws);
+IRF.ObsVar = nan(s.n.ObsVar,op.nSteps,nShocks2Show,op.nDraws);
+IRF.StateVar = nan(s.n.ObsVar,op.nSteps,nShocks2Show,op.nDraws);
+IRF.AuxVar = nan(s.n.ObsVar,op.nSteps,nShocks2Show,op.nDraws);
+ShockIdx = zeros(nShocks2Show,1);
+for j = 1:nShocks2Show
+    ShockIdx(j) = find(ismember(s.ShockVar,op.Shocks2Show(j)));
+end    
+for jd=1:op.nDraws
+    matj = fnMats(xd(:,jd));
+    checkj = all(matj.REE.eu==1);
+    if ~checkj
+        IRF.Check(jd) = 0;
+        continue
+    end
+    irf = zeros(s.n.StateVar,nShocks2Show,op.nSteps);
+    irf = matj.REE.G2(:,idxShocks);
+    for t=2:op.nSteps
+        irf(:,:,t) = matj.REE.G1*irf(:,:,t-1);
+    end
+    IRF.StateVar(:,:,:,jd) = permute(irf,[1,3,2]);
+    irfObs = zeros(s.n.ObsVar,nShocks2Show,op.nSteps);
+    for t=1:nSteps
+        irfObs(:,:,t) = matj.ObsEq.H*irf(:,:,t);
+    end
+    IRF.ObsVar(:,:,:,jd) = permute(irfObs,[1,3,2]);
+    irfAux = zeros(s.n.AuxVar,nShocks2Show,op.nSteps);
+    irfAux(:,:,1) = matj.AuxREE.G2(:,idxShocks);
+    for t=2:nSteps
+        irfAux(:,:,t) = matj.AuxREE.G1*irf(:,:,t-1);
+    end
+    IRF.AuxVar(:,:,:,jd) = permute(irfAux,[1,3,2]);
+end
+IRF.ObsVar(:,:,:,~IRF.Check) = [];
+IRF.StateVar(:,:,:,~IRF.Check) = [];
+IRF.AuxVar(:,:,:,~IRF.Check) = [];
+IRF.Check(:,:,:,~IRF.Check) = [];
+op.nDraws = length(IRF.Check);
 
 
 %% -------------------------------------------------------------------
@@ -133,27 +175,6 @@ end
 
 %% ------------------------------------------------------------------------
 
-
-%% Prepare Draws
-if strcmp(UseDist,'priordraws')
-    if ~isfield(FileName,'GenPriorDraw')
-        MakeGenPriorDraw
-    end
-    xd = feval(FileName.GenPriorDraw,nDrawsUsed);
-elseif strcmp(UseDist,'postdraws')
-    if ~isfield(FileName,'MCMCDrawsRedux')
-        MakeMCMCDrawsRedux
-    end
-    load(FileName.MCMCDrawsRedux,'xd')
-    xd = xd(:,1:nDrawsUsed);
-else
-    if ~isfield(Params,UseDist)
-        fprintf(2,'Did not recognize distribution to use. Cannot proceed.\n');
-        return
-    end
-    xd = [Params(:).(UseDist)]';
-end
-nDrawsUsed = size(xd,2);
 
 %% Create Indices
 nShocks2Show = length(Shocks2Show);
