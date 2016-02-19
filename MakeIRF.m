@@ -74,16 +74,9 @@ if ~isfield(s,'PlotDir') || ~isfield(s.PlotDir,'IRF')
     s.PlotDir.IRF = 'Plots_IRF/';
 end
 if ~isdir(s.PlotDir.IRF), mkdir(s.PlotDir.IRF), end
-if ~isfield(s.FileName,'PlotsIRF'), 
-    s.FileName.PlotsIRF = sprintf('%sIRF_%s',s.Spec,op.UseDist); 
-end
-
-if ~isfield(op,'ReportFilename')
-    op.ReportFilename = sprintf('%sReport_IRF_%s',s.Spec,op.UseDist);
-end
-if ~isfield(op,'ReportTitle')
-    op.ReportTitle = sprintf('IRF Report:\\\\%s, %s',s.Spec,op.UseDist);
-end
+s.FileName.PlotsIRF = sprintf('%s_IRF_%s',s.Spec,op.UseDist); 
+op.ReportFilename = sprintf('%s_Report_IRF_%s',s.Spec,op.UseDist);
+op.ReportTitle = sprintf('IRF Report:\\\\%s, %s',s.Spec,op.UseDist);
 
 %% Check options
 nPanels = length(op.Panels);
@@ -196,15 +189,29 @@ for jS=1:nShocks2Show
         PlotData = op.VarScale*PlotData;
         Fig.TitleList = Pj.VarPretty;
         OutFigj = vcFigure(PlotData,Fig);
-        vcPrintPDF(...
-            [s.PlotDir.IRF,s.FileName.PlotsIRF,s.FileName.PlotsIRF,...
+        vcPrintPDF([s.PlotDir.IRF,s.FileName.PlotsIRF,...
              '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
     end
 end
 
 %% Make report with IRF
-fprintf('Making report...\n');
+fprintf('Making report: %s\n',op.ReportFilename);
 fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
+fprintf(fid,'\\newpage \n');
+for jS=1:nShocks2Show
+    Sj = op.Shocks2Show{jS};
+    fprintf(fid,'\\section{Shock: %s}\n',Sj);
+    for jP = 1:nPanels
+        Pj = op.Panels(jP).Title;
+        fprintf(fid,'\\subsection{%s}\n',Pj);
+        fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
+        fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
+        fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
+                s.PlotDir.IRF,s.FileName.PlotsIRF,Pj,Sj);
+        fprintf(fid,'\\end{figure}\n');
+        fprintf(fid,'\\newpage \n');
+    end
+end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(op.ReportFilename)
