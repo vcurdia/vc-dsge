@@ -15,7 +15,7 @@ function s = PrepModel(s)
 % ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% Created: January 27, 2016 by Vasco Curdia
+% Created: February 22, 2016 by Vasco Curdia
 % 
 % Copyright (C) 2016 Vasco Curdia
 
@@ -163,7 +163,7 @@ s.n = n;
 %% Generate matrices
 
 fprintf('Generating Mats for model evaluation\n')
-s.FileName.Mats = sprintf('%sMats',s.Spec);
+s.FileName.Mats = sprintf('%s_Mats',s.Spec);
 
 % Initiate file
 fidMats = fopen([s.FileName.Mats,'.m'],'wt');
