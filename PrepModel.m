@@ -15,7 +15,7 @@ function s = PrepModel(s)
 % ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% Created: January 27, 2016 by Vasco Curdia
+% Created: February 22, 2016 by Vasco Curdia
 % 
 % Copyright (C) 2016 Vasco Curdia
 
@@ -163,7 +163,7 @@ s.n = n;
 %% Generate matrices
 
 fprintf('Generating Mats for model evaluation\n')
-s.FileName.Mats = sprintf('%sMats',s.Spec);
+s.FileName.Mats = sprintf('%s_Mats',s.Spec);
 
 % Initiate file
 fidMats = fopen([s.FileName.Mats,'.m'],'wt');
@@ -179,9 +179,11 @@ fprintf(fidMats,'op.StoreStateEq = 1;\n');
 fprintf(fidMats,'op.StoreObsEq = 1;\n');
 fprintf(fidMats,'op.StoreKF = 1;\n');
 fprintf(fidMats,'op.StoreAuxEq = 1;\n');
+fprintf(fidMats,'op.StoreAuxREE = 1;\n');
 fprintf(fidMats,'op.SolveREE = 1;\n');
 fprintf(fidMats,'op.fid = 1;\n');
 fprintf(fidMats,'op.verbose = 0;\n');
+fprintf(fidMats,'op.gensys = {};\n');
 
 fprintf(fidMats,'\n%% Update options\n');
 fprintf(fidMats,'if length(varargin)>0 && isstruct(varargin{1})\n');
@@ -287,7 +289,7 @@ fprintf(fidMats,'if op.SolveREE\n');
 fprintf(fidMats,...
         '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fidMats,...
-        '        ''%s'',op.fid,op.verbose,varargin{:});\n',...
+        '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
         s.Options.GensysAuthor);
 fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'end\n');
@@ -347,7 +349,7 @@ fprintf(fidMats,'end\n');
 fprintf(fidMats,'\n%% Auxiliary equations matrices\n');
 MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
 nCols = [1,n.StateVar,n.StateVar,n.StateVar,n.ShockVar];
-fprintf(fidMats,'if op.StoreAuxEq\n');
+fprintf(fidMats,'if op.StoreAuxEq || op.StoreAuxREE\n');
 for jM=1:length(MatNames)
     Mj = MatNames{jM};
     SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
@@ -366,18 +368,21 @@ for jM=1:length(MatNames)
     end
     fprintf(fidMats,'        ];\n\n');
 end
-fprintf(fidMats,'    if op.SolveREE\n');
-fprintf(fidMats,['        AuxEq.REE.GBar = ',...
+fprintf(fidMats,'    if op.SolveREE && op.StoreAuxREE\n');
+fprintf(fidMats,['        AuxREE.GBar = ',...
                  'AuxEq.one+AuxEq.StateVar_tF*REE.GBar',...
                  '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.GBar;\n']);
-fprintf(fidMats,['        AuxEq.REE.G1 = AuxEq.StateVar_tL',...
+fprintf(fidMats,['        AuxREE.G1 = AuxEq.StateVar_tL',...
                  '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G1;\n']);
-fprintf(fidMats,['        AuxEq.REE.G2 = AuxEq.ShockVar_t',...
+fprintf(fidMats,['        AuxREE.G2 = AuxEq.ShockVar_t',...
                  '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G2;\n']);
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 fprintf(fidMats,'if op.StoreAuxEq\n');
 fprintf(fidMats,'    Mats.AuxEq = AuxEq;\n');
+fprintf(fidMats,'end\n');
+fprintf(fidMats,'if op.StoreAuxREE\n');
+fprintf(fidMats,'    Mats.AuxREE = AuxREE;\n');
 fprintf(fidMats,'end\n');
 
 
@@ -392,5 +397,6 @@ fclose(fidMats);
 %% Finish up
 s.Status.(Action) = 1;
 s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
+fprintf('\n%s %s\n\n',Action,vctoc([],s.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------

@@ -107,7 +107,7 @@ s.StateEq = {...
     };
 
 s = PrepModel(s);
-Mats = feval('MyDSGEMats',s.Param.PriorMean);
+Mats = feval(s.FileName.Mats,s.Param.PriorMean);
 
 s = PriorAnalysis(s);
 

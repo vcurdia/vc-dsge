@@ -39,8 +39,8 @@ if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
 s.Options.Prior = op;
-s.FileName.PriorDraw = [s.Spec,'PriorDraw'];
-s.FileName.PriorSample = [s.Spec,'PriorSample'];
+s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
+s.FileName.PriorSample = [s.Spec,'_PriorSample'];
 
 %% -------------------------------------------------------------------
 
@@ -338,6 +338,7 @@ end
 %% Finish up
 s.Status.(Action) = 1;
 s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
+fprintf('\n%s %s\n\n',Action,vctoc([],s.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------
 
