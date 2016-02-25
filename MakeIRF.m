@@ -171,8 +171,10 @@ for jS=1:op.nShocks2Show
             end
         end
         PlotData = op.VarScale*PlotData;
-        Fig.TitleList = Pj.VarPretty;
-        OutFigj = vcFigure(PlotData,Fig);
+        Figj = Fig;
+        Figj.TitleList = Pj.VarPretty;
+        Figj.FigShape = Pj.FigShape;
+        OutFigj = vcFigure(PlotData,Figj);
         vcPrintPDF([s.PlotDir.IRF,s.FileName.PlotsIRF,...
              '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
     end
@@ -187,7 +189,7 @@ for jS=1:op.nShocks2Show
     fprintf(fid,'\\section{Shock: %s}\n',Sj);
     for jP = 1:op.nPanels
         Pj = op.Panels(jP).Title;
-        fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',' '));
+        fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
