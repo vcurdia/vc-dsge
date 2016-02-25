@@ -4,7 +4,7 @@
 %
 %   
 % See also:
-% OpenDSGE, CloseDSGE, PrepModel
+% vcDSGE
 %
 % ...........................................................................
 %
@@ -111,7 +111,7 @@ Mats = feval(s.FileName.Mats,s.Param.PriorMean);
 
 s = PriorAnalysis(s);
 
-
+s = MakeIRF(s);
 
 %% -------------------------------------------------------------------
 
