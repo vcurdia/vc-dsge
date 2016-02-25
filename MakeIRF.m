@@ -183,7 +183,6 @@ end
 %% Make report with IRF
 fprintf('Making report: %s\n',op.ReportFilename);
 fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
-fprintf(fid,'\\newpage \n');
 for jS=1:op.nShocks2Show
     Sj = op.Shocks2Show{jS};
     fprintf(fid,'\\section{Shock: %s}\n',Sj);

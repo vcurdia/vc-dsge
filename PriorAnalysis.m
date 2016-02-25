@@ -38,9 +38,22 @@ if ~isfield(op,'ShowTableSample'), op.ShowTableSample = 1; end
 if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
-s.Options.Prior = op;
+
+if ~isfield(op,'isMoveLeft'), op.isMoveLeft = 0; end
+
+if ~isfield(op,'TableBreaks'), op.TableBreaks = 35:35:s.n.Param; end
+if ~isfield(op,'TableLines'), op.TableLines = []; end
+op.TableBreaks(op.TableBreaks>s.n.Param)=[];
+if ~ismember(s.n.Param,TableBreaks), op.TableBreaks(end+1) = s.n.Param; end
+op.nBreaks = length(op.TableBreaks);
+
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
 s.FileName.PriorSample = [s.Spec,'_PriorSample'];
+
+op.ReportFilename = sprintf('%s_Report_Prior_%s',s.Spec);
+op.ReportTitle = sprintf('Prior Analysis:\\\\%s',s.Spec);
+
+s.Options.Prior = op;
 
 %% -------------------------------------------------------------------
 
@@ -332,6 +345,53 @@ if op.nDrawsSample>0
     end
     save(s.FileName.PriorSample,'xd')
 end
+
+
+%% Make Prior Report
+
+fprintf('Making report: %s\n',op.ReportFilename);
+fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
+
+fprintf(fid,'\\section{Parameter Moments}\n');
+idxPar = 0;
+for jBreak=1:nBreaks
+    idxPar = (idxPar(end)+1):TableBreaks(jBreak);
+    fprintf(fid,'\\begin{eqnarray*} \n');
+    if isMoveLeft
+        fprintf(fid,'\\hspace{-0.5in}\n');
+    end
+    fprintf(fid,'\\begin{tabular}{ccccccccccccc} \n');
+    fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+    fprintf(fid,'& & \\multicolumn{4}{c}{Prior} & & \\multicolumn{6}{c}{Posterior} \\\\[0.5ex]\n');
+    fprintf(fid,'& & Dist & 5\\%% & Median & 95\\%% & & Mode & Mean & SE & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+    DispList = {'priorp050','priorp500','priorp950','postmode','postmean','postse',...
+                'postp050','postp500','postp950'};
+    nc = length(DispList);
+    idxPost = find(ismember(DispList,'postmode'));
+    for jr=idxPar
+        str2show = ['$',strrep(Params(jr).prettyname,'\','\\'),'$'];
+        str2show = [str2show,' & & ',Params(jr).priordist];
+        for jc=1:nc
+            if jc==idxPost,str2show = [str2show,' &'];end
+            str2show = sprintf('%s & %.4f',str2show,Params(jr).(DispList{jc}));
+        end
+        str2show=[str2show,' \\\\\n'];
+        fprintf(fid,str2show);
+        if ismember(jr,TableLines) && jr~=idxPar(end)
+            fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+        end        
+    end
+    fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+    fprintf(fid,'\\end{tabular}\n');
+    fprintf(fid,'\\end{eqnarray*}\n');
+    fprintf(fid,'\\newpage\n');
+end
+
+fprintf(fid,'\\end{document}\n');
+fclose(fid);
+pdflatex(op.ReportFilename)
+
 
 %% -------------------------------------------------------------------
 
