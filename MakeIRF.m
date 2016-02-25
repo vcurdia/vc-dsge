@@ -60,6 +60,13 @@ if ~isfield(op,'TickStep'), op.TickStep = 4; end
 if ~isfield(op,'ShockSize'), op.ShockSize = ones(1,op.nShocks2Show); end
 
 Fig = s.Options.Fig;
+if isfield(op,'Fig')
+    opList = fieldnames(op.Fig);
+    for jOp=1:length(opList)
+        Opj = opList{jOp};
+        if ~isfield(Fig,Opj), Fig.(Opj) = op.Fig.(opList{jOp}); end
+    end
+end
 
 if ~isfield(s,'PlotDir') || ~isfield(s.PlotDir,'IRF')
     s.PlotDir.IRF = 'Plots_IRF/';
