@@ -56,7 +56,7 @@ else
 end
 Param.PriorDist = {s.Param{:,2}}';
 Param.PriorMean = [s.Param{:,3}]';
-Param.PriorSE = [s.Param{:,4}]';
+Param.PriorSD = [s.Param{:,4}]';
 s.Param = Param;
 n.Param = length(Param.Names);
 for j=1:n.Param
