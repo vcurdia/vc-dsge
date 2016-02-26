@@ -38,7 +38,7 @@ if ~isfield(op,'Percentiles')
 end
 
 if ~isfield(op,'TablePrecision'), op.TablePrecision = 3; end
-if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 35; end
+if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 25; end
 if ~isfield(op,'TableLines'), op.TableLines = []; end
 
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
@@ -359,17 +359,17 @@ for jBreak=1:length(TableBreaks)
     idxPar = (idxPar(end)+1):TableBreaks(jBreak);
     fprintf(fid,'\\begin{table}[htb]\n');
     fprintf(fid,'\\centering\n');
-    fprintf(fid,'\\resizebox{\\textwidth}{!}{\n');
-    fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
+%    fprintf(fid,'\\resizebox{\\textwidth}{!}{\n');
+    fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-    fprintf(fid,'& & \\multicolumn{7}{c}{Unconstrained Prior} ');
+    fprintf(fid,'& \\multicolumn{7}{c}{Unconstrained Prior} ');
     fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
-    fprintf(fid,'& & Dist & Mode & Mean & SD & 5\\%% & Median & 95\\%% ');
+    fprintf(fid,'& Dist & Mode & Mean & SD & 5\\%% & Median & 95\\%% ');
     fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
         fprintf(fid,'$%s$',s.Param.PrettyNames{jr});
-        fprintf(fid,' & & %s', s.Param.PriorDist{jr});
+        fprintf(fid,' & %s', s.Param.PriorDist{jr});
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMode(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMean(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorSD(jr));
@@ -388,9 +388,9 @@ for jBreak=1:length(TableBreaks)
     end
     fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
     fprintf(fid,'\\end{tabular}\n');
-    fprintf(fid,'}\n');
+%    fprintf(fid,'}\n');
     fprintf(fid,'\\end{table}\n');
-    fprintf(fid,'\\newpage\n');
+    fprintf(fid,'\\clearpage\n');
 end
 
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
@@ -421,7 +421,7 @@ for jBreak=1:length(TableBreaks)
     fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
     fprintf(fid,'\\end{tabular}\n');
     fprintf(fid,'\\end{table}\n');
-    fprintf(fid,'\\newpage\n');
+    fprintf(fid,'\\clearpage\n');
 end
 
 fprintf(fid,'\\end{document}\n');
