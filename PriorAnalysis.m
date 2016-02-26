@@ -37,12 +37,9 @@ if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
 
-if ~isfield(op,'TablePrecision'), op.TablePrecision = 4; end
-if ~isfield(op,'TableBreaks'), op.TableBreaks = 35:35:s.n.Param; end
+if ~isfield(op,'TablePrecision'), op.TablePrecision = 3; end
+if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 35; end
 if ~isfield(op,'TableLines'), op.TableLines = []; end
-op.TableBreaks(op.TableBreaks>s.n.Param)=[];
-if ~ismember(s.n.Param,op.TableBreaks), op.TableBreaks(end+1) = s.n.Param; end
-op.nBreaks = length(op.TableBreaks);
 
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
 s.FileName.PriorSample = [s.Spec,'_PriorSample'];
@@ -353,36 +350,69 @@ save(s.FileName.PriorSample,'xd','xdAux')
 fprintf('Making report: %s\n',op.ReportFilename);
 fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
 
-fprintf(fid,'\\section{Prior: Parameters}\n');
-idxPar = 0;
+fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(op.TablePrecision),'f'];
-for jBreak=1:op.nBreaks
-    idxPar = (idxPar(end)+1):op.TableBreaks(jBreak);
+TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.Param;
+if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.Param; end
+idxPar = 0;
+for jBreak=1:length(TableBreaks)
+    idxPar = (idxPar(end)+1):TableBreaks(jBreak);
     fprintf(fid,'\\begin{table}[htb]\n');
     fprintf(fid,'\\centering\n');
-    fprintf(fid,'\\begin{tabular}{lcccccccccccccc} \n');
+    fprintf(fid,'\\resizebox{\\textwidth}{!}{\n');
+    fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-    fprintf(fid,'& & \\multicolumn{7}{c}{Unconstrained} ');
-    fprintf(fid,'& & \\multicolumn{5}{c}{Sample} \\\\[0.5ex]\n');
+    fprintf(fid,'& & \\multicolumn{7}{c}{Unconstrained Prior} ');
+    fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
     fprintf(fid,'& & Dist & Mode & Mean & SD & 5\\%% & Median & 95\\%% ');
-    fprintf(fid,'& & Mean & SD & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
-    idxPost = find(ismember(DispList,'postmode'));
     for jr=idxPar
-        fprintf(fid,'$%s$',strrep(s.Param.PrettyNames{jr},'\','\\'));
+        fprintf(fid,'$%s$',s.Param.PrettyNames{jr});
         fprintf(fid,' & & %s', s.Param.PriorDist{jr});
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorMode);
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorMean);
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorSD);
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc050);
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc500);
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc950);
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorMode(jr));
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorMean(jr));
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorSD(jr));
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc050(jr));
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc500(jr));
+        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc950(jr));
         fprintf(fid,' &');
-        fprintf(fid,str,Prior.Param.PriorMean);
-        fprintf(fid,str,Prior.Param.PriorSD);
-        fprintf(fid,str,Prior.Param.PriorPrc050);
-        fprintf(fid,str,Prior.Param.PriorPrc500);
-        fprintf(fid,str,Prior.Param.PriorPrc950);
+        fprintf(fid,str,Prior.Param.PriorMean(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc050(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc500(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc950(jr));
+        fprintf(fid,' \\\\\n');
+        if ismember(jr,op.TableLines) && jr~=idxPar(end)
+            fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+        end        
+    end
+    fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+    fprintf(fid,'\\end{tabular}\n');
+    fprintf(fid,'}\n');
+    fprintf(fid,'\\end{table}\n');
+    fprintf(fid,'\\newpage\n');
+end
+
+fprintf(fid,'\\section{Auxiliary Parameters}\n');
+str = [' & %.',int2str(op.TablePrecision),'f'];
+TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.AuxParam;
+if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.AuxParam; end
+idxPar = 0;
+for jBreak=1:length(TableBreaks)
+    idxPar = (idxPar(end)+1):TableBreaks(jBreak);
+    fprintf(fid,'\\begin{table}[htb]\n');
+    fprintf(fid,'\\centering\n');
+    fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
+    fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+    fprintf(fid,'& \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
+    fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+    for jr=idxPar
+        fprintf(fid,'$%s$',s.AuxParam.PrettyNames{jr});
+        fprintf(fid,str,Prior.AuxParam.PriorMean(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc050(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
         if ismember(jr,op.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
