@@ -41,8 +41,8 @@ if ~isfield(op,'Bands2Show'), op.Bands2Show = [50,70,90]; end
 if ~isfield(op,'PanelList')
     op.PanelList = {'ObsVar','StateVar','AuxVar'};
 end
-if ~isfield(op,'PanelMaxVar'), op.PanelMaxVar = 4; end
-if ~isfield(op,'PanelFigShape'), op.PanelFigShape = [2,2]; end
+if ~isfield(op,'PanelMaxVar'), op.PanelMaxVar = 9; end
+if ~isfield(op,'PanelFigShape'), op.PanelFigShape = [3,3]; end
 if ~isfield(op,'Panels')
     jP = 0;
     for jList=1:length(op.PanelList)
