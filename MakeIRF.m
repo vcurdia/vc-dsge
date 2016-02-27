@@ -173,7 +173,9 @@ for jS=1:op.nShocks2Show
         PlotData = op.VarScale*PlotData;
         Figj = Fig;
         Figj.TitleList = Pj.VarPretty;
-        Figj.FigShape = Pj.FigShape;
+        if isfield(Pj,'FigShape');
+            Figj.FigShape = Pj.FigShape;
+        end
         OutFigj = vcFigure(PlotData,Figj);
         vcPrintPDF([s.PlotDir.IRF,s.FileName.PlotsIRF,...
              '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
