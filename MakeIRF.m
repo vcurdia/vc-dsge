@@ -73,8 +73,8 @@ if ~isfield(s,'PlotDir') || ~isfield(s.PlotDir,'IRF')
 end
 if ~isdir(s.PlotDir.IRF), mkdir(s.PlotDir.IRF), end
 s.FileName.PlotsIRF = sprintf('%s_IRF_%s',s.Spec,op.UseDist); 
-op.ReportFilename = sprintf('%s_Report_IRF_%s',s.Spec,op.UseDist);
-op.ReportTitle = sprintf('IRF Report:\\\\%s, %s',s.Spec,op.UseDist);
+s.Report.IRF = sprintf('%s_Report_IRF_%s',s.Spec,op.UseDist);
+ReportTitle = sprintf('IRF Report:\\\\%s, %s',s.Spec,op.UseDist);
 
 % Save options
 s.Options.IRF = op;
@@ -181,8 +181,8 @@ for jS=1:op.nShocks2Show
 end
 
 %% Make report with IRF
-fprintf('Making report: %s\n',op.ReportFilename);
-fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
+fprintf('Making report: %s\n',s.Report.IRF);
+fid = vcCreateTex(s.Report.IRF,ReportTitle);
 for jS=1:op.nShocks2Show
     Sj = op.Shocks2Show{jS};
     fprintf(fid,'\\section{Shock: %s}\n',Sj);
@@ -199,7 +199,7 @@ for jS=1:op.nShocks2Show
 end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-pdflatex(op.ReportFilename)
+pdflatex(s.Report.IRF)
 
 
 %% -------------------------------------------------------------------
