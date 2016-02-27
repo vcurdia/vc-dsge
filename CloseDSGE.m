@@ -1,4 +1,4 @@
-function s = CloseDSGE(s,BaseFolder)
+function s = CloseDSGE(s)
 
 % CloseDSGE
 %
@@ -21,9 +21,5 @@ function s = CloseDSGE(s,BaseFolder)
 
 %fprintf('\nSaving workspace and exiting spec folder\n')
 save(s.Spec,'-struct','s')
-if nargin>1
-    cd(BaseFolder)
-else
-    cd ..
-end
+cd(s.SpecPathBase)
 

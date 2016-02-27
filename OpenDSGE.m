@@ -1,10 +1,11 @@
-function s = OpenDSGE(Spec,SpecPath)
+function s = OpenDSGE(Spec,SpecPath,SpecPathBase)
 
 % OpenDSGE
 %
 % Usage:
 %   s = CloseDSGE(Spec)
 %   s = CloseDSGE(Spec, SpecPath)
+%   s = CloseDSGE(Spec, SpecPath, SpecPathBase)
 %
 % Changes current folder to that of SpecPath and Initializes or loads DSGE as a
 % structure.
@@ -21,13 +22,18 @@ function s = OpenDSGE(Spec,SpecPath)
 %% -------------------------------------------------------------------
 
 if ~exist('SpecPath','var')
-    SpecPath = [Spec,'/']; 
-else
-    if ~strcmp(SpecPath,'/')
-        SpecPath = [SpecPath,'/'];
+    SpecPath = [Spec,'/'];
+    SpecPathBase = '../';
+end
+if ~exist('SpecPathBase','var')
+    if strcmp(SpecPath,'./')
+        SpecPathBase = './';
+    else
+        SpecPathBase = pwd;
     end
 end
-if ~isdir(SpecPath)
+
+if ~isempty(SpecPath) && ~isdir(SpecPath)
     mkdir(SpecPath)
 end
 cd(SpecPath)
@@ -39,7 +45,9 @@ else
     fprintf('Initiating DSGE: %s\n',Spec);
     s.Spec = Spec;
     s.SpecPath = SpecPath;
+    s.SpecPathBase = SpecPathBase;
     s.FileName = struct;
+    s.Report = struct;
     s.Options = struct;
     s.Status = struct;
     s.TimeElapsed = struct;
