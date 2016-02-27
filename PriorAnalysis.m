@@ -37,15 +37,16 @@ if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
 
+if ~isfield(op,'TableMoveLeft'), op.TableMoveLeft = 1; end
 if ~isfield(op,'TablePrecision'), op.TablePrecision = 3; end
-if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 25; end
+if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 35; end
 if ~isfield(op,'TableLines'), op.TableLines = []; end
 
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
 s.FileName.PriorSample = [s.Spec,'_PriorSample'];
 
-op.ReportFilename = sprintf('%s_Report_Prior',s.Spec);
-op.ReportTitle = sprintf('Prior Analysis:\\\\%s',s.Spec);
+s.Report.Prior = sprintf('%s_Report_Prior',s.Spec);
+ReportTitle = sprintf('Prior Analysis:\\\\%s',s.Spec);
 
 s.Options.Prior = op;
 
@@ -347,19 +348,24 @@ save(s.FileName.PriorSample,'xd','xdAux')
 
 %% Make Prior Report
 
-fprintf('Making report: %s\n',op.ReportFilename);
-fid = vcCreateTex(op.ReportFilename,op.ReportTitle);
+fprintf('Making report: %s\n',s.Report.Prior);
+fid = vcCreateTex(s.Report.Prior,ReportTitle);
 
 fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(op.TablePrecision),'f'];
 TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.Param;
 if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.Param; end
 idxPar = 0;
-for jBreak=1:length(TableBreaks)
+nBreaks = length(TableBreaks);
+for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):TableBreaks(jBreak);
-    fprintf(fid,'\\begin{table}[htb]\n');
-    fprintf(fid,'\\centering\n');
-%    fprintf(fid,'\\resizebox{\\textwidth}{!}{\n');
+    if jBreak>1
+        fprintf(fid,'\\section{Parameters (Cont)}\n');
+    end
+    fprintf(fid,'\\begin{equation*}\n');
+    if op.TableMoveLeft
+        fprintf(fid,'\\hspace{-0.5in}\n');
+    end
     fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Unconstrained Prior} ');
@@ -388,8 +394,7 @@ for jBreak=1:length(TableBreaks)
     end
     fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
     fprintf(fid,'\\end{tabular}\n');
-%    fprintf(fid,'}\n');
-    fprintf(fid,'\\end{table}\n');
+    fprintf(fid,'\\end{equation*}\n');
     fprintf(fid,'\\clearpage\n');
 end
 
@@ -398,10 +403,13 @@ str = [' & %.',int2str(op.TablePrecision),'f'];
 TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.AuxParam;
 if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.AuxParam; end
 idxPar = 0;
-for jBreak=1:length(TableBreaks)
+nBreaks = length(TableBreaks);
+for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):TableBreaks(jBreak);
-    fprintf(fid,'\\begin{table}[htb]\n');
-    fprintf(fid,'\\centering\n');
+    if jBreak>1
+        fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
+    end
+    fprintf(fid,'\\begin{equation*}\n');
     fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
@@ -420,13 +428,13 @@ for jBreak=1:length(TableBreaks)
     end
     fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
     fprintf(fid,'\\end{tabular}\n');
-    fprintf(fid,'\\end{table}\n');
+    fprintf(fid,'\\end{equation*}\n');
     fprintf(fid,'\\clearpage\n');
 end
 
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-pdflatex(op.ReportFilename)
+pdflatex(s.Report.Prior)
 
 
 %% -------------------------------------------------------------------
