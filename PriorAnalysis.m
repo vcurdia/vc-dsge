@@ -43,7 +43,7 @@ if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 35; end
 if ~isfield(op,'TableLines'), op.TableLines = []; end
 
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
-s.FileName.PriorSample = [s.Spec,'_PriorSample'];
+% s.FileName.PriorSample = [s.Spec,'_PriorSample'];
 
 s.Report.Prior = sprintf('%s_Report_Prior',s.Spec);
 ReportTitle = sprintf('Prior Analysis:\\\\%s',s.Spec);
@@ -343,14 +343,14 @@ for jP=1:length(pList)
     end
 end
 fprintf('\n');
-save(s.FileName.PriorSample,'xd','xdAux')
+% save(s.FileName.PriorSample,'xd','xdAux')
 
 
 %% Make Prior Report
 
 fprintf('Making report: %s\n',s.Report.Prior);
 fid = vcCreateTex(s.Report.Prior,ReportTitle);
-
+fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(op.TablePrecision),'f'];
 TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.Param;

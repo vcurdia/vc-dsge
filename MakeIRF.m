@@ -106,7 +106,7 @@ IRFAuxVar = nan(s.n.AuxVar,op.nSteps,op.nShocks2Show,op.nDraws);
 ShockIdx = zeros(op.nShocks2Show,1);
 for j = 1:op.nShocks2Show
     ShockIdx(j) = find(ismember(s.ShockVar,op.Shocks2Show(j)));
-end    
+end   
 parfor jd=1:op.nDraws
     matj = fnMats(xd(:,jd));
     checkj = all(matj.REE.eu==1);
@@ -179,15 +179,18 @@ for jS=1:op.nShocks2Show
         OutFigj = vcFigure(PlotData,Figj);
         vcPrintPDF([s.PlotDir.IRF,s.FileName.PlotsIRF,...
              '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
+%         print([s.PlotDir.IRF,s.FileName.PlotsIRF,...
+%              '_',Pj.Title,'_',Sj],'-dpdf')
     end
 end
 
 %% Make report with IRF
 fprintf('Making report: %s\n',s.Report.IRF);
 fid = vcCreateTex(s.Report.IRF,ReportTitle);
+fprintf(fid,'\\newpage \n');
 for jS=1:op.nShocks2Show
     Sj = op.Shocks2Show{jS};
-    fprintf(fid,'\\section{Shock: %s}\n',Sj);
+    fprintf(fid,'\\section{Shock: %s}\n',strrep(Sj,'_',''));
     for jP = 1:op.nPanels
         Pj = op.Panels(jP).Title;
         fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
@@ -195,6 +198,9 @@ for jS=1:op.nShocks2Show
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
                 s.PlotDir.IRF,s.FileName.PlotsIRF,Pj,Sj);
+%         fprintf(fid,'\\includegraphics[width = \\textwidth,');
+%         fprintf(fid,'viewport = 60 200 560 600, clip]{%s%s_%s_%s.pdf}\n',...
+%                 s.PlotDir.IRF,s.FileName.PlotsIRF,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
     end
@@ -202,7 +208,6 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(s.Report.IRF)
-
 
 %% -------------------------------------------------------------------
 
