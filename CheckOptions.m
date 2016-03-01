@@ -98,4 +98,20 @@ if ~isfield(op,'OpenPDF'), op.OpenPDF = 0; end
 
 s.Options.Fig = op;
 
+
+%% Parameter Tables
+
+if isfield(s.Options,'ParTable')
+    op = s.Options.ParTable;
+else
+    op = struct; 
+end 
+
+if ~isfield(op,'MoveLeft'), op.MoveLeft = 1; end
+if ~isfield(op,'Precision'), op.Precision = 3; end
+if ~isfield(op,'MaxRows'), op.MaxRows = 35; end
+if ~isfield(op,'Lines'), op.Lines = []; end
+
+s.Options.ParTable = op;
+
 %% -------------------------------------------------------------------

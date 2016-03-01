@@ -27,6 +27,9 @@ fprintf('\n*** Analyzing DSGE Prior distribution\n')
 s.TimeElapsed.(Action) = toc();
 
 %% Options
+
+s = CheckOptions(s);
+
 if isfield(s.Options,'Prior')
     op = s.Options.Prior;
 else
@@ -36,11 +39,6 @@ if ~isfield(op,'nDrawsSample'),op.nDrawsSample = 1000; end
 if ~isfield(op,'Percentiles')
     op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
 end
-
-if ~isfield(op,'TableMoveLeft'), op.TableMoveLeft = 1; end
-if ~isfield(op,'TablePrecision'), op.TablePrecision = 3; end
-if ~isfield(op,'TableMaxRows'), op.TableMaxRows = 35; end
-if ~isfield(op,'TableLines'), op.TableLines = []; end
 
 s.FileName.PriorDraw = [s.Spec,'_PriorDraw'];
 % s.FileName.PriorSample = [s.Spec,'_PriorSample'];
@@ -352,8 +350,8 @@ fprintf('Making report: %s\n',s.Report.Prior);
 fid = vcCreateTex(s.Report.Prior,ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
-str = [' & %.',int2str(op.TablePrecision),'f'];
-TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.Param;
+str = [' & %.',int2str(op.ParTable.Precision),'f'];
+TableBreaks = op.ParTable.MaxRows:op.ParTable.MaxRows:s.n.Param;
 if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.Param; end
 idxPar = 0;
 nBreaks = length(TableBreaks);
@@ -363,7 +361,7 @@ for jBreak=1:nBreaks
         fprintf(fid,'\\section{Parameters (Cont)}\n');
     end
     fprintf(fid,'\\begin{equation*}\n');
-    if op.TableMoveLeft
+    if op.ParTable.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
     fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
@@ -388,7 +386,7 @@ for jBreak=1:nBreaks
         fprintf(fid,str,Prior.Param.PriorPrc500(jr));
         fprintf(fid,str,Prior.Param.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,op.TableLines) && jr~=idxPar(end)
+        if ismember(jr,op.ParTable.Lines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
@@ -399,8 +397,8 @@ for jBreak=1:nBreaks
 end
 
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
-str = [' & %.',int2str(op.TablePrecision),'f'];
-TableBreaks = op.TableMaxRows:op.TableMaxRows:s.n.AuxParam;
+str = [' & %.',int2str(op.ParTable.Precision),'f'];
+TableBreaks = op.ParTable.MaxRows:op.ParTable.MaxRows:s.n.AuxParam;
 if ~ismember(s.n.Param,TableBreaks), TableBreaks(end+1) = s.n.AuxParam; end
 idxPar = 0;
 nBreaks = length(TableBreaks);
@@ -422,7 +420,7 @@ for jBreak=1:nBreaks
         fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
         fprintf(fid,str,Prior.AuxParam.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,op.TableLines) && jr~=idxPar(end)
+        if ismember(jr,op.ParTable.Lines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
