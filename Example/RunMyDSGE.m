@@ -111,6 +111,7 @@ Mats = feval(s.FileName.Mats,s.Param.PriorMean);
 
 s = PriorAnalysis(s);
 
+s.Options.Sim.UseDist = 'PriorDraws';
 s = MakeIRF(s);
 
 %% -------------------------------------------------------------------
