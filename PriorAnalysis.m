@@ -374,7 +374,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'$%s$',s.Param.PrettyNames{jr});
+        fprintf(fid,'%s',s.Param.PrettyNames{jr});
         fprintf(fid,' & %s', s.Param.PriorDist{jr});
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMode(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMean(jr));
@@ -416,7 +416,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'$%s$',s.AuxParam.PrettyNames{jr});
+        fprintf(fid,'%s',s.AuxParam.PrettyNames{jr});
         fprintf(fid,str,Prior.AuxParam.PriorMean(jr));
         fprintf(fid,str,Prior.AuxParam.PriorPrc050(jr));
         fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
