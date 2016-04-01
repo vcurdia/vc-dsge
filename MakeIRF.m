@@ -45,8 +45,8 @@ end
 op.nPanels = length(op.Panels);
 for jP=1:op.nPanels
     op.Panels(jP).nVar = length(op.Panels(jP).Var);
-    if ~isfield(op.Panels(jP),'NamesPretty')
-        op.Panels(jP).VarPretty = op.Panels(jP).Var;
+    if ~isfield(op.Panels(jP),'PrettyNames')
+        op.Panels(jP).PrettyNames = op.Panels(jP).Var;
     end
     if ~isfield(op.Panels(jP),'Scale') || isempty(op.Panels(jP).Scale)
         op.Panels(jP).Scale = ones(1,op.Panels(jP).nVar);
@@ -105,7 +105,7 @@ IRFStateVar = nan(s.n.StateVar,op.nSteps,op.nShocks2Show,op.nDraws);
 IRFAuxVar = nan(s.n.AuxVar,op.nSteps,op.nShocks2Show,op.nDraws);
 ShockIdx = zeros(op.nShocks2Show,1);
 for j = 1:op.nShocks2Show
-    ShockIdx(j) = find(ismember(s.ShockVar,op.Shocks2Show(j)));
+    ShockIdx(j) = find(ismember(s.ShockVar.Names,op.Shocks2Show(j)));
 end   
 parfor jd=1:op.nDraws
     matj = fnMats(xd(:,jd));
@@ -150,20 +150,20 @@ for jS=1:op.nShocks2Show
         PlotData = nan(nDrawsUsed,op.nSteps,Pj.nVar);
         for jV=1:Pj.nVar
             Vj = Pj.Var{jV};
-            [tf,idxV] = ismember(Vj,s.ObsVar);
+            [tf,idxV] = ismember(Vj,s.ObsVar.Names);
             if tf
                PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                    squeeze(IRFObsVar(idxV,:,jS,:))';
             end
             if ~tf
-                [tf,idxV] = ismember(Vj,s.StateVar);
+                [tf,idxV] = ismember(Vj,s.StateVar.Names);
                 if tf
                     PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                         squeeze(IRFStateVar(idxV,:,jS,:))';
                 end
             end
             if ~tf
-                [tf,idxV] = ismember(Vj,s.AuxVar);
+                [tf,idxV] = ismember(Vj,s.AuxVar.Names);
                 if tf
                     PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                         squeeze(IRFAuxVar(idxV,:,jS,:))';
@@ -172,7 +172,7 @@ for jS=1:op.nShocks2Show
         end
         PlotData = op.VarScale*PlotData;
         Figj = Fig;
-        Figj.TitleList = Pj.VarPretty;
+        Figj.TitleList = Pj.PrettyNames;
         if isfield(Pj,'FigShape');
             Figj.FigShape = Pj.FigShape;
         end

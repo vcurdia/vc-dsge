@@ -45,11 +45,12 @@ fprintf('Generating symbolic variables and systems of equations...\n')
 
 % Check for non-specified model fields
 if ~isfield(s,'AuxParam'), s.AuxParam = cell(0,2); end
-if ~isfield(s,'AuxVar'), s.AuxVar = cell(0,2); end
+if ~isfield(s,'AuxVar'), s.AuxVar = cell(0,3); end
 
 % Parameters
+[n.Param,nc] = size(s.Param);
 Param.Names = {s.Param{:,1}}';
-if size(s.Param,2)==4
+if nc==4
     Param.PrettyNames = Param.Names;
 else
     Param.PrettyNames = {s.Param{:,5}}';
@@ -58,41 +59,54 @@ Param.PriorDist = {s.Param{:,2}}';
 Param.PriorMean = [s.Param{:,3}]';
 Param.PriorSD = [s.Param{:,4}]';
 s.Param = Param;
-n.Param = length(Param.Names);
 for j=1:n.Param
     eval(['syms ',Param.Names{j}]);
 end
 
 % Auxiliary Parameters
+[n.AuxParam,nc] = size(s.AuxParam);
 AuxParam.Names = {s.AuxParam{:,1}}';
-if size(s.AuxParam,2)==2
+if nc==2
     AuxParam.PrettyNames = AuxParam.Names;
 else
     AuxParam.PrettyNames = {s.AuxParam{:,3}}';
 end
 AuxParam.Expressions = {s.AuxParam{:,2}}';
 s.AuxParam = AuxParam;
-n.AuxParam = length(AuxParam.Names);
 for j=1:n.AuxParam
     eval(['syms ',AuxParam.Names{j}]);
 end
 
 % Observation variables
-n.ObsVar = length(s.ObsVar);
+[n.ObsVar,nc] = size(s.ObsVar);
+ObsVar.Names = {s.ObsVar{:,1}}';
+if nc==1
+    ObsVar.PrettyNames = ObsVar.Names;
+else
+    ObsVar.PrettyNames = {s.ObsVar{:,2}}';
+end
+s.ObsVar = ObsVar;
 ObsVar_t = sym(zeros(1,n.ObsVar));
 for j=1:n.ObsVar
-    jv = [s.ObsVar{j},'_t'];
+    jv = [ObsVar.Names{j},'_t'];
     eval(['syms ',jv]);
     ObsVar_t(j) = eval(jv);
 end
 
 % State space variables
-n.StateVar = length(s.StateVar);
+[n.StateVar,nc] = size(s.StateVar);
+StateVar.Names = {s.StateVar{:,1}}';
+if nc==1
+    StateVar.PrettyNames = StateVar.Names;
+else
+    StateVar.PrettyNames = {s.StateVar{:,2}}';
+end
+s.StateVar = StateVar;
 StateVar_t = sym(zeros(1,n.StateVar)); 
 StateVar_tF = sym(zeros(1,n.StateVar)); 
 StateVar_tL = sym(zeros(1,n.StateVar));
 for j=1:n.StateVar
-    jv = [s.StateVar{j},'_t'];
+    jv = [StateVar.Names{j},'_t'];
     eval(sprintf('syms %1$s %1$sF %1$sL',jv))
     StateVar_t(j) = eval(jv);
     StateVar_tF(j) = eval([jv,'F']);
@@ -100,10 +114,17 @@ for j=1:n.StateVar
 end
 
 % Shocks
-n.ShockVar = length(s.ShockVar);
+[n.ShockVar,nc] = size(s.ShockVar);
+ShockVar.Names = {s.ShockVar{:,1}}';
+if nc==1
+    ShockVar.PrettyNames = ShockVar.Names;
+else
+    ShockVar.PrettyNames = {s.ShockVar{:,2}}';
+end
+s.ShockVar = ShockVar;
 ShockVar_t = sym(zeros(1,n.ShockVar));
 for j=1:n.ShockVar
-    jv = [s.ShockVar{j},'_t'];
+    jv = [ShockVar.Names{j},'_t'];
     eval(['syms ',jv]);
     ShockVar_t(j) = eval(jv);
 end
@@ -112,12 +133,18 @@ end
 syms one
 
 % Auxiliary variables
+[n.AuxVar,nc] = size(s.AuxVar);
+AuxVar.Names = {s.AuxVar{:,1}}';
+if nc==2
+    AuxVar.PrettyNames = AuxVar.Names;
+else
+    AuxVar.PrettyNames = {s.AuxVar{:,3}}';
+end
 s.AuxEq = {s.AuxVar{:,2}}.';
-s.AuxVar = {s.AuxVar{:,1}}.';
-n.AuxVar = length(s.AuxVar);
+s.AuxVar = AuxVar;
 AuxEq = sym(zeros(n.AuxVar,1));
 for j=1:n.AuxVar
-    jv = [s.AuxVar{j},'_t'];
+    jv = [AuxVar.Names{j},'_t'];
     eval([jv,' = ',s.AuxEq{j},';'])
     AuxEq(j) = eval(jv);
     % if the expression has no leads then can define a lead for it

@@ -61,20 +61,37 @@ s.AuxParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
 
-s.ObsVar = {'DGDP';'PI';'FFR'};
+s.ObsVar = {...
+    'DGDP', 'GDP Growth';
+    'PI', 'Inflation';
+    'FFR', 'FFR'};
 
 s.StateVar = {...
     % Regular variables
-    'xtil';'YA';'pitil';'pi';'ir';
-    'xe';'re';'YAe';
-    'delta';'gamma';'u';
+    'xtil', '$\tilde{x}$';
+    'YA', '$Y_A$';
+    'pitil', '$\tilde{\pi}$';
+    'pi', '$\pi$';
+    'ir', '$i$';
+    'xe', '$x^e$';
+    're', '$r^e$';
+    'YAe', '$Y_A^e$';
+    'delta', '$\delta$';
+    'gamma', '$\gamma$';
+    'u', '$u$';
     % a couple of artificial variables
-    'YAL';'YAeL';
+    'YAL', '$Y_{A,t-1}$';
+    'YAeL', '$Y_{A,t-1}^e$';
     };
 
-s.ShockVar = {'edelta';'egamma';'eu';'ei'}; 
+s.ShockVar = {...
+    'edelta', '$\varepsilon_\delta$';
+    'egamma', '$\varepsilon_\gamma$';
+    'eu', '$\varepsilon_u$';
+    'ei', '$\varepsilon_i$';
+             }; 
 
-s.AuxVar = {'r','ir_t-pi_tF'};
+s.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
 s.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
