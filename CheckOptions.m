@@ -50,13 +50,16 @@ if ~isfield(op,'Panels')
         for j=(1:ceil(s.n.(Listj)/op.PanelMaxVar))
             jP = jP+1;
             if op.PanelMaxVar==1
-                op.Panels(jP).Var = s.(Listj)(j);
+                op.Panels(jP).Var = s.(Listj).Names(j);
+                op.Panels(jP).PrettyNames = s.(Listj).PrettyNames(j);
                 op.Panels(jP).Title = sprintf('%s_%s',Listj,...
                                               op.Panels(jP).Var{1});
 %                op.Panels(jP).FigShape = [1,1];
             else
                 op.Panels(jP).Title = sprintf('%s_%.0f',Listj,j);
-                op.Panels(jP).Var = s.(Listj)(...
+                op.Panels(jP).Var = s.(Listj).Names(...
+                    (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,s.n.(Listj)));
+                op.Panels(jP).PrettyNames = s.(Listj).PrettyNames(...
                     (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,s.n.(Listj)));
 %                op.Panels(jP).FigShape = op.PanelFigShape;
             end
@@ -66,15 +69,15 @@ end
 op.nPanels = length(op.Panels);
 for jP=1:op.nPanels
     op.Panels(jP).nVar = length(op.Panels(jP).Var);
-    if ~isfield(op.Panels(jP),'NamesPretty')
-        op.Panels(jP).VarPretty = op.Panels(jP).Var;
+    if ~isfield(op.Panels(jP),'PrettyNames')
+        op.Panels(jP).PrettyNames = op.Panels(jP).Var;
     end
     if ~isfield(op.Panels(jP),'Scale') || isempty(op.Panels(jP).Scale)
         op.Panels(jP).Scale = ones(1,op.Panels(jP).nVar);
     end
 end
 
-if ~isfield(op,'Shocks2Show'), op.Shocks2Show = s.ShockVar; end
+if ~isfield(op,'Shocks2Show'), op.Shocks2Show = s.ShockVar.Names; end
 op.nShocks2Show = length(op.Shocks2Show);
 
 if ~isfield(op,'VarScale'), op.VarScale = 1; end
