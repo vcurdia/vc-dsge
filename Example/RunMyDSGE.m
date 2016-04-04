@@ -2,6 +2,10 @@
 %
 % This file gives an example of how to use the VC_DSGE package
 %
+% Note: the structure with the DSGE in the workspace does not have to be called
+%       "m", it can take any name (that does not conflict with other workspace 
+%       variable names).
+%
 %   
 % See also:
 % vcDSGE
@@ -27,11 +31,11 @@ set(0,'defaultTextInterpreter','latex');
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-s = OpenDSGE('MyDSGE');
+m = OpenDSGE('MyDSGE');
 
 %% Setup the model
 
-s.Param = {...
+m.Param = {...
     'omega', 'G', 1, 0.2,'$\omega$';
     'xi', 'G', 0.1, 0.05,'$\xi$';
     'eta', 'B', 0.6, 0.2,'$\eta$';
@@ -51,7 +55,7 @@ s.Param = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
-s.AuxParam = {...
+m.AuxParam = {...
     'beta','0.99','$\beta$';
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
@@ -61,12 +65,12 @@ s.AuxParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
 
-s.ObsVar = {...
+m.ObsVar = {...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
     'FFR', 'FFR'};
 
-s.StateVar = {...
+m.StateVar = {...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -84,22 +88,22 @@ s.StateVar = {...
     'YAeL', '$Y_{A,t-1}^e$';
     };
 
-s.ShockVar = {...
+m.ShockVar = {...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
              }; 
 
-s.AuxVar = {'r','ir_t-pi_tF','$r$'};
+m.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
-s.ObsEq = {...
+m.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
     };
 
-s.StateEq = {...
+m.StateEq = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -124,18 +128,18 @@ s.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-s = PrepModel(s);
-Mats = feval(s.FileName.Mats,s.Param.PriorMean);
+m = PrepModel(m);
+Mats = feval(m.FileName.Mats,m.Param.PriorMean);
 
-s = PriorAnalysis(s);
+m = PriorAnalysis(m);
 
-s.Options.Sim.UseDist = 'PriorDraws';
-s = MakeIRF(s);
+m.Options.Sim.UseDist = 'PriorDraws';
+m = MakeIRF(m);
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-s = CloseDSGE(s);
+m = CloseDSGE(m);
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)

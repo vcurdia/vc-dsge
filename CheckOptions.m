@@ -1,4 +1,4 @@
-function s = CheckOptions(s)
+function dsge = CheckOptions(dsge)
 
 % SetDefaultOptions
 %
@@ -21,8 +21,8 @@ function s = CheckOptions(s)
 
 %% Options for Simulations
 
-if isfield(s.Options,'Sim')
-    op = s.Options.Sim;
+if isfield(dsge.Options,'Sim')
+    op = dsge.Options.Sim;
 else
     op = struct; 
 end 
@@ -47,20 +47,22 @@ if ~isfield(op,'Panels')
     jP = 0;
     for jList=1:length(op.PanelList)
         Listj = op.PanelList{jList};
-        for j=(1:ceil(s.n.(Listj)/op.PanelMaxVar))
+        for j=(1:ceil(dsge.n.(Listj)/op.PanelMaxVar))
             jP = jP+1;
             if op.PanelMaxVar==1
-                op.Panels(jP).Var = s.(Listj).Names(j);
-                op.Panels(jP).PrettyNames = s.(Listj).PrettyNames(j);
+                op.Panels(jP).Var = dsge.(Listj).Names(j);
+                op.Panels(jP).PrettyNames = dsge.(Listj).PrettyNames(j);
                 op.Panels(jP).Title = sprintf('%s_%s',Listj,...
                                               op.Panels(jP).Var{1});
 %                op.Panels(jP).FigShape = [1,1];
             else
                 op.Panels(jP).Title = sprintf('%s_%.0f',Listj,j);
-                op.Panels(jP).Var = s.(Listj).Names(...
-                    (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,s.n.(Listj)));
-                op.Panels(jP).PrettyNames = s.(Listj).PrettyNames(...
-                    (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,s.n.(Listj)));
+                op.Panels(jP).Var = dsge.(Listj).Names(...
+                    (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,...
+                                               dsge.n.(Listj)));
+                op.Panels(jP).PrettyNames = dsge.(Listj).PrettyNames(...
+                    (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,...
+                                               dsge.n.(Listj)));
 %                op.Panels(jP).FigShape = op.PanelFigShape;
             end
         end
@@ -77,18 +79,18 @@ for jP=1:op.nPanels
     end
 end
 
-if ~isfield(op,'Shocks2Show'), op.Shocks2Show = s.ShockVar.Names; end
+if ~isfield(op,'Shocks2Show'), op.Shocks2Show = dsge.ShockVar.Names; end
 op.nShocks2Show = length(op.Shocks2Show);
 
 if ~isfield(op,'VarScale'), op.VarScale = 1; end
 
-s.Options.Sim = op;
+dsge.Options.Sim = op;
 
 
 %% Figures
 
-if isfield(s.Options,'Fig')
-    op = s.Options.Fig;
+if isfield(dsge.Options,'Fig')
+    op = dsge.Options.Fig;
 else
     op = struct; 
 end 
@@ -99,13 +101,13 @@ if ~isfield(op,'YMinScale'), op.YMinScale = 0; end
 if ~isfield(op,'KeepEPS'), op.KeepEPS = 0; end
 if ~isfield(op,'OpenPDF'), op.OpenPDF = 0; end
 
-s.Options.Fig = op;
+dsge.Options.Fig = op;
 
 
 %% Parameter Tables
 
-if isfield(s.Options,'ParTable')
-    op = s.Options.ParTable;
+if isfield(dsge.Options,'ParTable')
+    op = dsge.Options.ParTable;
 else
     op = struct; 
 end 
@@ -115,6 +117,6 @@ if ~isfield(op,'Precision'), op.Precision = 3; end
 if ~isfield(op,'MaxRows'), op.MaxRows = 35; end
 if ~isfield(op,'Lines'), op.Lines = []; end
 
-s.Options.ParTable = op;
+dsge.Options.ParTable = op;
 
 %% -------------------------------------------------------------------

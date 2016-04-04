@@ -1,14 +1,17 @@
-function s = OpenDSGE(Spec,SpecPath,SpecPathBase)
+function dsge = OpenDSGE(Spec,SpecPath,SpecPathBase)
 
 % OpenDSGE
 %
 % Usage:
-%   s = CloseDSGE(Spec)
-%   s = CloseDSGE(Spec, SpecPath)
-%   s = CloseDSGE(Spec, SpecPath, SpecPathBase)
+%   dsge = CloseDSGE(Spec)
+%   dsge = CloseDSGE(Spec, SpecPath)
+%   dsge = CloseDSGE(Spec, SpecPath, SpecPathBase)
 %
 % Changes current folder to that of SpecPath and Initializes or loads DSGE as a
 % structure.
+%
+% Note: the structure with the DSGE in the workspace does not have to be called
+%       "dsge".
 %
 % See also:
 % RunMyDSGE, CloseDSGE
@@ -40,17 +43,17 @@ cd(SpecPath)
 
 if exist([Spec,'.mat'],'file')
     fprintf('Opening spec %s\n',Spec);
-    s = load(Spec);
+    dsge = load(Spec);
 else
     fprintf('Initiating DSGE: %s\n',Spec);
-    s.Spec = Spec;
-    s.SpecPath = SpecPath;
-    s.SpecPathBase = SpecPathBase;
-    s.FileName = struct;
-    s.Report = struct;
-    s.Options = struct;
-    s.Status = struct;
-    s.TimeElapsed = struct;
-    save(Spec,'-struct','s')
+    dsge.Spec = Spec;
+    dsge.SpecPath = SpecPath;
+    dsge.SpecPathBase = SpecPathBase;
+    dsge.FileName = struct;
+    dsge.Report = struct;
+    dsge.Options = struct;
+    dsge.Status = struct;
+    dsge.TimeElapsed = struct;
+    save(Spec,'-struct','dsge')
 end
 

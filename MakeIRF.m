@@ -1,4 +1,4 @@
-function s = MakeIRF(s)
+function dsge = MakeIRF(dsge)
 
 % MakeIRF
 % 
@@ -22,23 +22,23 @@ Action = 'IRF';
 fprintf('\n*** Making IRF\n')
 
 % Set Timer
-s.TimeElapsed.(Action) = toc();
+dsge.TimeElapsed.(Action) = toc();
 
 %% Options
 
-s = CheckOptions(s);
+dsge = CheckOptions(dsge);
 
-if isfield(s.Options,'IRF')
-    op = s.Options.IRF;
+if isfield(dsge.Options,'IRF')
+    op = dsge.Options.IRF;
 else
     op = struct; 
 end
 
 % Import default options from Sim
-opList = fieldnames(s.Options.Sim);
+opList = fieldnames(dsge.Options.Sim);
 for jOp=1:length(opList)
     Opj = opList{jOp};
-    if ~isfield(op,Opj), op.(Opj) = s.Options.Sim.(opList{jOp}); end
+    if ~isfield(op,Opj), op.(Opj) = dsge.Options.Sim.(opList{jOp}); end
 end
 
 % Check options
@@ -59,7 +59,7 @@ if ~isfield(op,'TickStep'), op.TickStep = 4; end
 
 if ~isfield(op,'ShockSize'), op.ShockSize = ones(1,op.nShocks2Show); end
 
-Fig = s.Options.Fig;
+Fig = dsge.Options.Fig;
 if isfield(op,'Fig')
     opList = fieldnames(op.Fig);
     for jOp=1:length(opList)
@@ -68,44 +68,44 @@ if isfield(op,'Fig')
     end
 end
 
-if ~isfield(s,'PlotDir') || ~isfield(s.PlotDir,'IRF')
-    s.PlotDir.IRF = 'Plots_IRF/';
+if ~isfield(dsge,'PlotDir') || ~isfield(dsge.PlotDir,'IRF')
+    dsge.PlotDir.IRF = 'Plots_IRF/';
 end
-if ~isdir(s.PlotDir.IRF), mkdir(s.PlotDir.IRF), end
-s.FileName.PlotsIRF = sprintf('%s_IRF_%s',s.Spec,op.UseDist); 
-s.Report.IRF = sprintf('%s_Report_IRF_%s',s.Spec,op.UseDist);
-ReportTitle = sprintf('IRF Report:\\\\%s, %s',s.Spec,op.UseDist);
+if ~isdir(dsge.PlotDir.IRF), mkdir(dsge.PlotDir.IRF), end
+dsge.FileName.PlotsIRF = sprintf('%s_IRF_%s',dsge.Spec,op.UseDist); 
+dsge.Report.IRF = sprintf('%s_Report_IRF_%s',dsge.Spec,op.UseDist);
+ReportTitle = sprintf('IRF Report:\\\\%s, %s',dsge.Spec,op.UseDist);
 
 % Save options
-s.Options.IRF = op;
+dsge.Options.IRF = op;
 
 %% -------------------------------------------------------------------
 
 %% Prepare Draws
 if strcmp(op.UseDist,'PriorDraws')
-    xd = feval(s.FileName.PriorDraw,op.nDraws);
+    xd = feval(dsge.FileName.PriorDraw,op.nDraws);
 elseif strcmp(op.UseDist,'PostDraws')
     load(FileName.MCMCDrawsRedux,'xd')
     xd = xd(:,1:op.nDraws);
 else
-    if ~isfield(s.Param,op.UseDist)
+    if ~isfield(dsge.Param,op.UseDist)
         fprintf(2,'Did not recognize distribution to use. Cannot proceed.\n');
         return
     end
-    xd = s.Param.(op.UseDist);
+    xd = dsge.Param.(op.UseDist);
 end
 
 %% Generate IRF
 fprintf('Generating IRFs...\n');
-fnMats = @(x)feval(s.FileName.Mats,x,...
+fnMats = @(x)feval(dsge.FileName.Mats,x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 IRFCheck = ones(1,op.nDraws);
-IRFObsVar = nan(s.n.ObsVar,op.nSteps,op.nShocks2Show,op.nDraws);
-IRFStateVar = nan(s.n.StateVar,op.nSteps,op.nShocks2Show,op.nDraws);
-IRFAuxVar = nan(s.n.AuxVar,op.nSteps,op.nShocks2Show,op.nDraws);
+IRFObsVar = nan(dsge.n.ObsVar,op.nSteps,op.nShocks2Show,op.nDraws);
+IRFStateVar = nan(dsge.n.StateVar,op.nSteps,op.nShocks2Show,op.nDraws);
+IRFAuxVar = nan(dsge.n.AuxVar,op.nSteps,op.nShocks2Show,op.nDraws);
 ShockIdx = zeros(op.nShocks2Show,1);
 for j = 1:op.nShocks2Show
-    ShockIdx(j) = find(ismember(s.ShockVar.Names,op.Shocks2Show(j)));
+    ShockIdx(j) = find(ismember(dsge.ShockVar.Names,op.Shocks2Show(j)));
 end   
 parfor jd=1:op.nDraws
     matj = fnMats(xd(:,jd));
@@ -114,18 +114,18 @@ parfor jd=1:op.nDraws
         IRFCheck(jd) = 0;
         continue
     end
-    irf = zeros(s.n.StateVar,op.nShocks2Show,op.nSteps);
+    irf = zeros(dsge.n.StateVar,op.nShocks2Show,op.nSteps);
     irf = matj.REE.G2(:,ShockIdx);
     for t=2:op.nSteps
         irf(:,:,t) = matj.REE.G1*irf(:,:,t-1);
     end
     IRFStateVar(:,:,:,jd) = permute(irf,[1,3,2]);
-    irfObs = zeros(s.n.ObsVar,op.nShocks2Show,op.nSteps);
+    irfObs = zeros(dsge.n.ObsVar,op.nShocks2Show,op.nSteps);
     for t=1:op.nSteps
         irfObs(:,:,t) = matj.ObsEq.H*irf(:,:,t);
     end
     IRFObsVar(:,:,:,jd) = permute(irfObs,[1,3,2]);
-    irfAux = zeros(s.n.AuxVar,op.nShocks2Show,op.nSteps);
+    irfAux = zeros(dsge.n.AuxVar,op.nShocks2Show,op.nSteps);
     irfAux(:,:,1) = matj.AuxREE.G2(:,ShockIdx);
     for t=2:op.nSteps
         irfAux(:,:,t) = matj.AuxREE.G1*irf(:,:,t-1);
@@ -150,20 +150,20 @@ for jS=1:op.nShocks2Show
         PlotData = nan(nDrawsUsed,op.nSteps,Pj.nVar);
         for jV=1:Pj.nVar
             Vj = Pj.Var{jV};
-            [tf,idxV] = ismember(Vj,s.ObsVar.Names);
+            [tf,idxV] = ismember(Vj,dsge.ObsVar.Names);
             if tf
                PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                    squeeze(IRFObsVar(idxV,:,jS,:))';
             end
             if ~tf
-                [tf,idxV] = ismember(Vj,s.StateVar.Names);
+                [tf,idxV] = ismember(Vj,dsge.StateVar.Names);
                 if tf
                     PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                         squeeze(IRFStateVar(idxV,:,jS,:))';
                 end
             end
             if ~tf
-                [tf,idxV] = ismember(Vj,s.AuxVar.Names);
+                [tf,idxV] = ismember(Vj,dsge.AuxVar.Names);
                 if tf
                     PlotData(:,:,jV) = Pj.Scale(jV)*op.ShockSize(jS)*...
                         squeeze(IRFAuxVar(idxV,:,jS,:))';
@@ -177,16 +177,16 @@ for jS=1:op.nShocks2Show
             Figj.FigShape = Pj.FigShape;
         end
         OutFigj = vcFigure(PlotData,Figj);
-        vcPrintPDF([s.PlotDir.IRF,s.FileName.PlotsIRF,...
+        vcPrintPDF([dsge.PlotDir.IRF,dsge.FileName.PlotsIRF,...
              '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
-%         print([s.PlotDir.IRF,s.FileName.PlotsIRF,...
+%         print([dsge.PlotDir.IRF,dsge.FileName.PlotsIRF,...
 %              '_',Pj.Title,'_',Sj],'-dpdf')
     end
 end
 
 %% Make report with IRF
-fprintf('Making report: %s\n',s.Report.IRF);
-fid = vcCreateTex(s.Report.IRF,ReportTitle);
+fprintf('Making report: %s\n',dsge.Report.IRF);
+fid = vcCreateTex(dsge.Report.IRF,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jS=1:op.nShocks2Show
     Sj = op.Shocks2Show{jS};
@@ -197,17 +197,17 @@ for jS=1:op.nShocks2Show
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
-                s.PlotDir.IRF,s.FileName.PlotsIRF,Pj,Sj);
+                dsge.PlotDir.IRF,dsge.FileName.PlotsIRF,Pj,Sj);
 %         fprintf(fid,'\\includegraphics[width = \\textwidth,');
 %         fprintf(fid,'viewport = 60 200 560 600, clip]{%s%s_%s_%s.pdf}\n',...
-%                 s.PlotDir.IRF,s.FileName.PlotsIRF,Pj,Sj);
+%                 dsge.PlotDir.IRF,dsge.FileName.PlotsIRF,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
     end
 end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-pdflatex(s.Report.IRF)
+pdflatex(dsge.Report.IRF)
 
 %% -------------------------------------------------------------------
 
@@ -216,8 +216,8 @@ if strcmp(Fig.Visible,'off')
 end
 
 %% Finish up
-s.Status.(Action) = 1;
-s.TimeElapsed.(Action) = toc-s.TimeElapsed.(Action);
-fprintf('\n%s %s\n\n',Action,vctoc([],s.TimeElapsed.(Action)))
+dsge.Status.(Action) = 1;
+dsge.TimeElapsed.(Action) = toc-dsge.TimeElapsed.(Action);
+fprintf('\n%s %s\n\n',Action,vctoc([],dsge.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------
