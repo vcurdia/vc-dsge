@@ -183,7 +183,7 @@ end
 % Build State equations
 dsge.n.StateEq = length(dsge.StateEq);
 if dsge.n.StateEq~=dsge.n.StateVar
-    error(['Number of state variables (%\.0f) is different from number of ' ...
+    error(['Number of state variables (%.0f) is different from number of ' ...
            'state equations (%.0f).'],dsge.n.StateVar,dsge.n.StateEq)
 end
 StateEq = sym(zeros(dsge.n.StateEq,1));
