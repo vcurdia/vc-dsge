@@ -177,7 +177,7 @@ if dsge.n.ObsEq~=dsge.n.ObsVar
 end
 ObsEq = sym(zeros(dsge.n.ObsEq,1));
 for j=1:dsge.n.ObsEq
-    ObsEq(j) = sym(dsge.ObsEq{j});
+    ObsEq(j) = eval(sym(dsge.ObsEq{j}));
 end
 
 % Build State equations
@@ -188,7 +188,7 @@ if dsge.n.StateEq~=dsge.n.StateVar
 end
 StateEq = sym(zeros(dsge.n.StateEq,1));
 for j=1:dsge.n.StateEq
-    StateEq(j) = sym(dsge.StateEq{j});
+    StateEq(j) = eval(sym(dsge.StateEq{j}));
 end
 
 %% Generate matrices
