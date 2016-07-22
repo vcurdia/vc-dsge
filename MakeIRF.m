@@ -68,7 +68,7 @@ if isfield(op,'Fig')
     end
 end
 
-if ~isfield(dsge,'PlotDir') || ~isfield(dsge.PlotDir,'IRF')
+if ~isfield(dsge.PlotDir,'IRF')
     dsge.PlotDir.IRF = 'Plots_IRF/';
 end
 if ~isdir(dsge.PlotDir.IRF), mkdir(dsge.PlotDir.IRF), end
