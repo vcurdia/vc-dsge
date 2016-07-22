@@ -18,9 +18,9 @@ function [REE,fmat,fwt,ywt,gev]=SolveREE(StateEq,Author,varargin)
 %% -------------------------------------------------------------------
 
 %% Preamble
-REE.GBar = NaN;
-REE.G1 = NaN;
-REE.G2 = NaN;
+REE.GBar = [];
+REE.G1 = [];
+REE.G2 = [];
 REE.eu = [0;0];
 if ~exist('Author','var'), Author = 'CS'; end
 

@@ -39,7 +39,10 @@ end
 if ~isfield(op,'Bands2Show'), op.Bands2Show = [50,70,90]; end
 
 if ~isfield(op,'PanelList')
-    op.PanelList = {'ObsVar','StateVar','AuxVar'};
+    op.PanelList = {1,0};
+    if ~dsge.n.ObsVar>0, op.PanelList{end+1} = 'ObsVar';end
+    op.PanelList{end+1} = 'StateVar';
+    if ~dsge.n.AuxVar>0, op.PanelList{end+1} = 'AuxVar';end
 end
 if ~isfield(op,'PanelMaxVar'), op.PanelMaxVar = 9; end
 %if ~isfield(op,'PanelFigShape'), op.PanelFigShape = [3,3]; end

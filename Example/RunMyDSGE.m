@@ -31,7 +31,7 @@ set(0,'defaultTextInterpreter','latex');
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = OpenDSGE('MyDSGE');
+m = CreateDSGE('MyDSGE');
 
 %% Setup the model
 
