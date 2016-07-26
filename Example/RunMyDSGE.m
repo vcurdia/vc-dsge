@@ -21,11 +21,29 @@
 %% Preamble
 clear all
 tic
+
+%% Path
+MyPath.Root = fullfile(pwd,'../../../Matlab/');
+MyPath.List = {...
+    'vcDSGE',...
+    'vcTools',...
+    'Misc',...
+    'Misc/SimsGensys',...
+    'Misc/SimsKF',...
+    'Misc/SimsOptimize',...
+    'Misc/SimsVARtools',...
+    'Misc/JaeWon',...
+    };
+for j=1:length(MyPath.List)
+    MyPath.Add{j} = [MyPath.Root,MyPath.List{j}];
+end
+addpath(MyPath.Add{:})
+clear MyPath
+
+%% Use latex interpreter in figures
 set(0,'defaultTextInterpreter','latex');
 
-% diary('MyDSGE.log')
-% diary on
-
+%% Initiate parallel pool
 % parpool(2)
 
 %% -------------------------------------------------------------------
@@ -143,7 +161,6 @@ m = CloseDSGE(m);
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)
-% diary off
 % exit
 
 %% -------------------------------------------------------------------
