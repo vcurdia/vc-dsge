@@ -1,0 +1,57 @@
+#+TITLE: Notes on vcDSGE
+#+AUTHOR: Vasco Cúrdia
+#+EMAIL: vasco.curdia@sf.frb.org
+
+#+OPTIONS: email:t toc:nil
+
+
+* TO DO
+
+
+* 2016-08-18: Aux-Parameters that require numerical solution
+If there are aux-parameters that require a numerical solution conditional on
+the parameter values then we can proceed as follows.
+
+Create 
+m.NumSolveParam with the following fields:
+- Names: list of parameter names that link to AuxParam
+- Fcn: system of equations to solve. Each equation (function element) is a
+  function of elements of AuxParam
+- Guess: vector with guess of solution for each NumSolveParam
+- Solution: solution of csolve
+- rc: return code from csolve
+
+In doing this I need to create AuxParamFcn which will evaluate AuxParam for a
+given guess of NumSolveParam.
+
+Once solution is achieved then can map AuxParam to the output of that function.
+
+If length of m.NumSolveParam.Names is zero (empty) then this step is skipped.
+
+
+* References
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \hypersetup{
+#+LATEX_HEADER:     colorlinks,
+#+LATEX_HEADER:     citecolor=RefColor,
+#+LATEX_HEADER:     filecolor=RefColor,
+#+LATEX_HEADER:     linkcolor=RefColor,
+#+LATEX_HEADER:     urlcolor=RefColor,
+#+LATEX_HEADER: }
+#+LATEX_HEADER: \usepackage{natbib} 
+#+LATEX_HEADER: \usepackage[letterpaper]{geometry}
+#+LATEX_HEADER: \geometry{top=1.25in, bottom=1.0in, left=1.0in, right=1.0in}
+#+LATEX_HEADER: \setlength{\headheight}{15pt}
+#+LATEX_HEADER: \definecolor{RefColor}{rgb}{0.1,0.3,0.5}
+#+LATEX_HEADER: \usepackage{setspace}
+
+# If using regular indented paragraphs, including the 1st paragraph
+# #+LATEX_HEADER: \usepackage{indentfirst}
+
+# If want to use unindented paragraphs:
+#+LATEX_HEADER: \usepackage[parfill]{parskip}
+
+#+LATEX_HEADER: \numberwithin{equation}{section}
+
+bibliographystyle:../../Bibliography/aea
+bibliography:../../Bibliography/References.bib
