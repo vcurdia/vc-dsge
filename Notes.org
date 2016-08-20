@@ -81,6 +81,8 @@ relations), then let's proceed as follows:
     and evaluate NumSolveParam Instances
   - Evaluate AuxParam at NumSolveParam.Solution
 
+Note: we can use nested function so that each evaluation of AuxParam changes
+its value in workspace, and the same with NumSolveParam
 
 * References
 #+LATEX_HEADER: \usepackage{color}
