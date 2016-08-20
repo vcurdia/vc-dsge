@@ -8,6 +8,37 @@
 * TO DO
 
 
+* 2016-02-01: Misc notes
+
+Estimation actions:
+- State: what's the current state of the estimation
+- DataAnalysis
+- PriorAnalysis
+- MaxPost
+- MCMC (stage 1, ..., n)
+- MCMC Calibration
+- MCMC Convergence
+- PostAnalysis
+- MgLikelihood
+
+Report (for params):
+- Prior
+- MaxPost
+- MCMC
+- MCMC Conv
+- Mg Likelihood
+- Post analysis
+All this for params and param ratios
+
+Sim (for variables):
+- States
+- Forecast
+- IRF
+- VDecomp
+- Hist Decomp
+for Var Obs, Var States and Var Add
+
+
 * 2016-08-18: Aux-Parameters that require numerical solution
 If there are aux-parameters that require a numerical solution conditional on
 the parameter values then we can proceed as follows.
@@ -27,6 +58,28 @@ given guess of NumSolveParam.
 Once solution is achieved then can map AuxParam to the output of that function.
 
 If length of m.NumSolveParam.Names is zero (empty) then this step is skipped.
+
+
+* 2016-08-19: Num solution
+In case of need to solve some parameters numerically (usually steady state
+relations), then let's proceed as follows:
+- Set m.NumSolveParam w/ fields:
+  - Names
+  - Eq
+  - Guess
+- In PrepModel
+  - create sym variables for NumSolveParam.Names
+  - AuxParam refers to NumSolveParam.Names and gets properly defined
+- In MatsMake
+  - Create fcn that evaluates AuxParam given Param and NumSolveParam instances
+  - create fcn that assigns Eqs based on Param and AuxParam for a given guess
+    of NumSolveParam
+  - use csolve to solve this fcn w.r.t. NumSolveParam
+  - assign fields to NumSolveParam:
+    - Solution
+    - rc
+    and evaluate NumSolveParam Instances
+  - Evaluate AuxParam at NumSolveParam.Solution
 
 
 * References
