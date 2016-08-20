@@ -149,23 +149,10 @@ for j=1:np
         if psd==inf
             a = 1;
         else
-            fname = sprintf('igamsolve%.0f',cputime*1e10);
-            fid=fopen([fname,'.m'],'wt');
-            fprintf(fid,'function f=%s(x)\n',fname);
-            fprintf(fid,'pmean = %.16f;\n',pmean);
-            fprintf(fid,'pvar = %.16f;\n',psd^2);
-            fprintf(fid,'for j=1:length(x)\n');
-            fprintf(fid,'    a = x(j);\n');
-            fprintf(fid,...
-                    ['    f(j) = 1/(a-1)*(pmean*gamma(a)/gamma(a-1/2))^2',...
-                     '-pmean^2-pvar;\n']);
-            fprintf(fid,'end\n');
-            fclose(fid);
-            [a,rc] = csolvevb(fname,5,[],1e-10,1000);
+            [a,rc] = csolvevb(@(x)igamsolve(x,pmean,psd),5,[],1e-10,1000);
             if rc~=0, 
                 error('Search for iGam parameters failed, rc=%.0f',rc), 
             end
-            delete([fname,'.m'])
         end
         b = (gamma(a-1/2)/pmean/gamma(a))^2;
         p.PriorMode(j) = (1/b/(a+1/2))^(1/2);
@@ -446,3 +433,5 @@ fprintf('\n%s %s\n\n',Action,vctoc([],dsge.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------
 
+function f = igamsolve(a,pmean,psd)
+f = 1./(a-1).*(pmean*gamma(a)./gamma(a-1/2)).^2-pmean^2-psd^2;
