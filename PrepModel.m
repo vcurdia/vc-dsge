@@ -252,6 +252,10 @@ fprintf(fidMats,'end\n');
 fprintf(fidMats,'\n%% Verify options\n');
 fprintf(fidMats,'if op.StoreKF, op.SolveREE = 1; end\n');
 
+fprintf(fidMats,'\n%% Initiate Status\n');
+fprintf(fidMats,'Mats.Status = 1;\n');
+fprintf(fidMats,'Mats.StatusMessage = '''';\n');
+
 if dsge.n.Param>0
     fprintf(fidMats,'\n%% Map parameters\n');
     for j=1:dsge.n.Param
@@ -283,10 +287,14 @@ if dsge.n.NumSolveParam>0
     end
     fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
                      'NumSolveGuess,[],1e-10,1000);']);
-    fprintf(fidMats,'if ~NumSolveRC && verbose\n');
-    fprintf(fidMats,['    fprintf(fid,''Warning: NumParam Solution not ' ...
-                     'normal!!\\n'');\n']);
-    fprintf(fidMats,'        end\n\n');
+    fprintf(fidMats,'Mats.NumSolveParamRC = NumSolveRC;\n');
+    fprintf(fidMats,'if NumSolveRC~=0 && verbose\n');
+    fprintf(fidMats,'    Mats.Status = 0;\n');
+    txt = 'NumSolveParam solution not normal!';
+    fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
+            txt);
+    fprintf(fidMats,'    fprintf(fid,''Warning: %s\\n'');\n',txt);
+    fprintf(fidMats,'end\n');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'%s = NumSolveSolution(%.0f);\n',...
                 NumSolveParam.Names{j},j);
@@ -296,16 +304,18 @@ if dsge.n.NumSolveParam>0
         fprintf(fidMats,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
                 NumSolveParam.Names{j});
     end
-        fprintf(fidMats,'    Mats.NumSolveParamRC = NumSolveRC;\n');
     fprintf(fidMats,'end\n');
 end
 
 
 if dsge.n.AuxParam>0
     fprintf(fidMats,'\n%% Map auxiliary parameters\n');
+    fprintf(fidMats,'function EvalAuxParam');
     for j=1:dsge.n.AuxParam
-        fprintf(fidMats,'%s = %s;\n',AuxParam.Names{j},AuxParam.Expressions{j});
+        fprintf(fidMats,'    %s = %s;\n',AuxParam.Names{j},...
+                AuxParam.Expressions{j});
     end
+    fprintf(fidMats,'end');
     fprintf(fidMats,'if op.StoreParam\n');
     for j=1:dsge.n.AuxParam
         fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',AuxParam.Names{j});
@@ -391,6 +401,11 @@ fprintf(fidMats,...
         '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
         dsge.Options.GensysAuthor);
 fprintf(fidMats,'    Mats.REE = REE;\n');
+fprintf(fidMats,'    if ~all(REE.eu==0);\n');
+fprintf(fidMats,'        Mats.Status = 0;\n');
+fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
+                 'solution not normal!\\n''];\n']);
+fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 
 if dsge.n.ObsVar>0
@@ -438,10 +453,13 @@ if dsge.n.ObsVar>0
         fprintf(fidMats,...
                 '    sig00 = real(sig00); sig00 = (sig00+sig00'')/2;\n');
         fprintf(fidMats,'    if sig00rc~=0\n');
+        txt = 'Could not find unconditional variance!';
+        fprintf(fidMats,...
+                '        Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
+                txt);
         fprintf(fidMats,'        if verbose\n');
         fprintf(fidMats,...
-                ['            fprintf(fid,''Warning: Could not find ',...
-                 'unconditional variance!\\n'');\n']);
+                '            fprintf(fid,''Warning: ''%s''\\n'');\n',txt);
         fprintf(fidMats,'        end\n\n');
         fprintf(fidMats,'    end\n\n');
     end
