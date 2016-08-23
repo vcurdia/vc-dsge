@@ -56,6 +56,12 @@ m.Param = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
+% In this model, NumSolveParams is used just for illustrative purposes. 
+% It is actually not needed to solve the model.
+m.NumSolveParams.Names = {'rr'};
+m.NumSolveParams.Eq = {'rr-r'};
+m.NumSolveParams.Guess = 1;
+
 m.AuxParam = {...
     'beta','0.99','$\beta$';
     'gamma','gammaa/400','$\gamma$';
