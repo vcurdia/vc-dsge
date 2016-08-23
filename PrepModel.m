@@ -65,6 +65,36 @@ for j=1:dsge.n.Param
     eval(['syms ',Param.Names{j}]);
 end
 
+% NumSolveParam
+NumSolveParam = dsge.NumSolveParam;
+if isfield(dsge.NumSolveParam,'Names')
+    dsge.n.NumSolveParam = length(NumSolveParam.Names);
+else
+    dsge.n.NumSolveParam = 0;
+end
+if dsge.n.NumSolveParam>0
+    if ~isfield(NumSolveParam,'PrettyNames')
+        NumSolveParam.PrettyNames = NumSolveParam.Names;
+    end
+    if ~isfield(NumSolveParam,'Eq')
+        error('NumSolveParam.Eq not defined!')
+    end
+    nNumSolveEq = length(NumSolveParam.Eq);
+    if nNumSolveParam~=dsge.n.NumSolveParam
+        error(['Number of param to solve numerically (%.0f) does not match ' ...
+               'number of equations (%.0f)!'], dsge.n.NumSolveParam, ...
+              nNumSolveEq)
+    end
+    if ~isfield(NumSolveParam,'Guess')
+        fprintf('NumSolveParam.Guess not defined. Ones assumed.')
+        NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
+    end
+    for j=1:dsge.n.NumSolveParam
+        eval(['syms ',NumSolveParam.Names{j}]);
+    end
+    dsge.NumSolveParam = NumSolveParam;
+end
+
 % Auxiliary Parameters
 [dsge.n.AuxParam,nc] = size(dsge.AuxParam);
 AuxParam.Names = {dsge.AuxParam{:,1}}';
@@ -233,6 +263,43 @@ if dsge.n.Param>0
     end
     fprintf(fidMats,'end\n');
 end
+
+if dsge.n.NumSolveParam>0
+    fprintf(fidMats,'\n%% NumSolve parameters\n');
+    fprintf(fidMats,'function f=NumSolveEq(x)');
+    fprintf(fidMats,'    for jx=1:size(x,2)');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'        %s = x(%.0f,jx);\n',NumSolveParam.Names{j},j);
+    end
+    fprintf(fidMats,'        EvalAuxParam');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'        f(%.0f,jx) = %s;\n',j,NumSolveParam.Eq{j});
+    end
+    fprintf(fidMats,'    end');
+    fprintf(fidMats,'end');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'NumSolveGuess(%.0f,1) = %.16f;\n',...
+                j,NumSolveParam.Guess(j));
+    end
+    fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
+                     'NumSolveGuess,[],1e-10,1000);']);
+    fprintf(fidMats,'if ~NumSolveRC && verbose\n');
+    fprintf(fidMats,['    fprintf(fid,''Warning: NumParam Solution not ' ...
+                     'normal!!\\n'');\n']);
+    fprintf(fidMats,'        end\n\n');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'%s = NumSolveSolution(%.0f);\n',...
+                NumSolveParam.Names{j},j);
+    end
+    fprintf(fidMats,'if op.StoreParam\n');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
+                NumSolveParam.Names{j});
+    end
+        fprintf(fidMats,'    Mats.NumSolveParamRC = NumSolveRC;\n');
+    fprintf(fidMats,'end\n');
+end
+
 
 if dsge.n.AuxParam>0
     fprintf(fidMats,'\n%% Map auxiliary parameters\n');
@@ -433,6 +500,7 @@ if dsge.n.AuxVar>0
 end
 
 % close file
+fprintf(fidMats,'end\n');
 fclose(fidMats);
 
     

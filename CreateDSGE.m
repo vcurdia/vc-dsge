@@ -51,6 +51,7 @@ dsge.Options = struct;
 dsge.Status = struct;
 dsge.TimeElapsed = struct;
 dsge.Param = cell(0,4);
+dsge.NumSolveParam = struct;
 dsge.AuxParam = cell(0,2);
 dsge.ObsVar = cell(0,1);
 dsge.StateVar = cell(0,1);
