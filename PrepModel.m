@@ -270,17 +270,17 @@ end
 
 if dsge.n.NumSolveParam>0
     fprintf(fidMats,'\n%% NumSolve parameters\n');
-    fprintf(fidMats,'function f=NumSolveEq(x)');
+    fprintf(fidMats,'function f=NumSolveEq(x)\n');
     fprintf(fidMats,'    for jx=1:size(x,2)');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'        %s = x(%.0f,jx);\n',NumSolveParam.Names{j},j);
     end
-    fprintf(fidMats,'        EvalAuxParam');
+    fprintf(fidMats,'        EvalAuxParam\n');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'        f(%.0f,jx) = %s;\n',j,NumSolveParam.Eq{j});
     end
-    fprintf(fidMats,'    end');
-    fprintf(fidMats,'end');
+    fprintf(fidMats,'    end\n');
+    fprintf(fidMats,'end\n');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'NumSolveGuess(%.0f,1) = %.16f;\n',...
                 j,NumSolveParam.Guess(j));
@@ -310,12 +310,15 @@ end
 
 if dsge.n.AuxParam>0
     fprintf(fidMats,'\n%% Map auxiliary parameters\n');
-    fprintf(fidMats,'function EvalAuxParam');
-    for j=1:dsge.n.AuxParam
-        fprintf(fidMats,'    %s = %s;\n',AuxParam.Names{j},...
-                AuxParam.Expressions{j});
+    if dsge.n.NumSolveParam>0
+        fprintf(fidMats,'function EvalAuxParam \n');
     end
-    fprintf(fidMats,'end');
+    for j=1:dsge.n.AuxParam
+        fprintf(fidMats,'%s = %s;\n',AuxParam.Names{j},AuxParam.Expressions{j});
+    end
+    if dsge.n.NumSolveParam>0
+        fprintf(fidMats,'end \n');
+    end
     fprintf(fidMats,'if op.StoreParam\n');
     for j=1:dsge.n.AuxParam
         fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',AuxParam.Names{j});
