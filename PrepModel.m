@@ -268,6 +268,16 @@ if dsge.n.Param>0
     fprintf(fidMats,'end\n');
 end
 
+if dsge.n.AuxParam>0 || dsge.n.NumSolveParam>0
+    fprintf(fidMats,'\n%% Initialize auxiliary parameters\n');
+    for j=1:dsge.n.NumSolveParam
+        fprintf(fidMats,'%s = [];\n',NumSolveParam.Names{j});
+    end
+    for j=1:dsge.n.AuxParam
+        fprintf(fidMats,'%s = [];\n',AuxParam.Names{j});
+    end
+end
+
 if dsge.n.NumSolveParam>0
     fprintf(fidMats,'\n%% NumSolve parameters\n');
     fprintf(fidMats,'function f=NumSolveEq(x)\n');
@@ -403,7 +413,7 @@ fprintf(fidMats,...
         '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
         dsge.Options.GensysAuthor);
 fprintf(fidMats,'    Mats.REE = REE;\n');
-fprintf(fidMats,'    if ~all(REE.eu==0);\n');
+fprintf(fidMats,'    if ~all(REE.eu==1);\n');
 fprintf(fidMats,'        Mats.Status = 0;\n');
 fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
                  'solution not normal!\\n''];\n']);
