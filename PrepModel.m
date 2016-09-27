@@ -80,7 +80,7 @@ if dsge.n.NumSolveParam>0
         error('NumSolveParam.Eq not defined!')
     end
     nNumSolveEq = length(NumSolveParam.Eq);
-    if nNumSolveParam~=dsge.n.NumSolveParam
+    if nNumSolveEq~=dsge.n.NumSolveParam
         error(['Number of param to solve numerically (%.0f) does not match ' ...
                'number of equations (%.0f)!'], dsge.n.NumSolveParam, ...
               nNumSolveEq)
@@ -271,7 +271,7 @@ end
 if dsge.n.NumSolveParam>0
     fprintf(fidMats,'\n%% NumSolve parameters\n');
     fprintf(fidMats,'function f=NumSolveEq(x)\n');
-    fprintf(fidMats,'    for jx=1:size(x,2)');
+    fprintf(fidMats,'    for jx=1:size(x,2)\n');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'        %s = x(%.0f,jx);\n',NumSolveParam.Names{j},j);
     end
@@ -306,7 +306,6 @@ if dsge.n.NumSolveParam>0
     end
     fprintf(fidMats,'end\n');
 end
-
 
 if dsge.n.AuxParam>0
     fprintf(fidMats,'\n%% Map auxiliary parameters\n');
@@ -462,7 +461,7 @@ if dsge.n.ObsVar>0
                 txt);
         fprintf(fidMats,'        if verbose\n');
         fprintf(fidMats,...
-                '            fprintf(fid,''Warning: ''%s''\\n'');\n',txt);
+                '            fprintf(fid,''Warning: %s\\n'');\n',txt);
         fprintf(fidMats,'        end\n\n');
         fprintf(fidMats,'    end\n\n');
     end

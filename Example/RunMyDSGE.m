@@ -58,9 +58,9 @@ m.Param = {...
 
 % In this model, NumSolveParams is used just for illustrative purposes. 
 % It is actually not needed to solve the model.
-m.NumSolveParams.Names = {'rr'};
-m.NumSolveParams.Eq = {'rr-r'};
-m.NumSolveParams.Guess = 1;
+m.NumSolveParam.Names = {'rr'};
+m.NumSolveParam.Eq = {'rr-r'};
+m.NumSolveParam.Guess = 1;
 
 m.AuxParam = {...
     'beta','0.99','$\beta$';
