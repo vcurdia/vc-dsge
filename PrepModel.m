@@ -62,7 +62,8 @@ Param.PriorMean = [dsge.Param{:,3}]';
 Param.PriorSD = [dsge.Param{:,4}]';
 dsge.Param = Param;
 for j=1:dsge.n.Param
-    eval(['syms ',Param.Names{j}]);
+%     eval(['syms ',Param.Names{j}]);
+    eval([Param.Names{j},'=sym(''',Param.Names{j},''');']);
 end
 
 % NumSolveParam
@@ -90,7 +91,8 @@ if dsge.n.NumSolveParam>0
         NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
     end
     for j=1:dsge.n.NumSolveParam
-        eval(['syms ',NumSolveParam.Names{j}]);
+%         eval(['syms ',NumSolveParam.Names{j}]);
+        eval([NumSolveParam.Names{j},'=sym(''',NumSolveParam.Names{j},''');']);
     end
     dsge.NumSolveParam = NumSolveParam;
 end
@@ -106,7 +108,8 @@ end
 AuxParam.Expressions = {dsge.AuxParam{:,2}}';
 dsge.AuxParam = AuxParam;
 for j=1:dsge.n.AuxParam
-    eval(['syms ',AuxParam.Names{j}]);
+%     eval(['syms ',AuxParam.Names{j}]);
+    eval([AuxParam.Names{j},'=sym(''',AuxParam.Names{j},''');']);
 end
 
 % Observation variables
