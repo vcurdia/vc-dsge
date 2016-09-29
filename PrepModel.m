@@ -61,10 +61,7 @@ Param.PriorDist = {dsge.Param{:,2}}';
 Param.PriorMean = [dsge.Param{:,3}]';
 Param.PriorSD = [dsge.Param{:,4}]';
 dsge.Param = Param;
-for j=1:dsge.n.Param
-%     eval(['syms ',Param.Names{j}]);
-    eval([Param.Names{j},'=sym(''',Param.Names{j},''');']);
-end
+vcSym(Param.Names{:})
 
 % NumSolveParam
 NumSolveParam = dsge.NumSolveParam;
@@ -90,10 +87,7 @@ if dsge.n.NumSolveParam>0
         fprintf('NumSolveParam.Guess not defined. Ones assumed.')
         NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
     end
-    for j=1:dsge.n.NumSolveParam
-%         eval(['syms ',NumSolveParam.Names{j}]);
-        eval([NumSolveParam.Names{j},'=sym(''',NumSolveParam.Names{j},''');']);
-    end
+    vcSym(NumSolveParam.Names{:})
     dsge.NumSolveParam = NumSolveParam;
 end
 
@@ -107,10 +101,7 @@ else
 end
 AuxParam.Expressions = {dsge.AuxParam{:,2}}';
 dsge.AuxParam = AuxParam;
-for j=1:dsge.n.AuxParam
-%     eval(['syms ',AuxParam.Names{j}]);
-    eval([AuxParam.Names{j},'=sym(''',AuxParam.Names{j},''');']);
-end
+vcSym(AuxParam.Names{:})
 
 % Observation variables
 [dsge.n.ObsVar,nc] = size(dsge.ObsVar);
@@ -124,7 +115,7 @@ dsge.ObsVar = ObsVar;
 ObsVar_t = sym(zeros(1,dsge.n.ObsVar));
 for j=1:dsge.n.ObsVar
     jv = [ObsVar.Names{j},'_t'];
-    eval(['syms ',jv]);
+    vcSym(jv)
     ObsVar_t(j) = eval(jv);
 end
 
@@ -142,7 +133,7 @@ StateVar_tF = sym(zeros(1,dsge.n.StateVar));
 StateVar_tL = sym(zeros(1,dsge.n.StateVar));
 for j=1:dsge.n.StateVar
     jv = [StateVar.Names{j},'_t'];
-    eval(sprintf('syms %1$s %1$sF %1$sL',jv))
+    vcSym(jv,[jv,'F'],[jv,'L'])
     StateVar_t(j) = eval(jv);
     StateVar_tF(j) = eval([jv,'F']);
     StateVar_tL(j) = eval([jv,'L']);
@@ -160,12 +151,12 @@ dsge.ShockVar = ShockVar;
 ShockVar_t = sym(zeros(1,dsge.n.ShockVar));
 for j=1:dsge.n.ShockVar
     jv = [ShockVar.Names{j},'_t'];
-    eval(['syms ',jv]);
+    vcSym(jv)
     ShockVar_t(j) = eval(jv);
 end
 
 % constant variable
-syms one
+vcSym('one')
 
 % Auxiliary variables
 [dsge.n.AuxVar,nc] = size(dsge.AuxVar);
