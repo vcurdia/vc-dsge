@@ -292,12 +292,14 @@ if dsge.n.NumSolveParam>0
     fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
                      'NumSolveGuess,[],1e-10,1000);']);
     fprintf(fidMats,'Mats.NumSolveParamRC = NumSolveRC;\n');
-    fprintf(fidMats,'if NumSolveRC~=0 && verbose\n');
+    fprintf(fidMats,'if NumSolveRC~=0\n');
     fprintf(fidMats,'    Mats.Status = 0;\n');
     txt = 'NumSolveParam solution not normal!';
     fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
             txt);
-    fprintf(fidMats,'    fprintf(fid,''Warning: %s\\n'');\n',txt);
+    fprintf(fidMats,'    if verbose\n');
+    fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
+    fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
     for j=1:dsge.n.NumSolveParam
         fprintf(fidMats,'%s = NumSolveSolution(%.0f);\n',...
@@ -322,9 +324,22 @@ if dsge.n.AuxParam>0
     if dsge.n.NumSolveParam>0
         fprintf(fidMats,'end \n');
     end
+end
+
+% Incorporate NumSolveParam into AuxParam
+if dsge.n.NumSolveParam>0
+    dsge.n.AuxParam = dsge.n.AuxParam + dsge.n.NumSolveParam;
+    dsge.AuxParam.Names = [dsge.AuxParam.Names;dsge.NumSolveParam.Names];
+    dsge.AuxParam.PrettyNames = ...
+        [dsge.AuxParam.PrettyNames;dsge.NumSolveParam.PrettyNames];
+    dsge.AuxParam.Expressions(dsge.n.AuxParam+1-(1:dsge.n.NumSolveParam)) = ...
+                        {'NaN'};
+end
+if dsge.n.AuxParam>0
     fprintf(fidMats,'if op.StoreParam\n');
     for j=1:dsge.n.AuxParam
-        fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',AuxParam.Names{j});
+        fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
+                dsge.AuxParam.Names{j});
     end
     fprintf(fidMats,'end\n');
 end
