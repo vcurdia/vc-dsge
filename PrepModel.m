@@ -66,13 +66,20 @@ vcSym(Param.Names{:})
 % NumSolveParam
 NumSolveParam = dsge.NumSolveParam;
 if isfield(dsge.NumSolveParam,'Names')
-    dsge.n.NumSolveParam = length(NumSolveParam.Names);
+    [dsge.n.NumSolveParam,nc] = size(NumSolveParam.Names);
 else
     dsge.n.NumSolveParam = 0;
 end
 if dsge.n.NumSolveParam>0
-    if ~isfield(NumSolveParam,'PrettyNames')
-        NumSolveParam.PrettyNames = NumSolveParam.Names;
+    NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
+    NumSolveParam.PrettyNames = NumSolveParam.Names(:,1);
+    for jc=nc:-1:2
+        if ischar(NumSolveParam.Names{1,jc})
+            NumSolveParam.PrettyNames = NumSolveParam.Names(:,jc);
+        else
+            NumSolveParam.Guess = [NumSolveParam.Names{:,jc}];
+        end
+        NumSolveParam.Names(:,jc) = [];
     end
     if ~isfield(NumSolveParam,'Eq')
         error('NumSolveParam.Eq not defined!')
@@ -82,10 +89,6 @@ if dsge.n.NumSolveParam>0
         error(['Number of param to solve numerically (%.0f) does not match ' ...
                'number of equations (%.0f)!'], dsge.n.NumSolveParam, ...
               nNumSolveEq)
-    end
-    if ~isfield(NumSolveParam,'Guess')
-        fprintf('NumSolveParam.Guess not defined. Ones assumed.')
-        NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
     end
     vcSym(NumSolveParam.Names{:})
     dsge.NumSolveParam = NumSolveParam;

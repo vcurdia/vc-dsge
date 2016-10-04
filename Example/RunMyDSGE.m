@@ -57,10 +57,11 @@ m.Param = {...
     };
 
 % Uncomment the following lines to show how NumSolveParam works: 
-% m.NumSolveParam.Names = {'rA';'rB'};
-% m.NumSolveParam.PrettyNames = {'$r^A$';'$r^B$'};
+% m.NumSolveParam.Names = {...
+%     'rA','$r^A$',1;
+%     'rB','$r^B$',1;
+%     };
 % m.NumSolveParam.Eq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
-% m.NumSolveParam.Guess = [1;1];
 
 m.AuxParam = {...
     'beta','0.99','$\beta$';
