@@ -44,7 +44,7 @@ if ~isfield(op,'PanelList')
     op.PanelList{end+1} = 'StateVar';
     if ~dsge.n.AuxVar>0, op.PanelList{end+1} = 'AuxVar';end
 end
-if ~isfield(op,'PanelMaxVar'), op.PanelMaxVar = 9; end
+if ~isfield(op,'PanelMaxVar'), op.PanelMaxVar = 16; end
 %if ~isfield(op,'PanelFigShape'), op.PanelFigShape = [3,3]; end
 if ~isfield(op,'Panels')
     jP = 0;
