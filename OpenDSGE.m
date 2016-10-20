@@ -1,9 +1,9 @@
-function dsge = OpenDSGE(Spec)
+function dsge = OpenDSGE(Spec,SpecPath)
 
 % OpenDSGE
 %
 % Usage:
-%   dsge = CloseDSGE(Spec)
+%   dsge = OpenDSGE(Spec)
 %   dsge = CloseDSGE(Spec, SpecPath)
 %
 % Changes current folder to that of SpecPath and loads DSGE as a structure.
