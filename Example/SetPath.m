@@ -1,4 +1,4 @@
-% setPath
+% setpath
 
 MyPath.Root = fullfile(pwd,'../../../Matlab/');
 MyPath.List = {...

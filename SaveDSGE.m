@@ -1,17 +1,17 @@
-function SaveDSGE(dsge)
+function savedsge(obj)
 
-% SaveDSGE
+% savedsge
 %
 % Usage:
-%   SaveDSGE(dsge)
+%   savedsge(obj)
 %
-% Saves DSGE (but does not leave dsge folder).
+% Saves DSGE
 %
 % Note: the structure with the DSGE in the workspace does not have to be called
-%       "dsge".
+%       "obj".
 %
 % See also:
-% RunMyDSGE, OpenDSGE, CloseDSGE
+% setupMyDSGE, opendsge, createdsge
 %
 % ...........................................................................
 %
@@ -22,6 +22,6 @@ function SaveDSGE(dsge)
 %% -------------------------------------------------------------------
 
 %fprintf('\nSaving workspace and exiting spec folder\n')
-save(dsge.Spec,'-struct','dsge')
+save(obj.Spec,'-struct','obj')
 
 

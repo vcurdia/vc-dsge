@@ -22,9 +22,8 @@
 clear all
 tic
 SetPath
-
-%% Use latex interpreter in figures
 set(0,'defaultTextInterpreter','latex');
+BasePath = pwd;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -32,11 +31,15 @@ set(0,'defaultTextInterpreter','latex');
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = CreateDSGE('MyDSGE');
+m = createdsge('MyDSGE');
 
 %% Setup the model
 
-m.Param = {...
+m.Param.Set ={...
+    'beta','0.99','$\beta$';
+    };
+
+m.Param.Est = {...
     'omega', 'G', 1, 0.2,'$\omega$';
     'xi', 'G', 0.1, 0.05,'$\xi$';
     'eta', 'B', 0.6, 0.2,'$\eta$';
@@ -56,15 +59,14 @@ m.Param = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
-% Uncomment the following lines to show how NumSolveParam works: 
-% m.NumSolveParam.Names = {...
+% Uncomment the following lines to show how Param.NumSolve works: 
+% m.Param.NumSolve.Names = {...
 %     'rA','$r^A$',1;
 %     'rB','$r^B$',1;
 %     };
-% m.NumSolveParam.Eq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
+% m.Param.NumSolve.Eq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
 
-m.AuxParam = {...
-    'beta','0.99','$\beta$';
+m.Param.Aux = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -73,12 +75,12 @@ m.AuxParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
 
-m.ObsVar = {...
+m.Var.Obs = {...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
     'FFR', 'FFR'};
 
-m.StateVar = {...
+m.Var.State = {...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -96,22 +98,22 @@ m.StateVar = {...
     'YAeL', '$Y_{A,t-1}^e$';
     };
 
-m.ShockVar = {...
+m.Var.Shock = {...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
              }; 
 
-m.AuxVar = {'r','ir_t-pi_tF','$r$'};
+m.Var.Aux = {'r','ir_t-pi_tF','$r$'};
 
-m.ObsEq = {...
+m.Eq.Obs = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
     };
 
-m.StateEq = {...
+m.Eq.State = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -136,18 +138,19 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-m = PrepModel(m);
-Mats = feval(m.FileName.Mats,m.Param.PriorMean);
+m = prepdsge(m);
+Mats = evaldsge(m.Param.PriorMean);
 
-m = PriorAnalysis(m);
+m = prioranalysis(m);
 
 m.Options.Sim.UseDist = 'PriorDraws';
-m = MakeIRF(m);
+m = makeirf(m);
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-m = CloseDSGE(m);
+m = savedsge(m);
+cd(BaseFolder)
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)

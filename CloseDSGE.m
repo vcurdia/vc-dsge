@@ -1,18 +1,18 @@
-function dsge = CloseDSGE(dsge)
+function obj = closedsge(obj)
 
-% CloseDSGE
+% closedsge
 %
 % Usage:
-%   dsge = CloseDSGE(dsge)
-%   dsge = CloseDSGE(dsge,BaseFolder)
+%   obj = closedsge(obj)
+%   obj = CloseDSGE(obj,BaseFolder)
 %
-% Saves DSGE and exists Spec folder.
+% Saves obj and exists Spec folder.
 %
 % Note: the structure with the DSGE in the workspace does not have to be called
-%       "dsge".
+%       "obj".
 %
 % See also:
-% RunMyDSGE, OpenDSGE
+% setupMyDSGE, opendsge
 %
 % ...........................................................................
 %
@@ -23,6 +23,6 @@ function dsge = CloseDSGE(dsge)
 %% -------------------------------------------------------------------
 
 %fprintf('\nSaving workspace and exiting spec folder\n')
-save(dsge.Spec,'-struct','dsge')
-cd(dsge.SpecPathBase)
+save(obj.Spec,'-struct','obj')
+cd(obj.SpecPathBase)
 

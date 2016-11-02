@@ -1,20 +1,24 @@
-function dsge = CreateDSGE(Spec,SpecPath,SpecPathBase)
+function obj = createdsge(Spec,SpecPath)
 
-% CreateDSGE
+% createdsge
 %
 % Usage:
-%   dsge = CloseDSGE(Spec)
-%   dsge = CloseDSGE(Spec, SpecPath)
-%   dsge = CloseDSGE(Spec, SpecPath, SpecPathBase)
+%   obj = createdsge(Spec)
+%   obj = createdsge(Spec, SpecPath)
 %
-% Changes current folder to that of SpecPath and Initializes DSGE as a
-% structure.
+% Creates subfolder under SpecPath with name of Spec and initializes the DSGE 
+% as a structure.
 %
+% Inputs:
+%   Spec: string with spec name, used for folder name to hold all the spec data 
+%         and spec-specific functions
+%   SpecPath: base path where spec folder will be located. Needs to end in "/".
+% 
 % Note: the structure with the DSGE in the workspace does not have to be called
-%       "dsge".
+%       "obj".
 %
 % See also:
-% RunMyDSGE, OpenDSGE, CloseDSGE
+% setupMyDSGE, opendsge, closedsge
 %
 % ...........................................................................
 %
@@ -24,43 +28,22 @@ function dsge = CreateDSGE(Spec,SpecPath,SpecPathBase)
 
 %% -------------------------------------------------------------------
 
-if ~exist('SpecPath','var')
-    SpecPath = [Spec,'/'];
+if exist('SpecPath','var')
+    if ~isdir(SpecPath), mkdir(SpecPath), end
+    cd(SpecPath)
 end
-if ~exist('SpecPathBase','var')
-    if strcmp(SpecPath,'./')
-        SpecPathBase = './';
-    else
-        SpecPathBase = '../';
-    end
-end
-
-if ~isempty(SpecPath) && ~isdir(SpecPath)
-    mkdir(SpecPath)
-end
-cd(SpecPath)
+mkdir(Spec)
+cd(Spec)
 
 fprintf('Initiating DSGE: %s\n',Spec);
-dsge.Spec = Spec;
-dsge.SpecPath = SpecPath;
-dsge.SpecPathBase = SpecPathBase;
-dsge.FileName = struct;
-dsge.Report = struct;
-dsge.PlotDir = struct;
-dsge.Options = struct;
-dsge.Status = struct;
-dsge.TimeElapsed = struct;
-dsge.Param = cell(0,4);
-dsge.NumSolveParam = struct;
-dsge.AuxParam = cell(0,2);
-dsge.ObsVar = cell(0,1);
-dsge.StateVar = cell(0,1);
-dsge.ShockVar = cell(0,1);
-dsge.AuxVar = cell(0,2);
-dsge.ObsEq = cell(0,1);
-dsge.StateEq = cell(0,1);
-dsge.AuxEq = cell(0,1);
+obj.Spec = Spec;
+obj.PlotDir = struct;
+obj.Options = struct;
+obj.TimeElapsed = struct;
+obj.Param = struct;
+obj.Var = struct;
+obj.Eq = struct;
 
-save(Spec,'-struct','dsge')
+savedsge(obj)
 
 

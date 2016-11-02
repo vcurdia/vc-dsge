@@ -49,19 +49,26 @@ end
 
 fprintf('Generating symbolic variables and systems of equations...\n')
 
-% Parameters
-[dsge.n.Param,nc] = size(dsge.Param);
-Param.Names = {dsge.Param{:,1}}';
-if nc==4
-    Param.PrettyNames = Param.Names;
+% Parameters to estimate
+if isfield(dsge.Param,'Est')
+    [Est.N,nc] = size(dsge.Param.Est);
 else
-    Param.PrettyNames = {dsge.Param{:,5}}';
+    Est.N = 0;
 end
-Param.PriorDist = {dsge.Param{:,2}}';
-Param.PriorMean = [dsge.Param{:,3}]';
-Param.PriorSD = [dsge.Param{:,4}]';
-dsge.Param = Param;
-vcSym(Param.Names{:})
+Est.Exist = Est.N>0;
+if Est.Exist
+    Est.Names = {dsge.Param.Est{:,1}}';
+    if nc==4
+        Est.PrettyNames = Est.Names;
+    else
+        Est.PrettyNames = {dsge.Param.Est{:,5}}';
+    end
+    Est.PriorDist = {dsge.Param.Est{:,2}}';
+    Est.PriorMean = [dsge.Param.Est{:,3}]';
+    Est.PriorSD = [dsge.Param.Est{:,4}]';
+    vcSym(Est.Names{:})
+end
+dsge.Param.Est = Est;
 
 % NumSolveParam
 NumSolveParam = dsge.NumSolveParam;

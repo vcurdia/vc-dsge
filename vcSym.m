@@ -1,11 +1,11 @@
-function vcSym(varargin)
+function vcsym(varargin)
 
-% vcSym
+% vcsym
 %
 % Creates symbolic variable(s) in caller workspace.
 %
 % Usage:
-%   vcSym(<VarName1>,...,<VarNameN>)
+%   vcsym(<VarName1>,...,<VarNameN>)
 %
 % Inputs:
 %   <VarName> (character array)
