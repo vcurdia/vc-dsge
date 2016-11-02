@@ -23,7 +23,7 @@ clear all
 tic
 SetPath
 set(0,'defaultTextInterpreter','latex');
-BasePath = pwd;
+BaseFolder = pwd;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -34,10 +34,6 @@ BasePath = pwd;
 m = CreateDSGE('MyDSGE');
 
 %% Setup the model
-
-m.Param.Set ={...
-    'beta','0.99','$\beta$';
-    };
 
 m.Param.Est = {...
     'omega', 'G', 1, 0.2,'$\omega$';
@@ -57,6 +53,10 @@ m.Param.Est = {...
     'sigmagamma', 'IG1', 0.5, 2,'$\sigma_\gamma$';
     'sigmau', 'IG1', 0.5, 2,'$\sigma_u$';
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
+    };
+
+m.Param.Set ={...
+    'beta','0.99','$\beta$';
     };
 
 % Uncomment the following lines to show how Param.NumSolve works: 

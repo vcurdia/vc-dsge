@@ -25,5 +25,5 @@ function obj = OpenDSGE(Spec,SpecPath)
 if exist('SpecPath','var'), cd(SpecPath), end
 cd(Spec)
 fprintf('Opening %s\n',Spec);
-obj = load(Spec);
+obj = load('DSGEData');
 

@@ -22,6 +22,7 @@ function SaveDSGE(obj)
 %% -------------------------------------------------------------------
 
 %fprintf('\nSaving workspace and exiting spec folder\n')
-save(obj.Spec,'-struct','obj')
+%save(obj.Spec,'-struct','obj')
+save('DSGEData','-struct','obj')
 
 
