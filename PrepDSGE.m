@@ -49,14 +49,20 @@ end
 
 fprintf('Generating symbolic variables and systems of equations...\n')
 
-% Parameters to estimate
-if isfield(obj.Param,'Est')
-    [Est.N,nc] = size(obj.Param.Est);
-else
-    Est.N = 0;
+% check number and existence of parameters
+pList = {'Est','Set','NumSolve','Aux'};
+for j=1:length(pList)
+    jp = pList{j};
+    if isfield(obj.Param,jp)
+        [obj.n.([jp,'Param']),nc] = size(obj.Param.(jp));
+    else
+        obj.n.([jp,'Param']) = 0;
+    end
+    obj.Exist.([jp,'Param']) = obj.n.([jp,'Param'])>0;
 end
-Est.Exist = Est.N>0;
-if Est.Exist
+
+% Estimated Parameters
+if obj.Exist.EstParam
     Est.Names = {obj.Param.Est{:,1}}';
     if nc==4
         Est.PrettyNames = Est.Names;
@@ -67,8 +73,21 @@ if Est.Exist
     Est.PriorMean = [obj.Param.Est{:,3}]';
     Est.PriorSD = [obj.Param.Est{:,4}]';
     vcSym(Est.Names{:})
+    obj.Param.Est = Est;
 end
-obj.Param.Est = Est;
+
+% Set Parameters
+if obj.Exist.SetParam
+    Set.Names = {obj.Param.Set{:,1}}';
+    if nc==2
+        Set.PrettyNames = Set.Names;
+    else
+        Set.PrettyNames = {obj.Param.Set{:,3}}';
+    end
+    Set.Values = [obj.Param.Set{:,2}]';
+    vcSym(Set.Names{:})
+    obj.Param.Set = Set;
+end
 
 % NumSolveParam
 NumSolveParam = obj.NumSolveParam;
