@@ -1,9 +1,9 @@
-function savedsge(obj)
+function SaveDSGE(obj)
 
-% savedsge
+% SaveDSGE
 %
 % Usage:
-%   savedsge(obj)
+%   SaveDSGE(obj)
 %
 % Saves DSGE
 %
@@ -11,7 +11,7 @@ function savedsge(obj)
 %       "obj".
 %
 % See also:
-% setupMyDSGE, opendsge, createdsge
+% SetupMyDSGE, OpenDSGE, CreateDSGE
 %
 % ...........................................................................
 %

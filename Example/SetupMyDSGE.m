@@ -31,7 +31,7 @@ BasePath = pwd;
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = createdsge('MyDSGE');
+m = CreateDSGE('MyDSGE');
 
 %% Setup the model
 
@@ -138,18 +138,18 @@ m.Eq.State = {...
     'YAeL_t-YAe_tL';
     };
 
-m = prepdsge(m);
-Mats = evaldsge(m.Param.PriorMean);
+m = PrepDSGE(m);
+Mats = EvalDSGE(m.Param.PriorMean);
 
-m = prioranalysis(m);
+m = PriorAnalysis(m);
 
 m.Options.Sim.UseDist = 'PriorDraws';
-m = makeirf(m);
+m = MakeIRF(m);
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-m = savedsge(m);
+m = SaveDSGE(m);
 cd(BaseFolder)
 fprintf('\n%s\n\n',vctoc)
 

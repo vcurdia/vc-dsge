@@ -1,10 +1,10 @@
-function obj = createdsge(Spec,SpecPath)
+function obj = CreateDSGE(Spec,SpecPath)
 
 % createdsge
 %
 % Usage:
-%   obj = createdsge(Spec)
-%   obj = createdsge(Spec, SpecPath)
+%   obj = CreateDSGE(Spec)
+%   obj = CreateDSGE(Spec, SpecPath)
 %
 % Creates subfolder under SpecPath with name of Spec and initializes the DSGE 
 % as a structure.
@@ -18,7 +18,7 @@ function obj = createdsge(Spec,SpecPath)
 %       "obj".
 %
 % See also:
-% setupMyDSGE, opendsge, closedsge
+% SetupMyDSGE, OpenDSGE, SaveDSGE
 %
 % ...........................................................................
 %
@@ -44,6 +44,6 @@ obj.Param = struct;
 obj.Var = struct;
 obj.Eq = struct;
 
-savedsge(obj)
+SaveDSGE(obj)
 
 

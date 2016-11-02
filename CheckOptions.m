@@ -1,6 +1,6 @@
-function obj = checkoptions(obj)
+function obj = CheckOptions(obj)
 
-% checkoptions
+% CheckOptions
 %
 % Checks options and if needed initializes them.
 %

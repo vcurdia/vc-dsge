@@ -1,10 +1,10 @@
-function obj = opendsge(Spec,SpecPath)
+function obj = OpenDSGE(Spec,SpecPath)
 
 % OpenDSGE
 %
 % Usage:
-%   obj = opendsge(Spec)
-%   obj = opendsge(Spec, SpecPath)
+%   obj = OpenDSGE(Spec)
+%   obj = OpenDSGE(Spec, SpecPath)
 %
 % Changes current folder to that of SpecPath and loads DSGE as a structure.
 %
@@ -12,7 +12,7 @@ function obj = opendsge(Spec,SpecPath)
 %       "dsge".
 %
 % See also:
-% setupMyDSGE, createdsge, closedsge
+% SetupMyDSGE, CreateDSGE, CloseDSGE
 %
 % ...........................................................................
 %

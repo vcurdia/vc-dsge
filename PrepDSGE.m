@@ -1,21 +1,21 @@
-function dsge = PrepModel(dsge)
+function obj = PrepDSGE(obj)
 
-% PrepModel
+% PrepDSGE
 %
-% Analyzes the model and generates code to evaluate the model for a given
-% parameter vector.
+% Analyzes the DSGE structure and generates code to evaluate the DSGE for a 
+% given parameter vector.
 %
 % Convention: x_t refers to x(t)
 %             x_tF refers to x(t+1)
 %             x_tL refers to x(t-1)
 %
 % Note: the structure with the DSGE in the workspace does not have to be called
-%       "dsge", however in the codes we use that notation, especially in 
-%       PrepModel in order to minimize variable and parameter name 
+%       "obj", however in the codes we use that notation, especially in 
+%       PrepDSGE in order to minimize variable and parameter name 
 %       incompatibilities.
 %
 % See also:
-% RunMyDSGE
+% SetupMyDSGE
 %
 % ...........................................................................
 %
@@ -27,7 +27,7 @@ function dsge = PrepModel(dsge)
 
 %% Preamble
 
-Action = 'PrepModel';
+Action = 'PrepDSGE';
 
 % % check if model already prepared
 % if isfield(dsge.Status,Action) && dsge.Statudsge.(Action), return, end
@@ -35,11 +35,11 @@ Action = 'PrepModel';
 fprintf('\n*** Analyzing DSGE model\n')
 
 % Set Timer
-dsge.TimeElapsed.(Action) = toc();
+obj.TimeElapsed.(Action) = toc();
 
 % Check settings
 if ~isfield(dsge.Options,'GensysAuthor'), 
-    dsge.Options.GensysAuthor = 'CS';
+    obj.Options.GensysAuthor = 'CS';
 end
 
 
@@ -50,35 +50,35 @@ end
 fprintf('Generating symbolic variables and systems of equations...\n')
 
 % Parameters to estimate
-if isfield(dsge.Param,'Est')
-    [Est.N,nc] = size(dsge.Param.Est);
+if isfield(obj.Param,'Est')
+    [Est.N,nc] = size(obj.Param.Est);
 else
     Est.N = 0;
 end
 Est.Exist = Est.N>0;
 if Est.Exist
-    Est.Names = {dsge.Param.Est{:,1}}';
+    Est.Names = {obj.Param.Est{:,1}}';
     if nc==4
         Est.PrettyNames = Est.Names;
     else
-        Est.PrettyNames = {dsge.Param.Est{:,5}}';
+        Est.PrettyNames = {obj.Param.Est{:,5}}';
     end
-    Est.PriorDist = {dsge.Param.Est{:,2}}';
-    Est.PriorMean = [dsge.Param.Est{:,3}]';
-    Est.PriorSD = [dsge.Param.Est{:,4}]';
+    Est.PriorDist = {obj.Param.Est{:,2}}';
+    Est.PriorMean = [obj.Param.Est{:,3}]';
+    Est.PriorSD = [obj.Param.Est{:,4}]';
     vcSym(Est.Names{:})
 end
-dsge.Param.Est = Est;
+obj.Param.Est = Est;
 
 % NumSolveParam
-NumSolveParam = dsge.NumSolveParam;
-if isfield(dsge.NumSolveParam,'Names')
-    [dsge.n.NumSolveParam,nc] = size(NumSolveParam.Names);
+NumSolveParam = obj.NumSolveParam;
+if isfield(obj.NumSolveParam,'Names')
+    [obj.n.NumSolveParam,nc] = size(NumSolveParam.Names);
 else
-    dsge.n.NumSolveParam = 0;
+    obj.n.NumSolveParam = 0;
 end
-if dsge.n.NumSolveParam>0
-    NumSolveParam.Guess = ones(dsge.n.NumSolveParam,1);
+if obj.n.NumSolveParam>0
+    NumSolveParam.Guess = ones(obj.n.NumSolveParam,1);
     NumSolveParam.PrettyNames = NumSolveParam.Names(:,1);
     for jc=nc:-1:2
         if ischar(NumSolveParam.Names{1,jc})
@@ -92,56 +92,56 @@ if dsge.n.NumSolveParam>0
         error('NumSolveParam.Eq not defined!')
     end
     nNumSolveEq = length(NumSolveParam.Eq);
-    if nNumSolveEq~=dsge.n.NumSolveParam
+    if nNumSolveEq~=obj.n.NumSolveParam
         error(['Number of param to solve numerically (%.0f) does not match ' ...
-               'number of equations (%.0f)!'], dsge.n.NumSolveParam, ...
+               'number of equations (%.0f)!'], obj.n.NumSolveParam, ...
               nNumSolveEq)
     end
     vcSym(NumSolveParam.Names{:})
-    dsge.NumSolveParam = NumSolveParam;
+    obj.NumSolveParam = NumSolveParam;
 end
 
 % Auxiliary Parameters
-[dsge.n.AuxParam,nc] = size(dsge.AuxParam);
-AuxParam.Names = {dsge.AuxParam{:,1}}';
+[obj.n.AuxParam,nc] = size(obj.AuxParam);
+AuxParam.Names = {obj.AuxParam{:,1}}';
 if nc==2
     AuxParam.PrettyNames = AuxParam.Names;
 else
-    AuxParam.PrettyNames = {dsge.AuxParam{:,3}}';
+    AuxParam.PrettyNames = {obj.AuxParam{:,3}}';
 end
-AuxParam.Expressions = {dsge.AuxParam{:,2}}';
-dsge.AuxParam = AuxParam;
+AuxParam.Expressions = {obj.AuxParam{:,2}}';
+obj.AuxParam = AuxParam;
 vcSym(AuxParam.Names{:})
 
 % Observation variables
-[dsge.n.ObsVar,nc] = size(dsge.ObsVar);
-ObsVar.Names = {dsge.ObsVar{:,1}}';
+[obj.n.ObsVar,nc] = size(obj.ObsVar);
+ObsVar.Names = {obj.ObsVar{:,1}}';
 if nc==1
     ObsVar.PrettyNames = ObsVar.Names;
 else
-    ObsVar.PrettyNames = {dsge.ObsVar{:,2}}';
+    ObsVar.PrettyNames = {obj.ObsVar{:,2}}';
 end
-dsge.ObsVar = ObsVar;
-ObsVar_t = sym(zeros(1,dsge.n.ObsVar));
-for j=1:dsge.n.ObsVar
+obj.ObsVar = ObsVar;
+ObsVar_t = sym(zeros(1,obj.n.ObsVar));
+for j=1:obj.n.ObsVar
     jv = [ObsVar.Names{j},'_t'];
     vcSym(jv)
     ObsVar_t(j) = eval(jv);
 end
 
 % State space variables
-[dsge.n.StateVar,nc] = size(dsge.StateVar);
-StateVar.Names = {dsge.StateVar{:,1}}';
+[obj.n.StateVar,nc] = size(obj.StateVar);
+StateVar.Names = {obj.StateVar{:,1}}';
 if nc==1
     StateVar.PrettyNames = StateVar.Names;
 else
-    StateVar.PrettyNames = {dsge.StateVar{:,2}}';
+    StateVar.PrettyNames = {obj.StateVar{:,2}}';
 end
-dsge.StateVar = StateVar;
-StateVar_t = sym(zeros(1,dsge.n.StateVar)); 
-StateVar_tF = sym(zeros(1,dsge.n.StateVar)); 
-StateVar_tL = sym(zeros(1,dsge.n.StateVar));
-for j=1:dsge.n.StateVar
+obj.StateVar = StateVar;
+StateVar_t = sym(zeros(1,obj.n.StateVar)); 
+StateVar_tF = sym(zeros(1,obj.n.StateVar)); 
+StateVar_tL = sym(zeros(1,obj.n.StateVar));
+for j=1:obj.n.StateVar
     jv = [StateVar.Names{j},'_t'];
     vcSym(jv,[jv,'F'],[jv,'L'])
     StateVar_t(j) = eval(jv);
@@ -150,16 +150,16 @@ for j=1:dsge.n.StateVar
 end
 
 % Shocks
-[dsge.n.ShockVar,nc] = size(dsge.ShockVar);
-ShockVar.Names = {dsge.ShockVar{:,1}}';
+[obj.n.ShockVar,nc] = size(obj.ShockVar);
+ShockVar.Names = {obj.ShockVar{:,1}}';
 if nc==1
     ShockVar.PrettyNames = ShockVar.Names;
 else
-    ShockVar.PrettyNames = {dsge.ShockVar{:,2}}';
+    ShockVar.PrettyNames = {obj.ShockVar{:,2}}';
 end
-dsge.ShockVar = ShockVar;
-ShockVar_t = sym(zeros(1,dsge.n.ShockVar));
-for j=1:dsge.n.ShockVar
+obj.ShockVar = ShockVar;
+ShockVar_t = sym(zeros(1,obj.n.ShockVar));
+for j=1:obj.n.ShockVar
     jv = [ShockVar.Names{j},'_t'];
     vcSym(jv)
     ShockVar_t(j) = eval(jv);
@@ -169,19 +169,19 @@ end
 vcSym('one')
 
 % Auxiliary variables
-[dsge.n.AuxVar,nc] = size(dsge.AuxVar);
-AuxVar.Names = {dsge.AuxVar{:,1}}';
+[obj.n.AuxVar,nc] = size(obj.AuxVar);
+AuxVar.Names = {obj.AuxVar{:,1}}';
 if nc==2
     AuxVar.PrettyNames = AuxVar.Names;
 else
-    AuxVar.PrettyNames = {dsge.AuxVar{:,3}}';
+    AuxVar.PrettyNames = {obj.AuxVar{:,3}}';
 end
-dsge.AuxEq = {dsge.AuxVar{:,2}}.';
-dsge.AuxVar = AuxVar;
-AuxEq = sym(zeros(dsge.n.AuxVar,1));
-for j=1:dsge.n.AuxVar
+obj.AuxEq = {obj.AuxVar{:,2}}.';
+obj.AuxVar = AuxVar;
+AuxEq = sym(zeros(obj.n.AuxVar,1));
+for j=1:obj.n.AuxVar
     jv = [AuxVar.Names{j},'_t'];
-    eval([jv,' = ',dsge.AuxEq{j},';'])
+    eval([jv,' = ',obj.AuxEq{j},';'])
     AuxEq(j) = eval(jv);
     % if the expression has no leads then can define a lead for it
     if all(jacobian(AuxEq(j),StateVar_tF)==0)
@@ -199,37 +199,37 @@ for j=1:dsge.n.AuxVar
 end
 
 % Build Observation equations
-if dsge.n.ObsVar>0
-    dsge.n.ObsEq = length(dsge.ObsEq);
-    if dsge.n.ObsEq~=dsge.n.ObsVar
+if obj.n.ObsVar>0
+    obj.n.ObsEq = length(obj.ObsEq);
+    if obj.n.ObsEq~=obj.n.ObsVar
         error(['Number of observables (%\.0f) is different from number of ' ...
-               'observation equations (%.0f).'],dsge.n.ObsVar,dsge.n.ObsEq)
+               'observation equations (%.0f).'],obj.n.ObsVar,obj.n.ObsEq)
     end
-    ObsEq = sym(zeros(dsge.n.ObsEq,1));
-    for j=1:dsge.n.ObsEq
-        ObsEq(j) = eval(dsge.ObsEq{j});
+    ObsEq = sym(zeros(obj.n.ObsEq,1));
+    for j=1:obj.n.ObsEq
+        ObsEq(j) = eval(obj.ObsEq{j});
     end
 end
 
 % Build State equations
-dsge.n.StateEq = length(dsge.StateEq);
-if dsge.n.StateEq~=dsge.n.StateVar
+obj.n.StateEq = length(obj.StateEq);
+if obj.n.StateEq~=obj.n.StateVar
     error(['Number of state variables (%.0f) is different from number of ' ...
-           'state equations (%.0f).'],dsge.n.StateVar,dsge.n.StateEq)
+           'state equations (%.0f).'],obj.n.StateVar,obj.n.StateEq)
 end
-StateEq = sym(zeros(dsge.n.StateEq,1));
-for j=1:dsge.n.StateEq
-    StateEq(j) = eval(dsge.StateEq{j});
+StateEq = sym(zeros(obj.n.StateEq,1));
+for j=1:obj.n.StateEq
+    StateEq(j) = eval(obj.StateEq{j});
 end
 
 %% Generate matrices
 
 fprintf('Generating Mats for model evaluation\n')
-dsge.FileName.Mats = sprintf('%s_Mats',dsge.Spec);
+obj.FileName.Mats = sprintf('%s_Mats',obj.Spec);
 
 % Initiate file
-fidMats = fopen([dsge.FileName.Mats,'.m'],'wt');
-fprintf(fidMats,'function Mats = %s(x,varargin)\n\n',dsge.FileName.Mats);
+fidMats = fopen([obj.FileName.Mats,'.m'],'wt');
+fprintf(fidMats,'function Mats = %s(x,varargin)\n\n',obj.FileName.Mats);
 fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
 fprintf(fidMats,'\n%% Default options\n');
@@ -260,42 +260,42 @@ fprintf(fidMats,'\n%% Initiate Status\n');
 fprintf(fidMats,'Mats.Status = 1;\n');
 fprintf(fidMats,'Mats.StatusMessage = '''';\n');
 
-if dsge.n.Param>0
+if obj.n.Param>0
     fprintf(fidMats,'\n%% Map parameters\n');
-    for j=1:dsge.n.Param
+    for j=1:obj.n.Param
         fprintf(fidMats,'%s = x(%.0f);\n',Param.Names{j},j);
     end
     fprintf(fidMats,'if op.StoreParam\n');
-    for j=1:dsge.n.Param
+    for j=1:obj.n.Param
         fprintf(fidMats,'    Mats.Param.%s = x(%.0f);\n',Param.Names{j},j);
     end
     fprintf(fidMats,'end\n');
 end
 
-if dsge.n.AuxParam>0 || dsge.n.NumSolveParam>0
+if obj.n.AuxParam>0 || obj.n.NumSolveParam>0
     fprintf(fidMats,'\n%% Initialize auxiliary parameters\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'%s = [];\n',NumSolveParam.Names{j});
     end
-    for j=1:dsge.n.AuxParam
+    for j=1:obj.n.AuxParam
         fprintf(fidMats,'%s = [];\n',AuxParam.Names{j});
     end
 end
 
-if dsge.n.NumSolveParam>0
+if obj.n.NumSolveParam>0
     fprintf(fidMats,'\n%% NumSolve parameters\n');
     fprintf(fidMats,'function f=NumSolveEq(x)\n');
     fprintf(fidMats,'    for jx=1:size(x,2)\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'        %s = x(%.0f,jx);\n',NumSolveParam.Names{j},j);
     end
     fprintf(fidMats,'        EvalAuxParam\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'        f(%.0f,jx) = %s;\n',j,NumSolveParam.Eq{j});
     end
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'NumSolveGuess(%.0f,1) = %.16f;\n',...
                 j,NumSolveParam.Guess(j));
     end
@@ -311,60 +311,60 @@ if dsge.n.NumSolveParam>0
     fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'%s = NumSolveSolution(%.0f);\n',...
                 NumSolveParam.Names{j},j);
     end
     fprintf(fidMats,'if op.StoreParam\n');
-    for j=1:dsge.n.NumSolveParam
+    for j=1:obj.n.NumSolveParam
         fprintf(fidMats,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
                 NumSolveParam.Names{j});
     end
     fprintf(fidMats,'end\n');
 end
 
-if dsge.n.AuxParam>0
+if obj.n.AuxParam>0
     fprintf(fidMats,'\n%% Map auxiliary parameters\n');
-    if dsge.n.NumSolveParam>0
+    if obj.n.NumSolveParam>0
         fprintf(fidMats,'function EvalAuxParam \n');
     end
-    for j=1:dsge.n.AuxParam
+    for j=1:obj.n.AuxParam
         fprintf(fidMats,'%s = %s;\n',AuxParam.Names{j},AuxParam.Expressions{j});
     end
-    if dsge.n.NumSolveParam>0
+    if obj.n.NumSolveParam>0
         fprintf(fidMats,'end \n');
     end
 end
 
 % Incorporate NumSolveParam into AuxParam
-if dsge.n.NumSolveParam>0
-    dsge.n.AuxParam = dsge.n.AuxParam + dsge.n.NumSolveParam;
-    dsge.AuxParam.Names = [dsge.AuxParam.Names;dsge.NumSolveParam.Names];
-    dsge.AuxParam.PrettyNames = ...
-        [dsge.AuxParam.PrettyNames;dsge.NumSolveParam.PrettyNames];
-    dsge.AuxParam.Expressions(dsge.n.AuxParam+1-(1:dsge.n.NumSolveParam)) = ...
+if obj.n.NumSolveParam>0
+    obj.n.AuxParam = obj.n.AuxParam + obj.n.NumSolveParam;
+    obj.AuxParam.Names = [obj.AuxParam.Names;obj.NumSolveParam.Names];
+    obj.AuxParam.PrettyNames = ...
+        [obj.AuxParam.PrettyNames;obj.NumSolveParam.PrettyNames];
+    obj.AuxParam.Expressions(obj.n.AuxParam+1-(1:obj.n.NumSolveParam)) = ...
                         {'NaN'};
 end
-if dsge.n.AuxParam>0
+if obj.n.AuxParam>0
     fprintf(fidMats,'if op.StoreParam\n');
-    for j=1:dsge.n.AuxParam
+    for j=1:obj.n.AuxParam
         fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
-                dsge.AuxParam.Names{j});
+                obj.AuxParam.Names{j});
     end
     fprintf(fidMats,'end\n');
 end
 
-if dsge.n.ObsVar>0
+if obj.n.ObsVar>0
     fprintf(fidMats,'\n%% Observation equations\n');
     H0 = -jacobian(ObsEq,ObsVar_t);
     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
     SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
     MatNames = fieldnames(SymMats.ObsEq);
-    nCols = [1,dsge.n.StateVar];
+    nCols = [1,obj.n.StateVar];
     fprintf(fidMats,'if op.StoreObsEq || op.StoreKF\n');
     for jM=1:length(MatNames)
         fprintf(fidMats,'    ObsEq.%s = [...\n',MatNames{jM});
-        for jeq=1:dsge.n.ObsVar
+        for jeq=1:obj.n.ObsVar
             fprintf(fidMats,'       ');
             for jc=1:nCols(jM)
                 fprintf(fidMats,' %s',...
@@ -392,10 +392,10 @@ SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
 MatNames = fieldnames(SymMats.StateEq);
-nCols = [1,dsge.n.StateVar,dsge.n.StateVar,dsge.n.StateVar,dsge.n.ShockVar];
+nCols = [1,obj.n.StateVar,obj.n.StateVar,obj.n.StateVar,obj.n.ShockVar];
 for jM=1:length(MatNames)
     fprintf(fidMats,'StateEq.%s = [...\n',MatNames{jM});
-    for jeq=1:dsge.n.StateVar
+    for jeq=1:obj.n.StateVar
         fprintf(fidMats,'   ');
         for jc=1:nCols(jM)
             fprintf(fidMats,' %s',...
@@ -410,9 +410,9 @@ for jM=1:length(MatNames)
     end
     fprintf(fidMats,'    ];\n\n');
 end
-fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',dsge.n.StateVar);
+fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',obj.n.StateVar);
 fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',...
-        dsge.n.StateVar);
+        obj.n.StateVar);
 fprintf(fidMats,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma3(:,cv) = [];\n');
@@ -430,7 +430,7 @@ fprintf(fidMats,...
         '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fidMats,...
         '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
-        dsge.Options.GensysAuthor);
+        obj.Options.GensysAuthor);
 fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'    if ~all(REE.eu==1);\n');
 fprintf(fidMats,'        Mats.Status = 0;\n');
@@ -439,37 +439,37 @@ fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 
-if dsge.n.ObsVar>0
+if obj.n.ObsVar>0
     fprintf(fidMats,'\n%% Kalman Filter matrices\n');
     fprintf(fidMats,'if op.StoreKF\n');
     fprintf(fidMats,'    if all(Mats.REE.GBar(:)==0)\n');
     fprintf(fidMats,'        KF.StateVarBar = zeros(%.0f,1);\n',...
-            dsge.n.StateVar);
+            obj.n.StateVar);
     fprintf(fidMats,'    else\n');
     fprintf(fidMats,...
             '        KF.StateVarBar = (eye(%.0f)-REE.G1)\\REE.GBar;\n',...
-            dsge.n.StateVar);
+            obj.n.StateVar);
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,...
             '    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
 
-    if isfield(dsge,'KFinit') && isfield(dsge.KFinit,'State')
+    if isfield(dsge,'KFinit') && isfield(obj.KFinit,'State')
         fprintf(fidMats,'    s00 = [...\n');
-        for jeq=1:dsge.n.StateVar
-            fprintf(fidMats,'        %.16f;\n',dsge.KFinit.State(jeq));
+        for jeq=1:obj.n.StateVar
+            fprintf(fidMats,'        %.16f;\n',obj.KFinit.State(jeq));
         end
         fprintf(fidMats,'        ];\n\n');
     else
-        fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',dsge.n.StateVar);
+        fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',obj.n.StateVar);
     end
 
-    if isfield(dsge,'KFinit') && isfield(dsge.KFinit,'Variance')
+    if isfield(dsge,'KFinit') && isfield(obj.KFinit,'Variance')
         fprintf(fidMats,'    sig00 = [...\n');
-        for jeq=1:dsge.n.StateVar
+        for jeq=1:obj.n.StateVar
             fprintf(fidMats,'       ');
-            for jc=1:dsge.n.StateVar
-                fprintf(fidMats,' %0.16f',dsge.KFinit.Variance(jeq,jc));
-                if jc==dsge.n.StateVar
+            for jc=1:obj.n.StateVar
+                fprintf(fidMats,' %0.16f',obj.KFinit.Variance(jeq,jc));
+                if jc==obj.n.StateVar
                     fprintf(fidMats,';\n');
                 else
                     fprintf(fidMats,',');
@@ -500,16 +500,16 @@ if dsge.n.ObsVar>0
     fprintf(fidMats,'end\n');
 end
 
-if dsge.n.AuxVar>0
+if obj.n.AuxVar>0
     fprintf(fidMats,'\n%% Auxiliary equations matrices\n');
     MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
-    nCols = [1,dsge.n.StateVar,dsge.n.StateVar,dsge.n.StateVar,dsge.n.ShockVar];
+    nCols = [1,obj.n.StateVar,obj.n.StateVar,obj.n.StateVar,obj.n.ShockVar];
     fprintf(fidMats,'if op.StoreAuxEq || op.StoreAuxREE\n');
     for jM=1:length(MatNames)
         Mj = MatNames{jM};
         SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
         fprintf(fidMats,'    AuxEq.%s = [...\n',Mj);
-        for jeq=1:dsge.n.AuxVar
+        for jeq=1:obj.n.AuxVar
             fprintf(fidMats,'       ');
             for jc=1:nCols(jM)
                 fprintf(fidMats,' %s',...
@@ -553,13 +553,10 @@ fprintf(fidMats,'end\n');
 fclose(fidMats);
 
     
-
-
 %% -------------------------------------------------------------------
 
 %% Finish up
-dsge.Status.(Action) = 1;
-dsge.TimeElapsed.(Action) = toc-dsge.TimeElapsed.(Action);
-fprintf('\n%s %s\n\n',Action,vctoc([],dsge.TimeElapsed.(Action)))
+obj.TimeElapsed.(Action) = toc-obj.TimeElapsed.(Action);
+fprintf('\n%s %s\n\n',Action,vctoc([],obj.TimeElapsed.(Action)))
 
 %% -------------------------------------------------------------------
