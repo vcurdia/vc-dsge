@@ -60,11 +60,11 @@ m.Param.Set ={...
     };
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-% m.Param.NumSolve.Names = {...
-%     'rA','$r^A$',1;
-%     'rB','$r^B$',1;
+% m.Param.NumSolve = {...
+%     'rA',1,'$r^A$';
+%     'rB',1,'$r^B$';
 %     };
-% m.Param.NumSolve.Eq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
+% m.Param.NumSolveEq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
 
 m.Param.Aux = {...
     'gamma','gammaa/400','$\gamma$';

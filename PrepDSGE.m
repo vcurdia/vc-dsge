@@ -45,156 +45,111 @@ end
 
 %% -------------------------------------------------------------------
 
-%% Prepare variables and equations
+%% Prepare parameters, variables and equations
 
 fprintf('Generating symbolic variables and systems of equations...\n')
 
-% check number and existence of parameters
+%% Parameters
+pp = obj.Param;
 pList = {'Est','Set','NumSolve','Aux'};
+p = struct;
 for j=1:length(pList)
     jp = pList{j};
     if isfield(obj.Param,jp)
-        [obj.n.([jp,'Param']),nc] = size(obj.Param.(jp));
+        [obj.n.Param.(jp),nc] = size(pp.(jp));
     else
-        obj.n.([jp,'Param']) = 0;
+        obj.n.Param.(jp) = 0;
     end
-    obj.Exist.([jp,'Param']) = obj.n.([jp,'Param'])>0;
-end
-
-% Estimated Parameters
-if obj.Exist.EstParam
-    Est.Names = {obj.Param.Est{:,1}}';
-    if nc==4
-        Est.PrettyNames = Est.Names;
-    else
-        Est.PrettyNames = {obj.Param.Est{:,5}}';
-    end
-    Est.PriorDist = {obj.Param.Est{:,2}}';
-    Est.PriorMean = [obj.Param.Est{:,3}]';
-    Est.PriorSD = [obj.Param.Est{:,4}]';
-    vcSym(Est.Names{:})
-    obj.Param.Est = Est;
-end
-
-% Set Parameters
-if obj.Exist.SetParam
-    Set.Names = {obj.Param.Set{:,1}}';
-    if nc==2
-        Set.PrettyNames = Set.Names;
-    else
-        Set.PrettyNames = {obj.Param.Set{:,3}}';
-    end
-    Set.Values = [obj.Param.Set{:,2}]';
-    vcSym(Set.Names{:})
-    obj.Param.Set = Set;
-end
-
-% NumSolveParam
-NumSolveParam = obj.NumSolveParam;
-if isfield(obj.NumSolveParam,'Names')
-    [obj.n.NumSolveParam,nc] = size(NumSolveParam.Names);
-else
-    obj.n.NumSolveParam = 0;
-end
-if obj.n.NumSolveParam>0
-    NumSolveParam.Guess = ones(obj.n.NumSolveParam,1);
-    NumSolveParam.PrettyNames = NumSolveParam.Names(:,1);
-    for jc=nc:-1:2
-        if ischar(NumSolveParam.Names{1,jc})
-            NumSolveParam.PrettyNames = NumSolveParam.Names(:,jc);
+    obj.Exist.Param.(jp) = obj.n.Param.(jp)>0;
+    if obj.Exist.Param.(jp)
+        p.(jp) = struct;
+        p.(jp).Names = {pp.(jp){:,1}}';
+        if nc==3+2*strcmp(jp,'Est')
+            p.(jp).PrettyNames = {pp.(jp){:,nc}}';
         else
-            NumSolveParam.Guess = [NumSolveParam.Names{:,jc}];
+            p.(jp).PrettyNames = p.(jp).Names;
         end
-        NumSolveParam.Names(:,jc) = [];
+        vcSym(p.(jp).Names{:})
     end
-    if ~isfield(NumSolveParam,'Eq')
-        error('NumSolveParam.Eq not defined!')
+end
+
+if obj.Exist.Param.Est
+    p.Est.PriorDist = {pp.Est{:,2}}';
+    p.Est.PriorMean = [pp.Est{:,3}]';
+    p.Est.PriorSD = [pp.Est{:,4}]';
+end
+
+if obj.Exist.Param.Set
+    p.Set.Values = [pp.Set{:,2}]';
+end
+
+if obj.Exist.Param.NumSolve
+    p.NumSolve.Guess = [pp.NumSolve{:,2}];
+    if ~isfield(pp,'NumSolveEq')
+        error('NumSolveEq not defined!')
+    else
+        p.NumSolve.Eq = pp.NumSolveEq;
     end
-    nNumSolveEq = length(NumSolveParam.Eq);
-    if nNumSolveEq~=obj.n.NumSolveParam
+    nNumSolveEq = length(pp.NumSolveEq);
+    if nNumSolveEq~=obj.n.Param.NumSolve
         error(['Number of param to solve numerically (%.0f) does not match ' ...
-               'number of equations (%.0f)!'], obj.n.NumSolveParam, ...
+               'number of equations (%.0f)!'], obj.n.Param.NumSolve, ...
               nNumSolveEq)
     end
-    vcSym(NumSolveParam.Names{:})
-    obj.NumSolveParam = NumSolveParam;
 end
 
-% Auxiliary Parameters
-[obj.n.AuxParam,nc] = size(obj.AuxParam);
-AuxParam.Names = {obj.AuxParam{:,1}}';
-if nc==2
-    AuxParam.PrettyNames = AuxParam.Names;
-else
-    AuxParam.PrettyNames = {obj.AuxParam{:,3}}';
-end
-AuxParam.Expressions = {obj.AuxParam{:,2}}';
-obj.AuxParam = AuxParam;
-vcSym(AuxParam.Names{:})
-
-% Observation variables
-[obj.n.ObsVar,nc] = size(obj.ObsVar);
-ObsVar.Names = {obj.ObsVar{:,1}}';
-if nc==1
-    ObsVar.PrettyNames = ObsVar.Names;
-else
-    ObsVar.PrettyNames = {obj.ObsVar{:,2}}';
-end
-obj.ObsVar = ObsVar;
-ObsVar_t = sym(zeros(1,obj.n.ObsVar));
-for j=1:obj.n.ObsVar
-    jv = [ObsVar.Names{j},'_t'];
-    vcSym(jv)
-    ObsVar_t(j) = eval(jv);
+if obj.Exist.Param.Aux
+    p.Aux.Expressions = {pp.Aux{:,2}}';
 end
 
-% State space variables
-[obj.n.StateVar,nc] = size(obj.StateVar);
-StateVar.Names = {obj.StateVar{:,1}}';
-if nc==1
-    StateVar.PrettyNames = StateVar.Names;
-else
-    StateVar.PrettyNames = {obj.StateVar{:,2}}';
-end
-obj.StateVar = StateVar;
-StateVar_t = sym(zeros(1,obj.n.StateVar)); 
-StateVar_tF = sym(zeros(1,obj.n.StateVar)); 
-StateVar_tL = sym(zeros(1,obj.n.StateVar));
-for j=1:obj.n.StateVar
-    jv = [StateVar.Names{j},'_t'];
-    vcSym(jv,[jv,'F'],[jv,'L'])
-    StateVar_t(j) = eval(jv);
-    StateVar_tF(j) = eval([jv,'F']);
-    StateVar_tL(j) = eval([jv,'L']);
-end
+obj.Param = p;
 
-% Shocks
-[obj.n.ShockVar,nc] = size(obj.ShockVar);
-ShockVar.Names = {obj.ShockVar{:,1}}';
-if nc==1
-    ShockVar.PrettyNames = ShockVar.Names;
-else
-    ShockVar.PrettyNames = {obj.ShockVar{:,2}}';
-end
-obj.ShockVar = ShockVar;
-ShockVar_t = sym(zeros(1,obj.n.ShockVar));
-for j=1:obj.n.ShockVar
-    jv = [ShockVar.Names{j},'_t'];
-    vcSym(jv)
-    ShockVar_t(j) = eval(jv);
-end
 
-% constant variable
+%% Variables
+
+vv = obj.Var;
+vList = {'Obs','State','Shock','Aux'};
+v = struct;
 vcSym('one')
-
-% Auxiliary variables
-[obj.n.AuxVar,nc] = size(obj.AuxVar);
-AuxVar.Names = {obj.AuxVar{:,1}}';
-if nc==2
-    AuxVar.PrettyNames = AuxVar.Names;
-else
-    AuxVar.PrettyNames = {obj.AuxVar{:,3}}';
+Var = struct;
+for j=1:length(vList)
+    jv = vList{j};
+    if isfield(obj.Var,jv)
+        [obj.n.Var.(jv),nc] = size(vv.(jv));
+    else
+        obj.n.Var.(jv) = 0;
+    end
+    obj.Exist.Var.(jv) = obj.n.Var.(jv)>0;
+    if obj.Exist.Var.(jv)
+        v.(jv) = struct;
+        v.(jv).Names = {vv.(jv){:,1}}';
+        if nc==2+strcmp(jp,'Aux')
+            v.(jv).PrettyNames = {vv.(jv){:,nc}}';
+        else
+            v.(jv).PrettyNames = v.(jv).Names;
+        end
+        Var.(jv).t = sym(zeros(1,obj.n.Var.(jv)));
+        for jj=1:obj.n.Var.(jv)
+            vj = [v.(jv).Names{jj},'_t'];
+            vcSym(vj)
+            Var.(jv).t(j) = eval(vj);
+        end
+    end
 end
+
+if obj.Exist.Var.State
+    Var.State.tF = sym(zeros(1,obj.n.Var.State)); 
+    Var.State.tL = sym(zeros(1,obj.n.Var.State));
+    for j=1:obj.n.StateVar
+        jv = [v.State.Names{j},'_t'];
+        vcSym([jv,'F'],[jv,'L'])
+        Var.State.tF(j) = eval([jv,'F']);
+        Var.State.tL(j) = eval([jv,'L']);
+    end
+end
+
+[HERE]
+
 obj.AuxEq = {obj.AuxVar{:,2}}.';
 obj.AuxVar = AuxVar;
 AuxEq = sym(zeros(obj.n.AuxVar,1));
