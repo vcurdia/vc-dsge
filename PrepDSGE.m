@@ -30,7 +30,7 @@ function obj = PrepDSGE(obj)
 Action = 'PrepDSGE';
 
 % % check if model already prepared
-% if isfield(dsge.Status,Action) && dsge.Statudsge.(Action), return, end
+% if isfield(obj.Status,Action) && obj.Statudsge.(Action), return, end
 
 fprintf('\n*** Analyzing DSGE model\n')
 
@@ -38,7 +38,7 @@ fprintf('\n*** Analyzing DSGE model\n')
 obj.TimeElapsed.(Action) = toc();
 
 % Check settings
-if ~isfield(dsge.Options,'GensysAuthor'), 
+if ~isfield(obj.Options,'GensysAuthor'), 
     obj.Options.GensysAuthor = 'CS';
 end
 
@@ -140,7 +140,7 @@ end
 if obj.Exist.Var.State
     Var.State.tF = sym(zeros(1,obj.n.Var.State)); 
     Var.State.tL = sym(zeros(1,obj.n.Var.State));
-    for j=1:obj.n.StateVar
+    for j=1:obj.n.Var.State
         jv = [v.State.Names{j},'_t'];
         vcSym([jv,'F'],[jv,'L'])
         Var.State.tF(j) = eval([jv,'F']);
@@ -148,53 +148,55 @@ if obj.Exist.Var.State
     end
 end
 
-[HERE]
-
-obj.AuxEq = {obj.AuxVar{:,2}}.';
-obj.AuxVar = AuxVar;
-AuxEq = sym(zeros(obj.n.AuxVar,1));
-for j=1:obj.n.AuxVar
-    jv = [AuxVar.Names{j},'_t'];
-    eval([jv,' = ',obj.AuxEq{j},';'])
-    AuxEq(j) = eval(jv);
-    % if the expression has no leads then can define a lead for it
-    if all(jacobian(AuxEq(j),StateVar_tF)==0)
-        eval([jv,'F = subs(',jv,',[StateVar_t,StateVar_tL]',...
-              ',[StateVar_tF,StateVar_t]);'])
-        % if expreassion has no leads or lags then can define lag for it. 
-        % notice that it does not make sense to define a lag if there are 
-        % leads in it, and that's why the check for lags is inside the check 
-        % for leads
-        if all(jacobian(AuxEq(j),StateVar_tL)==0)
-            eval([jv,'L = subs(',jv,',[StateVar_tF,StateVar_t]',...
-                  ',[StateVar_t,StateVar_tL]);'])
+if obj.Exist.Var.Aux
+    obj.n.Eq.Aux = obj.n.Var.Aux;
+    obj.Eq.Aux = {vv.Aux{:,2}}.';
+    EqAux = sym(zeros(obj.n.Var.Aux,1));
+    for j=1:obj.n.Eq.Aux
+        jv = [v.Aux.Names{j},'_t'];
+        eval([jv,' = ',obj.Eq.Aux{j},';'])
+        EqAux(j) = eval(jv);
+% If the expression has no leads then can define a lead for it
+        if all(jacobian(EqAux(j),Var.State.tF)==0)
+            eval([jv,'F = subs(',jv,',[Var.State.t,Var.State.tL],',...
+                  '[Var.State.tF,Var.State.t]);'])
+% If expreassion has no leads or lags then can define lag for it. 
+% Notice that it does not make sense to define a lag if there are leads in it,
+% and that's why the check for lags is inside the check for leads
+            if all(jacobian(EqAux(j),Var.State.tL)==0)
+                eval([jv,'L = subs(',jv,',[Var.State.tF,Var.State.t],',...
+                      '[Var.State.t,Var.State.tL]);'])
+            end
         end
     end
 end
 
 % Build Observation equations
-if obj.n.ObsVar>0
-    obj.n.ObsEq = length(obj.ObsEq);
-    if obj.n.ObsEq~=obj.n.ObsVar
+if obj.n.Var.Obs>0
+    obj.n.Eq.Obs = length(obj.Eq.Obs);
+    if obj.n.Eq.Obs~=obj.n.Var.Obs
         error(['Number of observables (%\.0f) is different from number of ' ...
-               'observation equations (%.0f).'],obj.n.ObsVar,obj.n.ObsEq)
+               'observation equations (%.0f).'],obj.n.Var.Obs,obj.n.Eq.Obs)
     end
-    ObsEq = sym(zeros(obj.n.ObsEq,1));
-    for j=1:obj.n.ObsEq
-        ObsEq(j) = eval(obj.ObsEq{j});
+    EqObs = sym(zeros(obj.n.Eq.Obs,1));
+    for j=1:obj.n.Eq.Obs
+        EqObs(j) = eval(obj.Eq.Obs{j});
     end
 end
 
 % Build State equations
-obj.n.StateEq = length(obj.StateEq);
-if obj.n.StateEq~=obj.n.StateVar
+obj.n.Eq.State = length(obj.Eq.State);
+if obj.n.Eq.State~=obj.n.Var.State
     error(['Number of state variables (%.0f) is different from number of ' ...
-           'state equations (%.0f).'],obj.n.StateVar,obj.n.StateEq)
+           'state equations (%.0f).'],obj.n.Var.State,obj.n.Eq.State)
 end
-StateEq = sym(zeros(obj.n.StateEq,1));
-for j=1:obj.n.StateEq
-    StateEq(j) = eval(obj.StateEq{j});
+EqState = sym(zeros(obj.n.Eq.State,1));
+for j=1:obj.n.Eq.State
+    EqState(j) = eval(obj.Eq.State{j});
 end
+
+keyboard
+
 
 %% Generate matrices
 
@@ -427,7 +429,7 @@ if obj.n.ObsVar>0
     fprintf(fidMats,...
             '    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
 
-    if isfield(dsge,'KFinit') && isfield(obj.KFinit,'State')
+    if isfield(obj,'KFinit') && isfield(obj.KFinit,'State')
         fprintf(fidMats,'    s00 = [...\n');
         for jeq=1:obj.n.StateVar
             fprintf(fidMats,'        %.16f;\n',obj.KFinit.State(jeq));
@@ -437,7 +439,7 @@ if obj.n.ObsVar>0
         fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',obj.n.StateVar);
     end
 
-    if isfield(dsge,'KFinit') && isfield(obj.KFinit,'Variance')
+    if isfield(obj,'KFinit') && isfield(obj.KFinit,'Variance')
         fprintf(fidMats,'    sig00 = [...\n');
         for jeq=1:obj.n.StateVar
             fprintf(fidMats,'       ');
