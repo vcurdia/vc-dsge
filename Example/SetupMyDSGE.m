@@ -1,14 +1,9 @@
 % RunMyDSGE
 %
-% This file gives an example of how to use the VC_DSGE package
+% This file gives an example of how to use the vcDSGE package
 %
-% Note: the structure with the DSGE in the workspace does not have to be called
-%       "m", it can take any name (that does not conflict with other workspace 
-%       variable names).
-%
-%   
 % See also:
-% vcDSGE
+% DSGE
 %
 % ...........................................................................
 %
@@ -31,11 +26,11 @@ BaseFolder = pwd;
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = CreateDSGE('MyDSGE');
+m = DSGE('MyDSGE');
 
 %% Setup the model
 
-m.Param.Est = {...
+m.Param = {...
     'omega', 'G', 1, 0.2,'$\omega$';
     'xi', 'G', 0.1, 0.05,'$\xi$';
     'eta', 'B', 0.6, 0.2,'$\eta$';
@@ -55,7 +50,9 @@ m.Param.Est = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
-m.Param.Set ={...
+return
+
+m.Param.Fix ={...
     'beta','0.99','$\beta$';
     };
 
