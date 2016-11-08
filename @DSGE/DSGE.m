@@ -75,6 +75,13 @@ classdef DSGE
             end
         end
     
+        function obj = set.AuxParam(obj,p)
+            [obj.NAuxParam,obj.AuxParam] = SetParam(obj,'AuxParam',p);
+            if obj.NAuxParam>0
+                obj.AuxParam.Expressions = p(:,2);
+            end
+        end
+    
     end
     
 end

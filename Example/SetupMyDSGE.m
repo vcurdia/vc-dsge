@@ -64,10 +64,7 @@ m.NumSolveParam = {...
         'rA+0.5/400-rB'};
                   };
 
-fprintf('\n%s\n\n',vctoc)
-return
-
-m.Param.Aux = {...
+m.AuxParam = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -75,6 +72,9 @@ m.Param.Aux = {...
     'phigamma','phigammatil*etagammatil','$\phi_\gamma$';
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
+
+fprintf('\n%s\n\n',vctoc)
+return
 
 m.Var.Obs = {...
     'DGDP', 'GDP Growth';
