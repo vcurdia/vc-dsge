@@ -73,15 +73,12 @@ m.AuxParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
 
-fprintf('\n%s\n\n',vctoc)
-return
-
-m.Var.Obs = {...
+m.ObsVar = {...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
     'FFR', 'FFR'};
 
-m.Var.State = {...
+m.StateVar = {...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -99,14 +96,17 @@ m.Var.State = {...
     'YAeL', '$Y_{A,t-1}^e$';
     };
 
-m.Var.Shock = {...
+m.ShockVar = {...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
              }; 
 
-m.Var.Aux = {'r','ir_t-pi_tF','$r$'};
+m.AuxVar = {'r','ir_t-pi_tF','$r$'};
+
+fprintf('\n%s\n\n',vctoc)
+return
 
 m.Eq.Obs = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';

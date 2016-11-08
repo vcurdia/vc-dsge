@@ -15,16 +15,25 @@ classdef DSGE
         SpecPath = './';
         FileName = struct;
 %         PlotDir = struct;
-        Param = struct;
-        FixParam = struct;
-        NumSolveParam = struct;
-        AuxParam = struct;
-%         Var = struct;
-%         Eq = struct;
+        Param
+        FixParam
+        NumSolveParam
+        AuxParam
+        ObsVar
+        StateVar
+        ShockVar
+        AuxVar
+        ObsEq
+        StateEq
+        AuxEq
         NParam = 0;
         NFixParam = 0;
         NNumSolveParam = 0;
         NAuxParam = 0;
+        NObsVar = 0;
+        NStateVar = 0;
+        NShockVar = 0;
+        NAuxVar = 0;
     end
    
     methods
@@ -41,7 +50,8 @@ classdef DSGE
         end
         
         function obj = set.Param(obj,p)
-            [obj.NParam,obj.Param] = SetParam(obj,'Param',p);
+            pType = 'Param';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
             if obj.NParam>0
                 obj.Param.PriorDist = p(:,2);
                 obj.Param.PriorMean = [p{:,3}]';
@@ -50,7 +60,8 @@ classdef DSGE
         end
         
         function obj = set.FixParam(obj,p)
-            [obj.NFixParam,obj.FixParam] = SetParam(obj,'FixParam',p);
+            pType = 'FixParam';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
             if obj.NFixParam>0
                 obj.FixParam.Values = [p{:,2}]';
             end
@@ -63,8 +74,8 @@ classdef DSGE
             end
             eq = p{2};
             p = p{1};
-            [obj.NNumSolveParam,obj.NumSolveParam] = ...
-                SetParam(obj,'NumSolveParam',p);
+            pType = 'NumSolveParam';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
             if obj.NNumSolveParam>0
                 obj.NumSolveParam.Guess = [p{:,2}]';
                 if isempty(eq) || (length(eq)<obj.NNumSolveParam)
@@ -76,9 +87,33 @@ classdef DSGE
         end
     
         function obj = set.AuxParam(obj,p)
-            [obj.NAuxParam,obj.AuxParam] = SetParam(obj,'AuxParam',p);
+            pType = 'AuxParam';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
             if obj.NAuxParam>0
                 obj.AuxParam.Expressions = p(:,2);
+            end
+        end
+    
+        function obj = set.ObsVar(obj,p)
+            pType = 'ObsVar';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
+        end
+    
+        function obj = set.StateVar(obj,p)
+            pType = 'StateVar';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
+        end
+    
+        function obj = set.ShockVar(obj,p)
+            pType = 'ShockVar';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
+        end
+    
+        function obj = set.AuxVar(obj,p)
+            pType = 'AuxVar';
+            [obj.(['N',pType]),obj.(pType)] = SetNames(obj,pType,p);
+            if obj.NAuxVar>0
+                obj.AuxEq = p(:,2);
             end
         end
     
@@ -86,19 +121,23 @@ classdef DSGE
     
 end
 
-function [np,pp] = SetParam(obj,pType,p)
-    if ~ismember(pType,...
-                 {'Param','FixParam','NumSolveParam','AuxParam'})
-        error('SetParam called with invalid parameter type.')
+function [np,pp] = SetNames(obj,pType,p)
+    if ~ismember(pType,{...
+        'Param','FixParam','NumSolveParam','AuxParam',...
+        'ObsVar','StateVar','ShockVar','AuxVar',...
+                       })
+        error('SetProperty called with invalid type.')
     end
     pp = struct;
     [np,nc] = size(p);
     if np==0, return, end
     pp.Names = p(:,1);
-    if nc==3+2*strcmp(pType,'Param')
+    if nc==(2+... 
+            ismember(pType,{'FixParam','NumSolveParam','AuxParam','AuxVar'})+...
+            3*strcmp(pType,'Param'))
         pp.PrettyNames = p(:,nc);
     else
-        pp.PrettyNames = p.(pType).Names;
+        pp.PrettyNames = pp.Names;
     end
 end
         
