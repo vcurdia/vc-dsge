@@ -50,18 +50,22 @@ m.Param = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
-return
-
-m.Param.Fix ={...
-    'beta','0.99','$\beta$';
+m.FixParam = {...
+    'beta', 0.99,'$\beta$';
     };
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-% m.Param.NumSolve = {...
-%     'rA',1,'$r^A$';
-%     'rB',1,'$r^B$';
-%     };
-% m.Param.NumSolveEq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
+m.NumSolveParam = {...
+    {...
+        'rA',1,'$r^A$';
+        'rB',1,'$r^B$';
+    },{...
+        '(rA+rB)/2-r';
+        'rA+0.5/400-rB'};
+                  };
+
+fprintf('\n%s\n\n',vctoc)
+return
 
 m.Param.Aux = {...
     'gamma','gammaa/400','$\gamma$';
