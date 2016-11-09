@@ -35,17 +35,22 @@ obj.TimeElapsed.(Action) = toc();
 
 fprintf('Generating symbolic variables and systems of equations...\n')
 
-list = {'','Fix','NumSolve','Aux'}
+%% basic check
+if (obj.NStateVar==0) || isempty(obj.StateEq)
+    error('Cannot without specifying state variables and states.')
+end
+
+list = {'','Fix','NumSolve','Aux'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(['N',jstr])>0, vcSym(obj.(jstr).Names), end
+    if obj.(['N',jstr])>0, vcSym(obj.(jstr).Names{:}), end
 end
 
 vcSym('one')
 
 vlist = {'Obs','State','Shock'};
 for jV=1:length(vlist)
-    Vj = vlist{jV}
+    Vj = vlist{jV};
     nV = obj.(['N',Vj,'Var']);
     if nV>0
         if strcmp(Vj,'State')
@@ -58,30 +63,30 @@ for jV=1:length(vlist)
             Var.(Vj).(tj) = sym(zeros(1,nV)); 
             for j=1:nV
                 vj = [obj.([Vj,'Var']).Names{j},'_',tj];
-                vcSym(jv)
-                Var.(Vj).(tj)(j) = eval(jv);
+                vcSym(vj)
+                Var.(Vj).(tj)(j) = eval(vj);
             end
         end
     end
 end
 
-HERE HERE HERE HERE HERE HERE 
-
-if obj.nAuxVar
-    EqAux = sym(zeros(obj.n.Var.Aux,1));
-    for j=1:obj.n.Eq.Aux
-        jv = [v.Aux.Names{j},'_t'];
-        eval([jv,' = ',obj.Eq.Aux{j},';'])
-        EqAux(j) = eval(jv);
+%% Aux Var and Eq
+nV = obj.NAuxVar;
+if nV>0
+    AuxEq = sym(zeros(nV,1));
+    for j=1:nV
+        vj = [obj.AuxVar.Names{j},'_t'];
+        eval([vj,' = ',obj.AuxEq{j},';'])
+        AuxEq(j) = eval(vj);
 % If the expression has no leads then can define a lead for it
-        if all(jacobian(EqAux(j),Var.State.tF)==0)
-            eval([jv,'F = subs(',jv,',[Var.State.t,Var.State.tL],',...
+        if all(jacobian(AuxEq(j),Var.State.tF)==0)
+            eval([vj,'F = subs(',vj,',[Var.State.t,Var.State.tL],',...
                   '[Var.State.tF,Var.State.t]);'])
 % If expreassion has no leads or lags then can define lag for it. 
 % Notice that it does not make sense to define a lag if there are leads in it,
 % and that's why the check for lags is inside the check for leads
-            if all(jacobian(EqAux(j),Var.State.tL)==0)
-                eval([jv,'L = subs(',jv,',[Var.State.tF,Var.State.t],',...
+            if all(jacobian(AuxEq(j),Var.State.tL)==0)
+                eval([vj,'L = subs(',vj,',[Var.State.tF,Var.State.t],',...
                       '[Var.State.t,Var.State.tL]);'])
             end
         end
@@ -89,35 +94,27 @@ if obj.nAuxVar
 end
 
 % Build Observation equations
-if obj.n.Var.Obs>0
-    obj.n.Eq.Obs = length(obj.Eq.Obs);
-    if obj.n.Eq.Obs~=obj.n.Var.Obs
-        error(['Number of observables (%\.0f) is different from number of ' ...
-               'observation equations (%.0f).'],obj.n.Var.Obs,obj.n.Eq.Obs)
-    end
-    EqObs = sym(zeros(obj.n.Eq.Obs,1));
-    for j=1:obj.n.Eq.Obs
-        EqObs(j) = eval(obj.Eq.Obs{j});
+if obj.NObsVar>0
+    ObsEq = sym(zeros(obj.NObsVar,1));
+    for j=1:obj.NObsVar
+        EqObs(j) = eval(obj.ObsEq{j});
     end
 end
 
 % Build State equations
-obj.n.Eq.State = length(obj.Eq.State);
-if obj.n.Eq.State~=obj.n.Var.State
-    error(['Number of state variables (%.0f) is different from number of ' ...
-           'state equations (%.0f).'],obj.n.Var.State,obj.n.Eq.State)
+StateEq = sym(zeros(obj.NStateVar,1));
+for j=1:obj.NStateVar
+    StateEq(j) = eval(obj.StateEq{j});
 end
-EqState = sym(zeros(obj.n.Eq.State,1));
-for j=1:obj.n.Eq.State
-    EqState(j) = eval(obj.Eq.State{j});
-end
-
-keyboard
 
 
 %% Generate matrices
 
-fprintf('Generating Mats for model evaluation\n')
+fprintf('Generating code to evaluate model Mats\n')
+
+BaseFolder = pwd;
+cd(obj.SpecPath)
+
 obj.FileName.Mats = sprintf('%s_Mats',obj.Spec);
 
 % Initiate file
@@ -444,7 +441,7 @@ end
 % close file
 fprintf(fidMats,'end\n');
 fclose(fidMats);
-
+cd(BaseFolder)
     
 %% -------------------------------------------------------------------
 
