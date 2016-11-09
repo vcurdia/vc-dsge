@@ -18,7 +18,7 @@ clear all
 tic
 SetPath
 set(0,'defaultTextInterpreter','latex');
-BaseFolder = pwd;
+BasePath = pwd;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -105,16 +105,13 @@ m.ShockVar = {...
 
 m.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
-fprintf('\n%s\n\n',vctoc)
-return
-
-m.Eq.Obs = {...
+m.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
     };
 
-m.Eq.State = {...
+m.StateEq = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -139,22 +136,26 @@ m.Eq.State = {...
     'YAeL_t-YAe_tL';
     };
 
-m = PrepDSGE(m);
-Mats = EvalDSGE(m.Param.PriorMean);
+m.GenMats;
+% Mats = EvalDSGE(m.Param.PriorMean);
 
-m = PriorAnalysis(m);
+% m = PriorAnalysis(m);
 
-m.Options.Sim.UseDist = 'PriorDraws';
-m = MakeIRF(m);
+% m.Options.Sim.UseDist = 'PriorDraws';
+% m = MakeIRF(m);
+
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-m = SaveDSGE(m);
-cd(BaseFolder)
+save([m.SpecPath,m.Spec])
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)
+
+return
+
 % exit
 
 %% -------------------------------------------------------------------
+
