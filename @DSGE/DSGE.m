@@ -37,6 +37,7 @@ classdef DSGE
         NShockVar = 0;
         NAuxVar = 0;
         GensysAuthor = 'CS';
+        KFInit
     end
    
     methods
@@ -134,6 +135,10 @@ classdef DSGE
         function obj = set.StateEq(obj,eq)
             obj.StateEq = eq;
             CheckEq(obj,'State')
+        end
+        
+        function out = Mats(obj,x,varargin)
+            out = feval(obj.FileName.Mats,[x;obj.FixParam.Values],varargin{:});
         end
     
     end

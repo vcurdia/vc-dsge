@@ -18,7 +18,7 @@ clear all
 tic
 SetPath
 set(0,'defaultTextInterpreter','latex');
-BasePath = pwd;
+HomeFolder = pwd;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -136,8 +136,10 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-m.GenMats;
-% Mats = EvalDSGE(m.Param.PriorMean);
+m = m.GenMats;
+cd(m.SpecPath)
+Mats = m.Mats(m.Param.PriorMean);
+cd(HomeFolder)
 
 % m = PriorAnalysis(m);
 
