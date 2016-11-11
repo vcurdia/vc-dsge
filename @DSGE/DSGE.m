@@ -14,8 +14,8 @@ classdef DSGE
         Spec = '';
         SpecPath = './';
         FileName = struct;
+        Report
 %         PlotDir = struct;
-%        Options = struct;
         TimeElapsed = struct;
         Param
         FixParam
@@ -38,6 +38,8 @@ classdef DSGE
         NAuxVar = 0;
         GensysAuthor = 'CS';
         KFInit
+        Prior
+        Post
     end
    
     methods
@@ -139,6 +141,10 @@ classdef DSGE
         
         function out = Mats(obj,x,varargin)
             out = feval(obj.FileName.Mats,[x;obj.FixParam.Values],varargin{:});
+        end
+    
+        function out = DrawPrior(obj,varargin)
+            out = feval(obj.FileName.DrawPrior,varargin{:});
         end
     
     end

@@ -120,13 +120,10 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-BaseFolder = pwd;
-cd(obj.SpecPath)
-
 obj.FileName.Mats = sprintf('%s_Mats',obj.Spec);
 
 % Initiate file
-fidMats = fopen([obj.FileName.Mats,'.m'],'wt');
+fidMats = fopen([obj.SpecPath,obj.FileName.Mats,'.m'],'wt');
 fprintf(fidMats,'function Mats = %s(x,varargin)\n\n',obj.FileName.Mats);
 fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
@@ -165,14 +162,6 @@ end
 for j=1:obj.NFixParam
     fprintf(fidMats,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.NParam+j);
 end
-fprintf(fidMats,'if op.StoreParam\n');
-for j=1:obj.NParam
-    fprintf(fidMats,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-end
-for j=1:obj.NFixParam
-    fprintf(fidMats,'    Mats.FixParam.%1$s = %1$s;\n',obj.FixParam.Names{j});
-end
-fprintf(fidMats,'end\n');
 
 if obj.NAuxParam>0 || obj.NNumSolveParam>0
     fprintf(fidMats,'\n%% Initialize auxiliary parameters\n');
@@ -241,10 +230,16 @@ if obj.NAuxParam>0
     end
 end
 
+% Combine Fix and NumSolve into Aux
+obj.NAuxParam = obj.NFixParam + obj.NNumSolveParam + obj.NAuxParam;
+obj.AuxParam.Names = [obj.FixParam.Names;
+                    obj.NumSolveParam.Names;obj.AuxParam.Names];
+obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
+                    obj.NumSolveParam.PrettyNames;obj.AuxParam.PrettyNames];
+
 fprintf(fidMats,'if op.StoreParam\n');
-for j=1:obj.NNumSolveParam
-    fprintf(fidMats,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
-            obj.NumSolveParam.Names{j});
+for j=1:obj.NParam
+    fprintf(fidMats,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
 end
 for j=1:obj.NAuxParam
     fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
@@ -449,7 +444,6 @@ end
 % close file
 fprintf(fidMats,'end\n');
 fclose(fidMats);
-cd(BaseFolder)
     
 %% -------------------------------------------------------------------
 
