@@ -16,7 +16,7 @@
 %% Preamble
 clear all
 tic
-SetPath
+setpath
 set(0,'defaultTextInterpreter','latex');
 BaseFolder = pwd;
 
@@ -64,7 +64,7 @@ m.NumSolveParam = {...
         'rA+0.5/400-rB'};
                   };
 
-m.AuxParam = {...
+m.CompoundParam = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -136,13 +136,13 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-m = m.GenMats;
+m = m.genmats;
 
-cd(m.SpecPath)
-Mats = m.Mats(m.Param.PriorMean);
+cd(m.Path)
+Mats = m.mats(m.Param.PriorMean);
 cd(BaseFolder)
 
-% m = PriorAnalysis(m);
+m = m.analyzeprior;
 
 % m.Options.Sim.UseDist = 'PriorDraws';
 % m = MakeIRF(m);
@@ -151,7 +151,7 @@ cd(BaseFolder)
 %% -------------------------------------------------------------------
 
 %% Finish up
-save([m.SpecPath,m.Spec])
+save([m.Path,m.Name])
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)

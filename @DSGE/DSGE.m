@@ -11,8 +11,8 @@ classdef DSGE
 % Copyright (C) 2016 Vasco Curdia
     
     properties
-        Spec = '';
-        SpecPath = './';
+        Name = '';
+        Path = './';
         FileName = struct;
         Report
 %         PlotDir = struct;
@@ -20,6 +20,7 @@ classdef DSGE
         Param
         FixParam
         NumSolveParam
+        CompoundParam
         AuxParam
         ObsVar
         StateVar
@@ -31,6 +32,7 @@ classdef DSGE
         NParam = 0;
         NFixParam = 0;
         NNumSolveParam = 0;
+        NCompoundParam = 0;
         NAuxParam = 0;
         NObsVar = 0;
         NStateVar = 0;
@@ -43,87 +45,104 @@ classdef DSGE
     end
    
     methods
-        function obj = DSGE(Spec,SpecPath)
+        function obj = DSGE(Name,Path)
             if nargin>0
-                obj.Spec = Spec;
+                obj.Name = Name;
             end
             if nargin<2
-                if ~isempty(obj.Spec)
-                    obj.SpecPath = [Spec,'/'];
+                if ~isempty(obj.Name)
+                    obj.Path = [Name,'/'];
                 end
             end
         end
         
-        function obj = set.SpecPath(obj,SpecPath)
-            if ~ismember(SpecPath,{'','./'})
-                obj.SpecPath = SpecPath;
-                mkdir(obj.SpecPath)
+        function obj = set.Path(obj,Path)
+            obj.Path = Path;
+            if ~ismember(Path,{'','./'}) && ~isdir(obj.Path)
+                mkdir(obj.Path)
             end
         end
         
         function obj = set.Param(obj,p)
-            pType = 'Param';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-            if obj.NParam>0
-                obj.Param.PriorDist = p(:,2);
-                obj.Param.PriorMean = [p{:,3}]';
-                obj.Param.PriorSD = [p{:,4}]';
+            if isstruct(p)
+                obj.Param = p;
+            else
+                pType = 'Param';
+                [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
+                if obj.NParam>0
+                    obj.Param.PriorDist = p(:,2);
+                    obj.Param.PriorMean = [p{:,3}]';
+                    obj.Param.PriorSD = [p{:,4}]';
+                end
             end
         end
         
         function obj = set.FixParam(obj,p)
-            pType = 'FixParam';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-            if obj.NFixParam>0
-                obj.FixParam.Values = [p{:,2}]';
-            end
-        end
-    
-        function obj = set.NumSolveParam(obj,p)
-            if length(p)<2
-                error(['Need to specify NumSolveParam as cell array with two ' ...
-                       'elements.'])
-            end
-            eq = p{2};
-            p = p{1};
-            pType = 'NumSolveParam';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-            if obj.NNumSolveParam>0
-                obj.NumSolveParam.Guess = [p{:,2}]';
-                if isempty(eq) || (length(eq)<obj.NNumSolveParam)
-                    error('Not enough equations specified for NumSolveParam.')
-                else
-                    obj.NumSolveParam.Eq = eq;
+            if isstruct(p)
+                obj.FixParam = p;
+            else
+                pType = 'FixParam';
+                [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
+                if obj.NFixParam>0
+                    obj.FixParam.Values = [p{:,2}]';
                 end
             end
         end
     
-        function obj = set.AuxParam(obj,p)
-            pType = 'AuxParam';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-            if obj.NAuxParam>0
-                obj.AuxParam.Expressions = p(:,2);
+        function obj = set.NumSolveParam(obj,p)
+            if isstruct(p)
+                obj.NumSolveParam = p;
+            else
+                if length(p)<2
+                    error(['Need to specify NumSolveParam as cell array ',...
+                           'with two elements.'])
+                end
+                eq = p{2};
+                p = p{1};
+                pType = 'NumSolveParam';
+                [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
+                if obj.NNumSolveParam>0
+                    obj.NumSolveParam.Guess = [p{:,2}]';
+                    if isempty(eq) || (length(eq)<obj.NNumSolveParam)
+                        error(['Not enough equations specified for ',...
+                               'NumSolveParam.'])
+                    else
+                        obj.NumSolveParam.Eq = eq;
+                    end
+                end
+            end
+        end
+    
+        function obj = set.CompoundParam(obj,p)
+            if isstruct(p)
+                obj.CompoundParam = p;
+            else
+                pType = 'CompoundParam';
+                [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
+                if obj.NCompoundParam>0
+                    obj.CompoundParam.Expressions = p(:,2);
+                end
             end
         end
     
         function obj = set.ObsVar(obj,p)
             pType = 'ObsVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
         end
     
         function obj = set.StateVar(obj,p)
             pType = 'StateVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
         end
     
         function obj = set.ShockVar(obj,p)
             pType = 'ShockVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
         end
     
         function obj = set.AuxVar(obj,p)
             pType = 'AuxVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.(['N',pType]),obj.(pType)] = setnames(pType,p);
             if obj.NAuxVar>0
                 obj.AuxEq = p(:,2);
             end
@@ -131,29 +150,38 @@ classdef DSGE
         
         function obj = set.ObsEq(obj,eq)
             obj.ObsEq = eq;
-            CheckEq(obj,'Obs')
+            checkeq(obj,'Obs')
         end
     
         function obj = set.StateEq(obj,eq)
             obj.StateEq = eq;
-            CheckEq(obj,'State')
+            checkeq(obj,'State')
         end
         
-        function out = Mats(obj,x,varargin)
+        function out = mats(obj,x,varargin)
             out = feval(obj.FileName.Mats,[x;obj.FixParam.Values],varargin{:});
         end
     
-        function out = DrawPrior(obj,varargin)
+        function out = drawprior(obj,varargin)
             out = feval(obj.FileName.DrawPrior,varargin{:});
         end
     
+        function obj = tracktime(obj,action,start)
+            if start
+                obj.TimeElapsed.(action) = tic;
+            else
+                obj.TimeElapsed.(action) = toc(obj.TimeElapsed.(action));
+                fprintf('\n%s %s\n\n',action,vctoc(obj.TimeElapsed.(action)))
+            end
+        end
+        
     end
     
 end
 
-function [np,pp] = SetNames(pType,p)
+function [np,pp] = setnames(pType,p)
     if ~ismember(pType,{...
-        'Param','FixParam','NumSolveParam','AuxParam',...
+        'Param','FixParam','NumSolveParam','CompoundParam',...
         'ObsVar','StateVar','ShockVar','AuxVar',...
                        })
         error('SetProperty called with invalid type.')
@@ -163,7 +191,8 @@ function [np,pp] = SetNames(pType,p)
     if np==0, return, end
     pp.Names = p(:,1);
     if nc==(2+... 
-            ismember(pType,{'FixParam','NumSolveParam','AuxParam','AuxVar'})+...
+            ismember(pType,{'FixParam','NumSolveParam','CompoundParam',...
+                            'AuxVar'})+...
             3*strcmp(pType,'Param'))
         pp.PrettyNames = p(:,nc);
     else
@@ -171,7 +200,7 @@ function [np,pp] = SetNames(pType,p)
     end
 end
         
-function CheckEq(obj,eqType)
+function checkeq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.(['N',eqType,'Var']);
     if nEq~=nVar

@@ -1,6 +1,6 @@
-function obj = GenMats(obj)
+function obj = genmats(obj)
 
-% GenMats
+% genmats
 %
 % Analyzes the DSGE structure and generates code to evaluate the DSGE for a 
 % given parameter vector.
@@ -10,7 +10,7 @@ function obj = GenMats(obj)
 %             x_tL refers to x(t-1)
 %
 % See also:
-% DSGE, SetupMyDSGE
+% DSGE, setupMyDSGE
 %
 % ...........................................................................
 %
@@ -22,12 +22,9 @@ function obj = GenMats(obj)
 
 %% Preamble
 
-Action = 'GenMats';
+obj = obj.tracktime('genmats',1);
 
-fprintf('\n*** GenMats\n')
-
-% Set Timer
-obj.TimeElapsed.(Action) = toc();
+fprintf('\n*** Generate DSGE mats\n')
 
 %% -------------------------------------------------------------------
 
@@ -41,20 +38,20 @@ if (obj.NStateVar==0) || isempty(obj.StateEq)
 end
 
 %% Sym Params
-list = {'','Fix','NumSolve','Aux'};
+list = {'','Fix','NumSolve','Compound'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(['N',jstr])>0, vcSym(obj.(jstr).Names{:}), end
+    if obj.(['N',jstr])>0, vcsym(obj.(jstr).Names{:}), end
 end
 
 %% Constant
-vcSym('one')
+vcsym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.NObsVar)); 
 for j=1:obj.NObsVar
     vj = [obj.ObsVar.Names{j},'_t'];
-    vcSym(vj)
+    vcsym(vj)
     ObsVar_t(j) = eval(vj);
 end
 
@@ -64,7 +61,7 @@ StateVar_tF = sym(zeros(1,obj.NStateVar));
 StateVar_tL = sym(zeros(1,obj.NStateVar)); 
 for j=1:obj.NStateVar
     vj = [obj.StateVar.Names{j},'_t'];
-    vcSym(vj,[vj,'F'],[vj,'L'])
+    vcsym(vj,[vj,'F'],[vj,'L'])
     StateVar_t(j) = eval(vj);
     StateVar_tF(j) = eval([vj,'F']);
     StateVar_tL(j) = eval([vj,'L']);
@@ -74,7 +71,7 @@ end
 ShockVar_t = sym(zeros(1,obj.NShockVar)); 
 for j=1:obj.NShockVar
     vj = [obj.ShockVar.Names{j},'_t'];
-    vcSym(vj)
+    vcsym(vj)
     ShockVar_t(j) = eval(vj);
 end
 
@@ -120,10 +117,10 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-obj.FileName.Mats = sprintf('%s_Mats',obj.Spec);
+obj.FileName.Mats = sprintf('%s_Mats',obj.Name);
 
 % Initiate file
-fidMats = fopen([obj.SpecPath,obj.FileName.Mats,'.m'],'wt');
+fidMats = fopen([obj.Path,obj.FileName.Mats,'.m'],'wt');
 fprintf(fidMats,'function Mats = %s(x,varargin)\n\n',obj.FileName.Mats);
 fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
@@ -163,13 +160,13 @@ for j=1:obj.NFixParam
     fprintf(fidMats,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.NParam+j);
 end
 
-if obj.NAuxParam>0 || obj.NNumSolveParam>0
-    fprintf(fidMats,'\n%% Initialize auxiliary parameters\n');
+if obj.NCompoundParam>0 || obj.NNumSolveParam>0
+    fprintf(fidMats,'\n%% Initialize compound parameters\n');
     for j=1:obj.NNumSolveParam
         fprintf(fidMats,'%s = [];\n',obj.NumSolveParam.Names{j});
     end
-    for j=1:obj.NAuxParam
-        fprintf(fidMats,'%s = [];\n',obj.AuxParam.Names{j});
+    for j=1:obj.NCompoundParam
+        fprintf(fidMats,'%s = [];\n',obj.CompoundParam.Names{j});
     end
 end
 
@@ -181,7 +178,7 @@ if obj.NNumSolveParam>0
         fprintf(fidMats,'        %s = x(%.0f,jx);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
-    fprintf(fidMats,'        EvalAuxParam\n');
+    fprintf(fidMats,'        EvalCompoundParam\n');
     for j=1:obj.NNumSolveParam
         fprintf(fidMats,'        f(%.0f,jx) = %s;\n',j,...
                 obj.NumSolveParam.Eq{j});
@@ -216,26 +213,27 @@ if obj.NNumSolveParam>0
     fprintf(fidMats,'end\n');
 end
 
-if obj.NAuxParam>0
-    fprintf(fidMats,'\n%% Map auxiliary parameters\n');
+if obj.NCompoundParam>0
+    fprintf(fidMats,'\n%% Map compound parameters\n');
     if obj.NNumSolveParam>0
-        fprintf(fidMats,'function EvalAuxParam \n');
+        fprintf(fidMats,'function EvalCompoundParam \n');
     end
-    for j=1:obj.NAuxParam
-        fprintf(fidMats,'%s = %s;\n',obj.AuxParam.Names{j},...
-                obj.AuxParam.Expressions{j});
+    for j=1:obj.NCompoundParam
+        fprintf(fidMats,'%s = %s;\n',obj.CompoundParam.Names{j},...
+                obj.CompoundParam.Expressions{j});
     end
     if obj.NNumSolveParam>0
         fprintf(fidMats,'end \n');
     end
 end
 
-% Combine Fix and NumSolve into Aux
-obj.NAuxParam = obj.NFixParam + obj.NNumSolveParam + obj.NAuxParam;
+% Combine Fix, NumSolve, and Compound into AuxParam
+obj.NAuxParam = obj.NFixParam + obj.NNumSolveParam + obj.NCompoundParam;
 obj.AuxParam.Names = [obj.FixParam.Names;
-                    obj.NumSolveParam.Names;obj.AuxParam.Names];
+                    obj.NumSolveParam.Names;obj.CompoundParam.Names];
 obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
-                    obj.NumSolveParam.PrettyNames;obj.AuxParam.PrettyNames];
+                    obj.NumSolveParam.PrettyNames;
+                    obj.CompoundParam.PrettyNames];
 
 fprintf(fidMats,'if op.StoreParam\n');
 for j=1:obj.NParam
@@ -448,7 +446,7 @@ fclose(fidMats);
 %% -------------------------------------------------------------------
 
 %% Finish up
-obj.TimeElapsed.(Action) = toc-obj.TimeElapsed.(Action);
-fprintf('\n%s %s\n\n',Action,vctoc([],obj.TimeElapsed.(Action)))
+obj = obj.tracktime('genmats',0);
+
 
 %% -------------------------------------------------------------------
