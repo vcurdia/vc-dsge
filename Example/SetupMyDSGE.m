@@ -1,4 +1,4 @@
-% RunMyDSGE
+% SetupMyDSGE
 %
 % This file gives an example of how to use the vcDSGE package
 %
@@ -16,7 +16,7 @@
 %% Preamble
 clear all
 tic
-setpath
+SetPath
 set(0,'defaultTextInterpreter','latex');
 BaseFolder = pwd;
 
@@ -136,13 +136,13 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-m = m.genmats;
+m = m.GenMats;
 
 cd(m.Path)
-Mats = m.mats(m.Param.PriorMean);
+Mats = m.Mats(m.Param.PriorMean);
 cd(BaseFolder)
 
-m = m.analyzeprior;
+m = m.AnalyzePrior;
 
 % m.Options.Sim.UseDist = 'PriorDraws';
 % m = MakeIRF(m);

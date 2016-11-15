@@ -1,6 +1,6 @@
-function obj = analyzeprior(obj)
+function obj = AnalyzePrior(obj)
 
-% analyzeprior
+% AnalyzePrior
 %
 % Analyzes the priors
 %
@@ -17,7 +17,8 @@ function obj = analyzeprior(obj)
 
 %% Preamble
 
-obj = obj.tracktime('analyzeprior',1);
+action = 'AnalyzePrior';
+obj = obj.TrackTime(action,1);
 
 fprintf('\n*** Analyzing DSGE Prior distribution\n')
 
@@ -36,7 +37,7 @@ end
 
 obj.FileName.DrawPrior = [obj.Name,'_DrawPrior'];
 
-obj.Report.Prior = sprintf('%s_Report_Prior',obj.Name);
+ReportFileName = sprintf('%s_Report_Prior',obj.Name);
 ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Name);
 
 %% -------------------------------------------------------------------
@@ -238,8 +239,8 @@ xj = zeros(np,1);
 BadDraws = false(1,Prior.nDraws);
 BaseFolder = pwd;
 cd(obj.Path)
-xd = obj.drawprior(Prior.nDraws);
-fh = @(x)obj.mats(x);
+xd = obj.DrawPrior(Prior.nDraws);
+fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
 parfor jd=1:Prior.nDraws
     Matsj = fh(xd(:,jd));
@@ -309,19 +310,14 @@ for jP=1:length(pList)
 end
 fprintf('\n');
 
-keyboard
-
-HERE HERE HERE HERE
-
 %% Make Prior Report
 
-fprintf('Making report: %s\n',obj.Report.Prior);
-fid = vcCreateTex(obj.Report.Prior,ReportTitle);
+fprintf('Making report: %s\n',ReportFileName);
+fid = vcCreateTex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
-str = [' & %.',int2str(opTable.Precision),'f'];
-TableBreaks = opTable.MaxRows:opTable.MaxRows:obj.n.Param;
-if ~ismember(obj.n.Param,TableBreaks), TableBreaks(end+1) = obj.n.Param; end
+str = [' & %.',int2str(obj.TablePrecision),'f'];
+TableBreaks = obj.SetTableBreaks(obj.NParam);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
@@ -330,7 +326,7 @@ for jBreak=1:nBreaks
         fprintf(fid,'\\section{Parameters (Cont)}\n');
     end
     fprintf(fid,'\\begin{equation*}\n');
-    if opTable.MoveLeft
+    if obj.TableMoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
     fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
@@ -350,12 +346,12 @@ for jBreak=1:nBreaks
         fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc500(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc950(jr));
         fprintf(fid,' &');
-        fprintf(fid,str,Prior.Param.PriorMean(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc050(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc500(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc950(jr));
+        fprintf(fid,str,obj.Param.PriorMean(jr));
+        fprintf(fid,str,obj.Param.PriorPrc050(jr));
+        fprintf(fid,str,obj.Param.PriorPrc500(jr));
+        fprintf(fid,str,obj.Param.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,opTable.Lines) && jr~=idxPar(end)
+        if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
@@ -366,9 +362,8 @@ for jBreak=1:nBreaks
 end
 
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
-str = [' & %.',int2str(opTable.Precision),'f'];
-TableBreaks = opTable.MaxRows:opTable.MaxRows:obj.n.AuxParam;
-if ~ismember(obj.n.Param,TableBreaks), TableBreaks(end+1) = obj.n.AuxParam; end
+str = [' & %.',int2str(obj.TablePrecision),'f'];
+TableBreaks = obj.SetTableBreaks(obj.NAuxParam);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
@@ -384,12 +379,12 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
         fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
-        fprintf(fid,str,Prior.AuxParam.PriorMean(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc050(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc950(jr));
+        fprintf(fid,str,obj.AuxParam.PriorMean(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc050(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc500(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,opTable.Lines) && jr~=idxPar(end)
+        if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
@@ -401,13 +396,13 @@ end
 
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-pdflatex(obj.Report.Prior)
+pdflatex(ReportFileName)
 
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-obj = obj.tracktime('analyzeprior',0);
+obj = obj.TrackTime(action,0);
 
 end
 

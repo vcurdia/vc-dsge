@@ -1,6 +1,6 @@
-function obj = genmats(obj)
+function obj = GenMats(obj)
 
-% genmats
+% GenMats
 %
 % Analyzes the DSGE structure and generates code to evaluate the DSGE for a 
 % given parameter vector.
@@ -10,7 +10,7 @@ function obj = genmats(obj)
 %             x_tL refers to x(t-1)
 %
 % See also:
-% DSGE, setupMyDSGE
+% DSGE, SetupMyDSGE
 %
 % ...........................................................................
 %
@@ -22,7 +22,8 @@ function obj = genmats(obj)
 
 %% Preamble
 
-obj = obj.tracktime('genmats',1);
+action = 'GenMats';
+obj = obj.TrackTime(action,1);
 
 fprintf('\n*** Generate DSGE mats\n')
 
@@ -41,17 +42,17 @@ end
 list = {'','Fix','NumSolve','Compound'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(['N',jstr])>0, vcsym(obj.(jstr).Names{:}), end
+    if obj.(['N',jstr])>0, vcSym(obj.(jstr).Names{:}), end
 end
 
 %% Constant
-vcsym('one')
+vcSym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.NObsVar)); 
 for j=1:obj.NObsVar
     vj = [obj.ObsVar.Names{j},'_t'];
-    vcsym(vj)
+    vcSym(vj)
     ObsVar_t(j) = eval(vj);
 end
 
@@ -61,7 +62,7 @@ StateVar_tF = sym(zeros(1,obj.NStateVar));
 StateVar_tL = sym(zeros(1,obj.NStateVar)); 
 for j=1:obj.NStateVar
     vj = [obj.StateVar.Names{j},'_t'];
-    vcsym(vj,[vj,'F'],[vj,'L'])
+    vcSym(vj,[vj,'F'],[vj,'L'])
     StateVar_t(j) = eval(vj);
     StateVar_tF(j) = eval([vj,'F']);
     StateVar_tL(j) = eval([vj,'L']);
@@ -71,7 +72,7 @@ end
 ShockVar_t = sym(zeros(1,obj.NShockVar)); 
 for j=1:obj.NShockVar
     vj = [obj.ShockVar.Names{j},'_t'];
-    vcsym(vj)
+    vcSym(vj)
     ShockVar_t(j) = eval(vj);
 end
 
@@ -446,7 +447,7 @@ fclose(fidMats);
 %% -------------------------------------------------------------------
 
 %% Finish up
-obj = obj.tracktime('genmats',0);
+obj = obj.TrackTime(action,0);
 
 
 %% -------------------------------------------------------------------
