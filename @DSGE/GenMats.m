@@ -31,11 +31,11 @@ fprintf('\n*** Generate DSGE mats\n')
 
 %% Prepare parameters, variables and equations
 
-fprintf('Generating symbolic variables and systems of equations...\n')
+fprintf('Generating symbolic variables and systems of equations\n')
 
 %% basic check
 if (obj.NStateVar==0) || isempty(obj.StateEq)
-    error('Cannot without specifying state variables and states.')
+    error('Cannot without specifying state variables and states')
 end
 
 %% Sym Params

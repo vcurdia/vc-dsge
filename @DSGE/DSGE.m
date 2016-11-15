@@ -13,6 +13,7 @@ classdef DSGE
     properties
         Name = '';
         Path = './';
+        BasePath = pwd;
         FileName = struct;
 %        Report
 %         PlotDir = struct;
@@ -66,6 +67,11 @@ classdef DSGE
                     obj.Path = [Name,'/'];
                 end
             end
+            obj.save
+        end
+        
+        function save(obj)
+            evalin('caller',['save(''',[obj.Path,obj.Name],''')'])
         end
         
         function obj = set.Path(obj,Path)

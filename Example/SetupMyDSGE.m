@@ -18,7 +18,6 @@ clear all
 tic
 SetPath
 set(0,'defaultTextInterpreter','latex');
-BaseFolder = pwd;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -140,7 +139,7 @@ m = m.GenMats;
 
 cd(m.Path)
 Mats = m.Mats(m.Param.PriorMean);
-cd(BaseFolder)
+cd(m.BasePath)
 
 m = m.AnalyzePrior;
 
@@ -151,7 +150,7 @@ m = m.AnalyzePrior;
 %% -------------------------------------------------------------------
 
 %% Finish up
-save([m.Path,m.Name])
+save(m)
 fprintf('\n%s\n\n',vctoc)
 
 % delete(gcp)

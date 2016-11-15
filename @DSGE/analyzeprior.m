@@ -237,7 +237,6 @@ nAux = obj.NAuxParam;
 xdAux = zeros(nAux,Prior.nDraws);
 xj = zeros(np,1);
 BadDraws = false(1,Prior.nDraws);
-BaseFolder = pwd;
 cd(obj.Path)
 xd = obj.DrawPrior(Prior.nDraws);
 fh = @(x)obj.Mats(x);
@@ -249,7 +248,7 @@ parfor jd=1:Prior.nDraws
         xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
     end
 end
-cd(BaseFolder)
+cd(obj.BasePath)
 
 Prior.nBadDraws = sum(BadDraws);
 Prior.FractionBadDraws = Prior.nBadDraws/Prior.nDraws;
@@ -313,7 +312,7 @@ fprintf('\n');
 %% Make Prior Report
 
 fprintf('Making report: %s\n',ReportFileName);
-fid = vcCreateTex(ReportFileName,ReportTitle);
+fid = vcCreateTex([obj.Path,ReportFileName],ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(obj.TablePrecision),'f'];
@@ -396,8 +395,9 @@ end
 
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
+cd(obj.Path)
 pdflatex(ReportFileName)
-
+cd(obj.BasePath)
 
 %% -------------------------------------------------------------------
 
