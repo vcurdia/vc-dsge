@@ -12,8 +12,6 @@ classdef DSGE
     
     properties
         Name = '';
-        Path = './';
-        BasePath = pwd;
         FileName = struct;
 %        Report
 %         PlotDir = struct;
@@ -58,26 +56,9 @@ classdef DSGE
     end
    
     methods
-        function obj = DSGE(Name,Path)
+        function obj = DSGE(Name)
             if nargin>0
                 obj.Name = Name;
-            end
-            if nargin<2
-                if ~isempty(obj.Name)
-                    obj.Path = [Name,'/'];
-                end
-            end
-            obj.save
-        end
-        
-        function save(obj)
-            evalin('caller',['save(''',[obj.Path,obj.Name],''')'])
-        end
-        
-        function obj = set.Path(obj,Path)
-            obj.Path = Path;
-            if ~ismember(Path,{'','./'}) && ~isdir(obj.Path)
-                mkdir(obj.Path)
             end
         end
         

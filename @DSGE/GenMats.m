@@ -121,7 +121,7 @@ fprintf('Generating code to evaluate model Mats\n')
 obj.FileName.Mats = sprintf('%s_Mats',obj.Name);
 
 % Initiate file
-fidMats = fopen([obj.Path,obj.FileName.Mats,'.m'],'wt');
+fidMats = fopen([obj.FileName.Mats,'.m'],'wt');
 fprintf(fidMats,'function Mats = %s(x,varargin)\n\n',obj.FileName.Mats);
 fprintf(fidMats,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 

@@ -218,7 +218,7 @@ fprintf('\n');
 
 fprintf('Generating function to draw from prior...\n')
 
-fid = fopen([obj.Path,obj.FileName.DrawPrior,'.m'],'wt');
+fid = fopen([obj.FileName.DrawPrior,'.m'],'wt');
 fprintf(fid,'function x=%s(nDraws)\n\n',obj.FileName.DrawPrior);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n\n',clock);
 fprintf(fid,'if ~exist(''nDraws'',''var''), nDraws = 1; end\n');
@@ -237,7 +237,6 @@ nAux = obj.NAuxParam;
 xdAux = zeros(nAux,Prior.nDraws);
 xj = zeros(np,1);
 BadDraws = false(1,Prior.nDraws);
-cd(obj.Path)
 xd = obj.DrawPrior(Prior.nDraws);
 fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
@@ -248,7 +247,6 @@ parfor jd=1:Prior.nDraws
         xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
     end
 end
-cd(obj.BasePath)
 
 Prior.nBadDraws = sum(BadDraws);
 Prior.FractionBadDraws = Prior.nBadDraws/Prior.nDraws;
@@ -312,7 +310,7 @@ fprintf('\n');
 %% Make Prior Report
 
 fprintf('Making report: %s\n',ReportFileName);
-fid = vcCreateTex([obj.Path,ReportFileName],ReportTitle);
+fid = vcCreateTex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(obj.TablePrecision),'f'];
@@ -395,9 +393,7 @@ end
 
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-cd(obj.Path)
 pdflatex(ReportFileName)
-cd(obj.BasePath)
 
 %% -------------------------------------------------------------------
 

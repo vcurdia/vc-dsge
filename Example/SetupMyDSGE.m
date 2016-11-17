@@ -26,6 +26,8 @@ set(0,'defaultTextInterpreter','latex');
 
 %% Initiate DSGE
 m = DSGE('MyDSGE');
+mkdir(m.Name)
+cd(m.Name)
 
 %% Setup the model
 
@@ -137,9 +139,7 @@ m.StateEq = {...
 
 m = m.GenMats;
 
-cd(m.Path)
 Mats = m.Mats(m.Param.PriorMean);
-cd(m.BasePath)
 
 m = m.AnalyzePrior;
 
@@ -150,12 +150,11 @@ m = m.AnalyzePrior;
 %% -------------------------------------------------------------------
 
 %% Finish up
-save(m)
 fprintf('\n%s\n\n',vctoc)
+save(m.Name)
+cd ..
 
 % delete(gcp)
-
-return
 
 % exit
 
