@@ -345,22 +345,22 @@ if obj.NObsVar>0
     fprintf(fidMats,...
             '    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
 
-    if ~isempty(obj.KFInit) && isfield(obj.KFInit,'State')
+    if ~isempty(obj.KFInitState)
         fprintf(fidMats,'    s00 = [...\n');
         for jeq=1:obj.NStateVar
-            fprintf(fidMats,'        %.16f;\n',obj.KFInit.State(jeq));
+            fprintf(fidMats,'        %.16f;\n',obj.KFInitState(jeq));
         end
         fprintf(fidMats,'        ];\n\n');
     else
         fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',obj.NStateVar);
     end
 
-    if ~isempty(obj.KFInit) && isfield(obj.KFinit,'Variance')
+    if ~isempty(obj.KFInitVariance)
         fprintf(fidMats,'    sig00 = [...\n');
         for jeq=1:obj.NStateVar
             fprintf(fidMats,'       ');
             for jc=1:obj.NStateVar
-                fprintf(fidMats,' %0.16f',obj.KFInit.Variance(jeq,jc));
+                fprintf(fidMats,' %0.16f',obj.KFInitVariance(jeq,jc));
                 if jc==obj.NStateVar
                     fprintf(fidMats,';\n');
                 else

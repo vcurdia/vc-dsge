@@ -37,7 +37,8 @@ classdef DSGE
         NStateVar = 0;
         NShockVar = 0;
         NAuxVar = 0;
-        KFInit
+        KFInitState
+        KFInitVariance
         Prior
         Post
         GensysAuthor = 'CS';
@@ -54,8 +55,9 @@ classdef DSGE
         FigOpenPDF = 0;
         ParamPercentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
         PriorNDraws = 1000;
-        SimUseDist = 'PriorMean';
+        SimDist = 'PriorMean';
         SimNDraws = 1;
+        PanelList = {};
     end
    
     methods
@@ -128,23 +130,20 @@ classdef DSGE
         end
     
         function obj = set.ObsVar(obj,p)
-            pType = 'ObsVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.NObsVar,obj.ObsVar] = SetNames('ObsVar',p);
+            if 
         end
     
         function obj = set.StateVar(obj,p)
-            pType = 'StateVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.NStateVar,obj.StateVar] = SetNames('StateVar',p);
         end
     
         function obj = set.ShockVar(obj,p)
-            pType = 'ShockVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.NShockVar,obj.ShockVar] = SetNames('ShockVar',p);
         end
     
         function obj = set.AuxVar(obj,p)
-            pType = 'AuxVar';
-            [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
+            [obj.NAuxVar,obj.AuxVar] = SetNames('AuxVar',p);
             if obj.NAuxVar>0
                 obj.AuxEq = p(:,2);
             end
