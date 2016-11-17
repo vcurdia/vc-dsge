@@ -30,11 +30,6 @@ else
     Prior = struct; 
 end
 
-if ~isfield(Prior,'nDraws'),Prior.nDraws = 1000; end
-if ~isfield(Prior,'Percentiles')
-    Prior.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
-end
-
 obj.FileName.DrawPrior = [obj.Name,'_DrawPrior'];
 
 ReportFileName = sprintf('%s_Report_Prior',obj.Name);
@@ -43,10 +38,10 @@ ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Name);
 %% -------------------------------------------------------------------
 
 %% Prepare variables
-nPrc = length(Prior.Percentiles);
+nPrc = length(obj.ParamPercentiles);
 PrcList = cell(nPrc,1);
 for jPrc=1:nPrc
-    PrcList{jPrc} = sprintf('PriorPrc%03.0f',1000*Prior.Percentiles(jPrc));
+    PrcList{jPrc} = sprintf('PriorPrc%03.0f',1000*obj.ParamPercentiles(jPrc));
 end
 
 %% Analyze Parameters
@@ -66,7 +61,7 @@ for j=1:np
         psd = p.PriorSD(j);
         p.PriorMode(j) = pmean;
         for jPrc=1:nPrc
-            p.(PrcList{jPrc})(j) = norminv(Prior.Percentiles(jPrc),pmean,psd);
+            p.(PrcList{jPrc})(j) = norminv(obj.ParamPercentiles(jPrc),pmean,psd);
         end
         p.PriorParams(j,:) = [pmean,psd];
         p.PriorLPdfCmd{j} = sprintf('log(normpdf(%s,%.16f,%.16f))',...
@@ -107,7 +102,7 @@ for j=1:np
         b = a*(1/pmean-1);
         p.PriorMode(j) = min(max(0,(a-1)/(a+b-2)),1);
         for jPrc=1:nPrc
-            p.(PrcList{jPrc})(j) = betainv(Prior.Percentiles(jPrc),a,b);
+            p.(PrcList{jPrc})(j) = betainv(obj.ParamPercentiles(jPrc),a,b);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf('log(betapdf(%s,%.16f,%.16f))',...
@@ -125,7 +120,7 @@ for j=1:np
             p.PriorMode(j) = NaN;
         end
         for jPrc=1:nPrc
-            p.(PrcList{jPrc})(j) = gaminv(Prior.Percentiles(jPrc),a,b);
+            p.(PrcList{jPrc})(j) = gaminv(obj.ParamPercentiles(jPrc),a,b);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf('log(gampdf(%s,%.16f,%.16f))',...
@@ -146,7 +141,7 @@ for j=1:np
         b = (gamma(a-1/2)/pmean/gamma(a))^2;
         p.PriorMode(j) = (1/b/(a+1/2))^(1/2);
         for jPrc=1:nPrc
-            p.(PrcList{jPrc})(j) = gaminv(1-Prior.Percentiles(jPrc),a,b)^(-1/2);
+            p.(PrcList{jPrc})(j) = gaminv(1-obj.ParamPercentiles(jPrc),a,b)^(-1/2);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf(...
@@ -167,7 +162,7 @@ for j=1:np
         b = 1/pmean/(a-1);
         p.PriorMode(j) = 1/b/(a+1);
         for jPrc=1:nPrc
-            p.(PrcList{jPrc})(j) = gaminv(1-Prior.Percentiles(jPrc),a,b)^(-1);
+            p.(PrcList{jPrc})(j) = gaminv(1-obj.ParamPercentiles(jPrc),a,b)^(-1);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf(...
@@ -232,15 +227,15 @@ fclose(fid);
 
 fprintf('\nPrior Sample:')
 fprintf('\n-------------\n\n')
-xd = zeros(np,Prior.nDraws);
+xd = zeros(np,obj.PriorNDraws);
 nAux = obj.NAuxParam;
-xdAux = zeros(nAux,Prior.nDraws);
+xdAux = zeros(nAux,obj.PriorNDraws);
 xj = zeros(np,1);
-BadDraws = false(1,Prior.nDraws);
-xd = obj.DrawPrior(Prior.nDraws);
+BadDraws = false(1,obj.PriorNDraws);
+xd = obj.DrawPrior(obj.PriorNDraws);
 fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
-parfor jd=1:Prior.nDraws
+parfor jd=1:obj.PriorNDraws
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~all(Matsj.REE.eu==1) || Matsj.KF.sig00rc~=0;
     for jp=1:nAux
@@ -248,21 +243,21 @@ parfor jd=1:Prior.nDraws
     end
 end
 
-Prior.nBadDraws = sum(BadDraws);
-Prior.FractionBadDraws = Prior.nBadDraws/Prior.nDraws;
+Prior.NDraws = obj.PriorNDraws;
+Prior.NBadDraws = sum(BadDraws);
+Prior.FractionBadDraws = Prior.NBadDraws/obj.PriorNDraws;
 Prior.LogTruncationCorrection = -log(1-Prior.FractionBadDraws);
 xd(:,BadDraws) = [];
-Prior.nDraws = size(xd,2);
-fprintf('Number of accepted draws: %.0f\n',Prior.nDraws);
-fprintf(...
-    'Percent of rejected draws: %.2f%%\n',...
-    Prior.FractionBadDraws*100);
+Prior.NDraws = size(xd,2);
+fprintf('Number of accepted draws: %.0f\n',Prior.NDraws);
+fprintf('Percent of rejected draws: %.2f%%\n',...
+        Prior.FractionBadDraws*100);
 fprintf('log-prior correction: %.6f\n',Prior.LogTruncationCorrection);
 
 p.PriorMean = mean(xd,2);
 p.PriorSD = std(xd,0,2);
 for jPrc=1:nPrc
-    p.(PrcList{jPrc}) = prctile(xd,100*Prior.Percentiles(jPrc),2);
+    p.(PrcList{jPrc}) = prctile(xd,100*obj.ParamPercentiles(jPrc),2);
 end
 % Prior.Param = p;
 obj.Param = p;
@@ -272,7 +267,7 @@ pAux = obj.AuxParam;
 pAux.PriorMean = mean(xdAux,2);
 pAux.PriorSD = std(xdAux,0,2);
 for jPrc=1:nPrc
-    pAux.(PrcList{jPrc}) = prctile(xdAux,100*Prior.Percentiles(jPrc),2);
+    pAux.(PrcList{jPrc}) = prctile(xdAux,100*obj.ParamPercentiles(jPrc),2);
 end
 obj.AuxParam = pAux;
 % Prior.AuxParam = pAux;

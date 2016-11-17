@@ -52,7 +52,10 @@ classdef DSGE
         FigYMinScale = 0; 
         FigKeepEPS = 0; 
         FigOpenPDF = 0;
-
+        ParamPercentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
+        PriorNDraws = 1000;
+        SimUseDist = 'PriorMean';
+        SimNDraws = 1;
     end
    
     methods
