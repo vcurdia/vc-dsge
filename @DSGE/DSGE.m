@@ -28,15 +28,6 @@ classdef DSGE
         ObsEq
         StateEq
         AuxEq
-        NParam = 0;
-        NFixParam = 0;
-        NNumSolveParam = 0;
-        NCompoundParam = 0;
-        NAuxParam = 0;
-        NObsVar = 0;
-        NStateVar = 0;
-        NShockVar = 0;
-        NAuxVar = 0;
         KFInitState
         KFInitVariance
         Prior
@@ -48,6 +39,7 @@ classdef DSGE
         TableLines = [];
         Bands2Show = [50,70,90];
         PanelMaxVar = 16;
+        FigPanels
         FigVisible = 'off'; 
         FigYSlack = 0.05; 
         FigYMinScale = 0; 
@@ -57,7 +49,7 @@ classdef DSGE
         PriorNDraws = 1000;
         SimDist = 'PriorMean';
         SimNDraws = 1;
-        PanelList = {};
+        SimShocks2Show
     end
    
     methods
@@ -71,9 +63,8 @@ classdef DSGE
             if isstruct(p)
                 obj.Param = p;
             else
-                pType = 'Param';
-                [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-                if obj.NParam>0
+                obj.Param = SetNames('Param',p);
+                if obj.Param.N>0
                     obj.Param.PriorDist = p(:,2);
                     obj.Param.PriorMean = [p{:,3}]';
                     obj.Param.PriorSD = [p{:,4}]';
@@ -85,9 +76,8 @@ classdef DSGE
             if isstruct(p)
                 obj.FixParam = p;
             else
-                pType = 'FixParam';
-                [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-                if obj.NFixParam>0
+                obj.FixParam = SetNames('FixParam',p);
+                if obj.FixParam.N>0
                     obj.FixParam.Values = [p{:,2}]';
                 end
             end
@@ -103,11 +93,10 @@ classdef DSGE
                 end
                 eq = p{2};
                 p = p{1};
-                pType = 'NumSolveParam';
-                [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-                if obj.NNumSolveParam>0
+                obj.NumSolveParam = SetNames('NumSolveParam',p);
+                if obj.NumSolveParam.N>0
                     obj.NumSolveParam.Guess = [p{:,2}]';
-                    if isempty(eq) || (length(eq)<obj.NNumSolveParam)
+                    if isempty(eq) || (length(eq)<obj.NumSolveParam.N)
                         error(['Not enough equations specified for ',...
                                'NumSolveParam.'])
                     else
@@ -121,30 +110,28 @@ classdef DSGE
             if isstruct(p)
                 obj.CompoundParam = p;
             else
-                pType = 'CompoundParam';
-                [obj.(['N',pType]),obj.(pType)] = SetNames(pType,p);
-                if obj.NCompoundParam>0
+                obj.CompoundParam = SetNames('CompoundParam',p);
+                if obj.CompoundParam.N>0
                     obj.CompoundParam.Expressions = p(:,2);
                 end
             end
         end
     
         function obj = set.ObsVar(obj,p)
-            [obj.NObsVar,obj.ObsVar] = SetNames('ObsVar',p);
-            if 
+            obj.ObsVar = SetNames('ObsVar',p);
         end
     
         function obj = set.StateVar(obj,p)
-            [obj.NStateVar,obj.StateVar] = SetNames('StateVar',p);
+            obj.StateVar = SetNames('StateVar',p);
         end
     
         function obj = set.ShockVar(obj,p)
-            [obj.NShockVar,obj.ShockVar] = SetNames('ShockVar',p);
+            obj.ShockVar = SetNames('ShockVar',p);
         end
     
         function obj = set.AuxVar(obj,p)
-            [obj.NAuxVar,obj.AuxVar] = SetNames('AuxVar',p);
-            if obj.NAuxVar>0
+            obj.AuxVar = SetNames('AuxVar',p);
+            if obj.AuxVar.N>0
                 obj.AuxEq = p(:,2);
             end
         end
@@ -187,7 +174,7 @@ classdef DSGE
     
 end
 
-function [np,pp] = SetNames(pType,p)
+function pp = SetNames(pType,p)
     if ~ismember(pType,{...
         'Param','FixParam','NumSolveParam','CompoundParam',...
         'ObsVar','StateVar','ShockVar','AuxVar',...
@@ -195,8 +182,8 @@ function [np,pp] = SetNames(pType,p)
         error('SetProperty called with invalid type.')
     end
     pp = struct;
-    [np,nc] = size(p);
-    if np==0, return, end
+    [pp.N,nc] = size(p);
+    if pp.N==0, return, end
     pp.Names = p(:,1);
     if nc==(2+... 
             ismember(pType,{'FixParam','NumSolveParam','CompoundParam',...
@@ -210,7 +197,7 @@ end
         
 function CheckEq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
-    nVar = obj.(['N',eqType,'Var']);
+    nVar = obj.([eqType,'Var']).N;
     if nEq~=nVar
         error(['Number of %sEq (%i) does not match number of ' ...
                'variables (%i).'],eqType,nEq,nVar)

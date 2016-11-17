@@ -34,7 +34,7 @@ fprintf('\n*** Generate DSGE mats\n')
 fprintf('Generating symbolic variables and systems of equations\n')
 
 %% basic check
-if (obj.NStateVar==0) || isempty(obj.StateEq)
+if (obj.StateVar.N==0) || isempty(obj.StateEq)
     error('Cannot without specifying state variables and states')
 end
 
@@ -42,25 +42,25 @@ end
 list = {'','Fix','NumSolve','Compound'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(['N',jstr])>0, vcSym(obj.(jstr).Names{:}), end
+    if obj.(jstr).N>0, vcSym(obj.(jstr).Names{:}), end
 end
 
 %% Constant
 vcSym('one')
 
 %% Obs Var
-ObsVar_t = sym(zeros(1,obj.NObsVar)); 
-for j=1:obj.NObsVar
+ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
+for j=1:obj.ObsVar.N
     vj = [obj.ObsVar.Names{j},'_t'];
     vcSym(vj)
     ObsVar_t(j) = eval(vj);
 end
 
 %% State Var
-StateVar_t = sym(zeros(1,obj.NStateVar)); 
-StateVar_tF = sym(zeros(1,obj.NStateVar)); 
-StateVar_tL = sym(zeros(1,obj.NStateVar)); 
-for j=1:obj.NStateVar
+StateVar_t = sym(zeros(1,obj.StateVar.N)); 
+StateVar_tF = sym(zeros(1,obj.StateVar.N)); 
+StateVar_tL = sym(zeros(1,obj.StateVar.N)); 
+for j=1:obj.StateVar.N
     vj = [obj.StateVar.Names{j},'_t'];
     vcSym(vj,[vj,'F'],[vj,'L'])
     StateVar_t(j) = eval(vj);
@@ -69,15 +69,15 @@ for j=1:obj.NStateVar
 end
 
 %% Shock Var
-ShockVar_t = sym(zeros(1,obj.NShockVar)); 
-for j=1:obj.NShockVar
+ShockVar_t = sym(zeros(1,obj.ShockVar.N)); 
+for j=1:obj.ShockVar.N
     vj = [obj.ShockVar.Names{j},'_t'];
     vcSym(vj)
     ShockVar_t(j) = eval(vj);
 end
 
 %% Aux Var and Eq
-nV = obj.NAuxVar;
+nV = obj.AuxVar.N;
 if nV>0
     AuxEq = sym(zeros(nV,1));
     for j=1:nV
@@ -99,17 +99,46 @@ if nV>0
     end
 end
 
+%% Set default FigPanels
+% PanelList = {};
+% if ~obj.ObsVar.N>0, PanelList{end+1} = 'ObsVar';end
+% PanelList{end+1} = 'StateVar';
+% if ~obj.AuxVar.N>0, PanelList{end+1} = 'AuxVar';end
+% jP = 0;
+% for jList=1:length(PanelList)
+%     Listj = PanelList{jList};
+%     for j=(1:ceil(obj.(Listj).N/op.PanelMaxVar))
+%         jP = jP+1;
+%         if op.PanelMaxVar==1
+%             op.Panels(jP).Var = obj.(Listj).Names(j);
+%             op.Panels(jP).PrettyNames = obj.(Listj).PrettyNames(j);
+%             op.Panels(jP).Title = sprintf('%s_%s',Listj,...
+%                                           op.Panels(jP).Var{1});
+%         else
+%             op.Panels(jP).Title = sprintf('%s_%.0f',Listj,j);
+%             op.Panels(jP).Var = obj.(Listj).Names(...
+%                 (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,...
+%                                            obj.n.(Listj)));
+%             op.Panels(jP).PrettyNames = obj.(Listj).PrettyNames(...
+%                 (j-1)*op.PanelMaxVar+1:min(j*op.PanelMaxVar,...
+%                                            obj.n.(Listj)));
+%         end
+%     end
+% end
+
+
+
 % Build Observation equations
-if obj.NObsVar>0
-    ObsEq = sym(zeros(obj.NObsVar,1));
-    for j=1:obj.NObsVar
+if obj.ObsVar.N>0
+    ObsEq = sym(zeros(obj.ObsVar.N,1));
+    for j=1:obj.ObsVar.N
         ObsEq(j) = eval(obj.ObsEq{j});
     end
 end
 
 % Build State equations
-StateEq = sym(zeros(obj.NStateVar,1));
-for j=1:obj.NStateVar
+StateEq = sym(zeros(obj.StateVar.N,1));
+for j=1:obj.StateVar.N
     StateEq(j) = eval(obj.StateEq{j});
 end
 
@@ -154,39 +183,39 @@ fprintf(fidMats,'Mats.Status = 1;\n');
 fprintf(fidMats,'Mats.StatusMessage = '''';\n');
 
 fprintf(fidMats,'\n%% Map parameters\n');
-for j=1:obj.NParam
+for j=1:obj.Param.N
     fprintf(fidMats,'%s = x(%.0f);\n',obj.Param.Names{j},j);
 end
-for j=1:obj.NFixParam
-    fprintf(fidMats,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.NParam+j);
+for j=1:obj.FixParam.N
+    fprintf(fidMats,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.Param.N+j);
 end
 
-if obj.NCompoundParam>0 || obj.NNumSolveParam>0
+if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
     fprintf(fidMats,'\n%% Initialize compound parameters\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'%s = [];\n',obj.NumSolveParam.Names{j});
     end
-    for j=1:obj.NCompoundParam
+    for j=1:obj.CompoundParam.N
         fprintf(fidMats,'%s = [];\n',obj.CompoundParam.Names{j});
     end
 end
 
-if obj.NNumSolveParam>0
+if obj.NumSolveParam.N>0
     fprintf(fidMats,'\n%% NumSolve parameters\n');
     fprintf(fidMats,'function f=NumSolveEq(x)\n');
     fprintf(fidMats,'    for jx=1:size(x,2)\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'        %s = x(%.0f,jx);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
     fprintf(fidMats,'        EvalCompoundParam\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'        f(%.0f,jx) = %s;\n',j,...
                 obj.NumSolveParam.Eq{j});
     end
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'NumSolveGuess(%.0f,1) = %.16f;\n',...
                 j,obj.NumSolveParam.Guess(j));
     end
@@ -202,34 +231,34 @@ if obj.NNumSolveParam>0
     fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'%s = NumSolveSolution(%.0f);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
     fprintf(fidMats,'if op.StoreParam\n');
-    for j=1:obj.NNumSolveParam
+    for j=1:obj.NumSolveParam.N
         fprintf(fidMats,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
                 obj.NumSolveParam.Names{j});
     end
     fprintf(fidMats,'end\n');
 end
 
-if obj.NCompoundParam>0
+if obj.CompoundParam.N>0
     fprintf(fidMats,'\n%% Map compound parameters\n');
-    if obj.NNumSolveParam>0
+    if obj.NumSolveParam.N>0
         fprintf(fidMats,'function EvalCompoundParam \n');
     end
-    for j=1:obj.NCompoundParam
+    for j=1:obj.CompoundParam.N
         fprintf(fidMats,'%s = %s;\n',obj.CompoundParam.Names{j},...
                 obj.CompoundParam.Expressions{j});
     end
-    if obj.NNumSolveParam>0
+    if obj.NumSolveParam.N>0
         fprintf(fidMats,'end \n');
     end
 end
 
 % Combine Fix, NumSolve, and Compound into AuxParam
-obj.NAuxParam = obj.NFixParam + obj.NNumSolveParam + obj.NCompoundParam;
+obj.AuxParam.N = obj.FixParam.N + obj.NumSolveParam.N + obj.CompoundParam.N;
 obj.AuxParam.Names = [obj.FixParam.Names;
                     obj.NumSolveParam.Names;obj.CompoundParam.Names];
 obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
@@ -237,26 +266,26 @@ obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
 
 fprintf(fidMats,'if op.StoreParam\n');
-for j=1:obj.NParam
+for j=1:obj.Param.N
     fprintf(fidMats,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
 end
-for j=1:obj.NAuxParam
+for j=1:obj.AuxParam.N
     fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
             obj.AuxParam.Names{j});
 end
 fprintf(fidMats,'end\n');
 
-if obj.NObsVar>0
+if obj.ObsVar.N>0
     fprintf(fidMats,'\n%% Observation equations\n');
     H0 = -jacobian(ObsEq,ObsVar_t);
     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
     SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
     MatNames = fieldnames(SymMats.ObsEq);
-    nCols = [1,obj.NStateVar];
+    nCols = [1,obj.StateVar.N];
     fprintf(fidMats,'if op.StoreObsEq || op.StoreKF\n');
     for jM=1:length(MatNames)
         fprintf(fidMats,'    ObsEq.%s = [...\n',MatNames{jM});
-        for jeq=1:obj.NObsVar
+        for jeq=1:obj.ObsVar.N
             fprintf(fidMats,'       ');
             for jc=1:nCols(jM)
                 fprintf(fidMats,' %s',...
@@ -284,10 +313,10 @@ SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
 MatNames = fieldnames(SymMats.StateEq);
-nCols = [1,obj.NStateVar,obj.NStateVar,obj.NStateVar,obj.NShockVar];
+nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N,obj.ShockVar.N];
 for jM=1:length(MatNames)
     fprintf(fidMats,'StateEq.%s = [...\n',MatNames{jM});
-    for jeq=1:obj.NStateVar
+    for jeq=1:obj.StateVar.N
         fprintf(fidMats,'   ');
         for jc=1:nCols(jM)
             fprintf(fidMats,' %s',...
@@ -302,9 +331,9 @@ for jM=1:length(MatNames)
     end
     fprintf(fidMats,'    ];\n\n');
 end
-fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',obj.NStateVar);
+fprintf(fidMats,'StateEq.Gamma3 = eye(%.0f);\n\n',obj.StateVar.N);
 fprintf(fidMats,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',...
-        obj.NStateVar);
+        obj.StateVar.N);
 fprintf(fidMats,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
 fprintf(fidMats,'StateEq.Gamma3(:,cv) = [];\n');
@@ -331,37 +360,37 @@ fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 
-if obj.NObsVar>0
+if obj.ObsVar.N>0
     fprintf(fidMats,'\n%% Kalman Filter matrices\n');
     fprintf(fidMats,'if op.StoreKF\n');
     fprintf(fidMats,'    if all(Mats.REE.GBar(:)==0)\n');
     fprintf(fidMats,'        KF.StateVarBar = zeros(%.0f,1);\n',...
-            obj.NStateVar);
+            obj.StateVar.N);
     fprintf(fidMats,'    else\n');
     fprintf(fidMats,...
             '        KF.StateVarBar = (eye(%.0f)-REE.G1)\\REE.GBar;\n',...
-            obj.NStateVar);
+            obj.StateVar.N);
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,...
             '    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
 
     if ~isempty(obj.KFInitState)
         fprintf(fidMats,'    s00 = [...\n');
-        for jeq=1:obj.NStateVar
+        for jeq=1:obj.StateVar.N
             fprintf(fidMats,'        %.16f;\n',obj.KFInitState(jeq));
         end
         fprintf(fidMats,'        ];\n\n');
     else
-        fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',obj.NStateVar);
+        fprintf(fidMats,'    KF.s00 = zeros(%.0f,1);\n\n',obj.StateVar.N);
     end
 
     if ~isempty(obj.KFInitVariance)
         fprintf(fidMats,'    sig00 = [...\n');
-        for jeq=1:obj.NStateVar
+        for jeq=1:obj.StateVar.N
             fprintf(fidMats,'       ');
-            for jc=1:obj.NStateVar
+            for jc=1:obj.StateVar.N
                 fprintf(fidMats,' %0.16f',obj.KFInitVariance(jeq,jc));
-                if jc==obj.NStateVar
+                if jc==obj.StateVar.N
                     fprintf(fidMats,';\n');
                 else
                     fprintf(fidMats,',');
@@ -392,16 +421,16 @@ if obj.NObsVar>0
     fprintf(fidMats,'end\n');
 end
 
-if obj.NAuxVar>0
+if obj.AuxVar.N>0
     fprintf(fidMats,'\n%% Auxiliary equations matrices\n');
     MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
-    nCols = [1,obj.NStateVar,obj.NStateVar,obj.NStateVar,obj.NShockVar];
+    nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N,obj.ShockVar.N];
     fprintf(fidMats,'if op.StoreAuxEq || op.StoreAuxREE\n');
     for jM=1:length(MatNames)
         Mj = MatNames{jM};
         SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
         fprintf(fidMats,'    AuxEq.%s = [...\n',Mj);
-        for jeq=1:obj.NAuxVar
+        for jeq=1:obj.AuxVar.N
             fprintf(fidMats,'       ');
             for jc=1:nCols(jM)
                 fprintf(fidMats,' %s',...

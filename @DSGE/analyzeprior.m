@@ -46,7 +46,7 @@ end
 
 %% Analyze Parameters
 p = obj.Param;
-np = obj.NParam;
+np = p.N;
 p.PriorMode = nan(np,1);
 p.PriorParams = nan(np,2);
 for jPrc=1:nPrc
@@ -228,7 +228,7 @@ fclose(fid);
 fprintf('\nPrior Sample:')
 fprintf('\n-------------\n\n')
 xd = zeros(np,obj.PriorNDraws);
-nAux = obj.NAuxParam;
+nAux = obj.AuxParam.N;
 xdAux = zeros(nAux,obj.PriorNDraws);
 xj = zeros(np,1);
 BadDraws = false(1,obj.PriorNDraws);
@@ -292,7 +292,7 @@ for jP=1:length(pList)
         fprintf('  %-8s',DispList{1,jc});
     end
     fprintf('\n');
-    for jp=1:obj.(['N',Pj])
+    for jp=1:obj.(Pj).N
         fprintf(['%',int2str(namelengthmax),'s'],obj.(Pj).Names{jp});
         for jc=1:nc
             fprintf('  %8.4f',obj.(Pj).(DispList{2,jc})(jp));
@@ -309,7 +309,7 @@ fid = vcCreateTex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(obj.TablePrecision),'f'];
-TableBreaks = obj.SetTableBreaks(obj.NParam);
+TableBreaks = obj.SetTableBreaks(obj.Param.N);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
@@ -355,7 +355,7 @@ end
 
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
 str = [' & %.',int2str(obj.TablePrecision),'f'];
-TableBreaks = obj.SetTableBreaks(obj.NAuxParam);
+TableBreaks = obj.SetTableBreaks(obj.AuxParam.N);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
