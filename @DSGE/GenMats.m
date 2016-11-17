@@ -44,6 +44,10 @@ for j=1:length(list)
     jstr = [list{j},'Param'];
     if obj.(jstr).N>0, vcSym(obj.(jstr).Names{:}), end
 end
+if obj.FixParam.N==0
+    obj.FixParam.Values = [];
+end
+
 
 %% Constant
 vcSym('one')
@@ -89,7 +93,7 @@ if nV>0
         if all(jacobian(AuxEq(j),StateVar_tF)==0)
             eval([vj,'F = subs(',vj,',[StateVar_t,StateVar_tL],',...
                   '[StateVar_tF,StateVar_t]);'])
-% If expreassion has no leads or lags then can define lag for it. 
+% If expression has no leads or lags then can define lag for it. 
 % Notice that it does not make sense to define a lag if there are leads in it,
 % and that's why the check for lags is inside the check for leads
             if all(jacobian(AuxEq(j),StateVar_tL)==0)

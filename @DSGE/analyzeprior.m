@@ -237,7 +237,8 @@ fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
 parfor jd=1:obj.PriorNDraws
     Matsj = fh(xd(:,jd));
-    BadDraws(jd) = ~all(Matsj.REE.eu==1) || Matsj.KF.sig00rc~=0;
+    BadDraws(jd) = ~all(Matsj.REE.eu==1) || ...
+        (isfield(Matsj,'KF') && Matsj.KF.sig00rc~=0);
     for jp=1:nAux
         xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
     end

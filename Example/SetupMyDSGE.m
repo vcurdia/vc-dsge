@@ -62,8 +62,8 @@ m.NumSolveParam = {...
         'rB',1,'$r^B$';
     },{...
         '(rA+rB)/2-r';
-        'rA+0.5/400-rB'};
-                  };
+        'rA+0.5/400-rB';
+      }};
 
 m.CompoundParam = {...
     'gamma','gammaa/400','$\gamma$';
