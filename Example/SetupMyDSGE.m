@@ -143,8 +143,9 @@ Mats = m.Mats(m.Param.PriorMean);
 
 m = m.AnalyzePrior;
 
-% m.Options.Sim.UseDist = 'PriorDraws';
-% m = MakeIRF(m);
+m.SimDist = 'PriorDraws';
+m.SimNDraws = 100;
+m = m.MakeIRF;
 
 
 %% -------------------------------------------------------------------

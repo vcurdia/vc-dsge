@@ -13,18 +13,17 @@ classdef DSGE
     properties
         Name = '';
         FileName = struct;
-%        Report
-%         PlotDir = struct;
+        PlotDir = struct;
         TimeElapsed = struct;
-        Param
-        FixParam
-        NumSolveParam
-        CompoundParam
-        AuxParam
-        ObsVar
-        StateVar
-        ShockVar
-        AuxVar
+        Param = InitiateNames;
+        FixParam = InitiateNames;
+        NumSolveParam = InitiateNames;
+        CompoundParam = InitiateNames;
+        AuxParam = InitiateNames;
+        ObsVar = InitiateNames;
+        StateVar = InitiateNames;
+        ShockVar = InitiateNames;
+        AuxVar = InitiateNames;
         ObsEq
         StateEq
         AuxEq
@@ -38,18 +37,23 @@ classdef DSGE
         TableMoveLeft = 1; 
         TableLines = [];
         Bands2Show = [50,70,90];
+        Shocks2Show
         FigPanelMaxVar = 16;
         FigPanels
-        FigVisible = 'off'; 
-        FigYSlack = 0.05; 
-        FigYMinScale = 0; 
-        FigKeepEPS = 0; 
-        FigOpenPDF = 0;
+        Fig = struct(...
+            'Visible','off',... 
+            'YSlack',0.05,... 
+            'YMinScale',0,... 
+            'KeepEPS',0,... 
+            'OpenPDF',0);
         ParamPercentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
         PriorNDraws = 1000;
         SimDist = 'PriorMean';
         SimNDraws = 1;
-        SimShocks2Show
+        IRFNSteps = 25;
+        IRFTickStep = 4;
+        IRFShockSize
+        VarScale = 1;
     end
    
     methods
@@ -170,6 +174,19 @@ classdef DSGE
             end
         end
         
+        function obj = CheckFigPanels(obj)
+             for jP=1:length(obj.FigPanels)
+                 obj.FigPanels(jP).NVar = length(obj.FigPanels(jP).Var);
+                 if ~isfield(obj.FigPanels(jP),'PrettyNames')
+                     obj.FigPanels(jP).PrettyNames = obj.FigPanels(jP).Var;
+                 end
+                 if ~isfield(obj.FigPanels(jP),'Scale') || ...
+                         isempty(obj.FigPanels(jP).Scale)
+                     obj.FigPanels(jP).Scale = ones(1,obj.FigPanels(jP).NVar);
+                 end
+             end
+        end
+        
     end
     
 end
@@ -183,7 +200,6 @@ function pp = SetNames(pType,p)
     end
     pp = struct;
     [pp.N,nc] = size(p);
-    if pp.N==0, return, end
     pp.Names = p(:,1);
     if nc==(2+... 
             ismember(pType,{'FixParam','NumSolveParam','CompoundParam',...
@@ -203,4 +219,11 @@ function CheckEq(obj,eqType)
                'variables (%i).'],eqType,nEq,nVar)
     end
 end
+
+function s = InitiateNames
+    s.N = 0;
+    s.Names = {};
+    s.PrettyNames = {};
+end
+
 

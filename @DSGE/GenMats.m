@@ -75,6 +75,7 @@ for j=1:obj.ShockVar.N
     vcSym(vj)
     ShockVar_t(j) = eval(vj);
 end
+obj.Shocks2Show = obj.ShockVar.Names;
 
 %% Aux Var and Eq
 nV = obj.AuxVar.N;
@@ -101,9 +102,9 @@ end
 
 %% Set default FigPanels
 PanelList = {};
-if ~obj.ObsVar.N>0, PanelList{end+1} = 'ObsVar';end
+if obj.ObsVar.N>0, PanelList{end+1} = 'ObsVar';end
 PanelList{end+1} = 'StateVar';
-if ~obj.AuxVar.N>0, PanelList{end+1} = 'AuxVar';end
+if obj.AuxVar.N>0, PanelList{end+1} = 'AuxVar';end
 jP = 0;
 for jList=1:length(PanelList)
     Listj = PanelList{jList};
