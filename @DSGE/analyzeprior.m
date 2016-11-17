@@ -52,7 +52,7 @@ p.PriorParams = nan(np,2);
 for jPrc=1:nPrc
     p.(PrcList{jPrc}) = nan(np,1);
 end
-p.PriorLogPdfCmd = cell(np,1);
+p.PriorLPdfCmd = cell(np,1);
 p.PriorPdfCmd = cell(np,1);
 p.PriorRndCmd = cell(np,1);
 for j=1:np

@@ -38,7 +38,7 @@ classdef DSGE
         TableMoveLeft = 1; 
         TableLines = [];
         Bands2Show = [50,70,90];
-        PanelMaxVar = 16;
+        FigPanelMaxVar = 16;
         FigPanels
         FigVisible = 'off'; 
         FigYSlack = 0.05; 
