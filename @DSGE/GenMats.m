@@ -231,7 +231,7 @@ if obj.NumSolveParam.N>0
     txt = 'NumSolveParam solution not normal!';
     fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
             txt);
-    fprintf(fidMats,'    if verbose\n');
+    fprintf(fidMats,'    if op.verbose\n');
     fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
@@ -413,7 +413,7 @@ if obj.ObsVar.N>0
         fprintf(fidMats,...
                 '        Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
                 txt);
-        fprintf(fidMats,'        if verbose\n');
+        fprintf(fidMats,'        if op.verbose\n');
         fprintf(fidMats,...
                 '            fprintf(fid,''Warning: %s\\n'');\n',txt);
         fprintf(fidMats,'        end\n\n');
