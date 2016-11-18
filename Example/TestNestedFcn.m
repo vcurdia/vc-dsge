@@ -1,4 +1,4 @@
-function out = TestNestedFcn()
+function out = testnestedfcn()
 
 a = 1;
 b = 2;

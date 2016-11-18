@@ -1,14 +1,15 @@
-function dsge = PriorAnalysis(dsge)
+function obj = AnalyzePrior(obj)
 
-% PriorAnalysis
+% AnalyzePrior
 %
 % Analyzes the priors
 %
 % See also:
+% DSGE, SetupMyDSGE
 %
 % ...........................................................................
 % 
-% Created: January 28, 2016 by Vasco Curdia
+% Created: November 10, 2016 by Vasco Curdia
 % 
 % Copyright 2016 by Vasco Curdia
 
@@ -16,57 +17,40 @@ function dsge = PriorAnalysis(dsge)
 
 %% Preamble
 
-Action = 'PriorAnalysis';
-
-% % check if model already prepared
-% if isfield(dsge.Status,Action) && dsge.Status.(Action), return, end
+action = 'AnalyzePrior';
+obj = obj.TrackTime(action,1);
 
 fprintf('\n*** Analyzing DSGE Prior distribution\n')
 
-% Set Timer
-dsge.TimeElapsed.(Action) = toc();
-
 %% Options
 
-dsge = CheckOptions(dsge);
-
-if isfield(dsge.Options,'Prior')
-    op = dsge.Options.Prior;
+if ~isempty(obj.Prior)
+    Prior = obj.Prior;
 else
-    op = struct; 
-end
-if ~isfield(op,'nDraws'),op.nDraws = 1000; end
-if ~isfield(op,'Percentiles')
-    op.Percentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
+    Prior = struct; 
 end
 
-dsge.FileName.PriorDraw = [dsge.Spec,'_PriorDraw'];
-% dsge.FileName.PriorSample = [dsge.Spec,'_PriorSample'];
+obj.FileName.DrawPrior = [obj.Name,'_DrawPrior'];
 
-dsge.Report.Prior = sprintf('%s_Report_Prior',dsge.Spec);
-ReportTitle = sprintf('Prior Analysis:\\\\%s',dsge.Spec);
-
-dsge.Options.Prior = op;
-
-opTable = dsge.Options.ParTable;
+ReportFileName = sprintf('%s_Report_Prior',obj.Name);
+ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Name);
 
 %% -------------------------------------------------------------------
 
 %% Prepare variables
-nprc = length(op.Percentiles);
-PrcList = cell(nprc,1);
-for jprc=1:nprc
-    PrcList{jprc} = sprintf('PriorPrc%03.0f',1000*op.Percentiles(jprc));
+nPrc = length(obj.ParamPercentiles);
+PrcList = cell(nPrc,1);
+for jPrc=1:nPrc
+    PrcList{jPrc} = sprintf('PriorPrc%03.0f',1000*obj.ParamPercentiles(jPrc));
 end
 
-
 %% Analyze Parameters
-p = dsge.Param;
-np = dsge.n.Param;
+p = obj.Param;
+np = p.N;
 p.PriorMode = nan(np,1);
 p.PriorParams = nan(np,2);
-for jprc=1:nprc
-    p.(PrcList{jprc}) = nan(np,1);
+for jPrc=1:nPrc
+    p.(PrcList{jPrc}) = nan(np,1);
 end
 p.PriorLPdfCmd = cell(np,1);
 p.PriorPdfCmd = cell(np,1);
@@ -76,8 +60,8 @@ for j=1:np
         pmean = p.PriorMean(j);
         psd = p.PriorSD(j);
         p.PriorMode(j) = pmean;
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = norminv(op.Percentiles(jprc),pmean,psd);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = norminv(obj.ParamPercentiles(jPrc),pmean,psd);
         end
         p.PriorParams(j,:) = [pmean,psd];
         p.PriorLPdfCmd{j} = sprintf('log(normpdf(%s,%.16f,%.16f))',...
@@ -96,9 +80,9 @@ for j=1:np
         p.PriorMean(j) = pmean + psd*alambda;
         p.PriorSD(j) = psd*(1-adelta)^(1/2);
         p.PriorMode(j) = max(0,pmean);
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = norminv(...
-                op.Percentiles(jprc)*aZ+acdf,pmean,psd);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = norminv(...
+                op.Percentiles(jPrc)*aZ+acdf,pmean,psd);
         end
         p.PriorParams(j,:) = [pmean,psd];
         p.PriorLPdfCmd{j} = sprintf(...
@@ -117,8 +101,8 @@ for j=1:np
         a = pmean*(pmean-pmean^2-psd^2)/psd^2;
         b = a*(1/pmean-1);
         p.PriorMode(j) = min(max(0,(a-1)/(a+b-2)),1);
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = betainv(op.Percentiles(jprc),a,b);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = betainv(obj.ParamPercentiles(jPrc),a,b);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf('log(betapdf(%s,%.16f,%.16f))',...
@@ -135,8 +119,8 @@ for j=1:np
         else
             p.PriorMode(j) = NaN;
         end
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = gaminv(op.Percentiles(jprc),a,b);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = gaminv(obj.ParamPercentiles(jPrc),a,b);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf('log(gampdf(%s,%.16f,%.16f))',...
@@ -156,8 +140,8 @@ for j=1:np
         end
         b = (gamma(a-1/2)/pmean/gamma(a))^2;
         p.PriorMode(j) = (1/b/(a+1/2))^(1/2);
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = gaminv(1-op.Percentiles(jprc),a,b)^(-1/2);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = gaminv(1-obj.ParamPercentiles(jPrc),a,b)^(-1/2);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf(...
@@ -177,8 +161,8 @@ for j=1:np
         end
         b = 1/pmean/(a-1);
         p.PriorMode(j) = 1/b/(a+1);
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = gaminv(1-op.Percentiles(jprc),a,b)^(-1);
+        for jPrc=1:nPrc
+            p.(PrcList{jPrc})(j) = gaminv(1-obj.ParamPercentiles(jPrc),a,b)^(-1);
         end
         p.PriorParams(j,:) = [a,b];
         p.PriorLPdfCmd{j} = sprintf(...
@@ -188,21 +172,9 @@ for j=1:np
             ['(%%1$.16f>0)',...
              '*(gampdf(%%1$.16f^(-1),%1$.16f,%2$.16f)/%%1$.16f^2)'],a,b);
         p.PriorRndCmd{j} = sprintf('gamrnd(%.16f,%.16f)^(-1)',a,b);
-    elseif strcmp(p.PriorDist{j},'C')
-        pmean = p.PriorMean(j);
-        psd = 0;
-        p.PriorSD(j) = 0;
-        p.PriorMode(j) = pmean;
-        for jprc=1:nprc
-            p.(PrcList{jprc})(j) = pmean;
-        end
-        p.PriorParams(j,:) = [pmean,psd];
-        p.PriorLPdfCmd{j} = sprintf('log(1*(%s==%.16f))',p.Names{j},pmean);
-        p.PriorPdfCmd{j} = sprintf('1*(%%.16f==%.16f)',pmean);
-        p.PriorRndCmd{j} = sprintf('%.16f',pmean);
     end
 end
-dsge.Param = p;
+obj.Param = p;
 Prior.UnconstrainedParam = p;
 
 %% display results on screen
@@ -241,8 +213,8 @@ fprintf('\n');
 
 fprintf('Generating function to draw from prior...\n')
 
-fid = fopen([dsge.FileName.PriorDraw,'.m'],'wt');
-fprintf(fid,'function x=%s(nDraws)\n\n',dsge.FileName.PriorDraw);
+fid = fopen([obj.FileName.DrawPrior,'.m'],'wt');
+fprintf(fid,'function x=%s(nDraws)\n\n',obj.FileName.DrawPrior);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n\n',clock);
 fprintf(fid,'if ~exist(''nDraws'',''var''), nDraws = 1; end\n');
 fprintf(fid,'x = zeros(%.0f,nDraws);\n',np);
@@ -255,53 +227,53 @@ fclose(fid);
 
 fprintf('\nPrior Sample:')
 fprintf('\n-------------\n\n')
-Prior.nDraws = op.nDraws;
-xd = zeros(np,Prior.nDraws);
-xdAux = zeros(dsge.n.AuxParam,Prior.nDraws);
+xd = zeros(np,obj.PriorNDraws);
+nAux = obj.AuxParam.N;
+xdAux = zeros(nAux,obj.PriorNDraws);
 xj = zeros(np,1);
-BadDraws = false(1,Prior.nDraws);
-xd = feval(dsge.FileName.PriorDraw,Prior.nDraws);
-fn = dsge.FileName.Mats;
-nAux = dsge.n.AuxParam;
-ListAux = dsge.AuxParam.Names;
-parfor jd=1:Prior.nDraws
-    Matsj = feval(fn,xd(:,jd));
-    BadDraws(jd) = ~all(Matsj.REE.eu==1) || Matsj.KF.sig00rc~=0;
+BadDraws = false(1,obj.PriorNDraws);
+xd = obj.DrawPrior(obj.PriorNDraws);
+fh = @(x)obj.Mats(x);
+AuxNames = obj.AuxParam.Names;
+parfor jd=1:obj.PriorNDraws
+    Matsj = fh(xd(:,jd));
+    BadDraws(jd) = ~all(Matsj.REE.eu==1) || ...
+        (isfield(Matsj,'KF') && Matsj.KF.sig00rc~=0);
     for jp=1:nAux
-        xdAux(jp,jd) = Matsj.AuxParam.(ListAux{jp});
+        xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
     end
 end
-clear fn
-Prior.nBadDraws = sum(BadDraws);
-Prior.FractionBadDraws = Prior.nBadDraws/Prior.nDraws;
+
+Prior.NDraws = obj.PriorNDraws;
+Prior.NBadDraws = sum(BadDraws);
+Prior.FractionBadDraws = Prior.NBadDraws/obj.PriorNDraws;
 Prior.LogTruncationCorrection = -log(1-Prior.FractionBadDraws);
 xd(:,BadDraws) = [];
-Prior.nDraws = size(xd,2);
-fprintf('Number of accepted draws: %.0f\n',Prior.nDraws);
-fprintf(...
-    'Percent of rejected draws: %.2f%%\n',...
-    Prior.FractionBadDraws*100);
+Prior.NDraws = size(xd,2);
+fprintf('Number of accepted draws: %.0f\n',Prior.NDraws);
+fprintf('Percent of rejected draws: %.2f%%\n',...
+        Prior.FractionBadDraws*100);
 fprintf('log-prior correction: %.6f\n',Prior.LogTruncationCorrection);
 
 p.PriorMean = mean(xd,2);
 p.PriorSD = std(xd,0,2);
-for jprc=1:nprc
-    p.(PrcList{jprc}) = prctile(xd,100*op.Percentiles(jprc),2);
+for jPrc=1:nPrc
+    p.(PrcList{jPrc}) = prctile(xd,100*obj.ParamPercentiles(jPrc),2);
 end
-Prior.Param = p;
-dsge.Param = p;
+% Prior.Param = p;
+obj.Param = p;
 
 xdAux(:,BadDraws) = [];
-pAux = dsge.AuxParam;
+pAux = obj.AuxParam;
 pAux.PriorMean = mean(xdAux,2);
 pAux.PriorSD = std(xdAux,0,2);
-for jprc=1:nprc
-    pAux.(PrcList{jprc}) = prctile(xdAux,100*op.Percentiles(jprc),2);
+for jPrc=1:nPrc
+    pAux.(PrcList{jPrc}) = prctile(xdAux,100*obj.ParamPercentiles(jPrc),2);
 end
-dsge.AuxParam = pAux;
-Prior.AuxParam = pAux;
+obj.AuxParam = pAux;
+% Prior.AuxParam = pAux;
 
-dsge.Prior = Prior;
+obj.Prior = Prior;
 
 pList = {'Param','AuxParam'};
 DispList = {'  Mean','PriorMean';
@@ -313,35 +285,32 @@ DispList = {'  Mean','PriorMean';
 nc = size(DispList,2);
 for jP=1:length(pList)
     Pj = pList{jP};
-    psj = Prior.(Pj);
-    namelength = [cellfun('length',dsge.(Pj).Names)];
+    psj = obj.(Pj);
+    namelength = [cellfun('length',obj.(Pj).Names)];
     namelengthmax = max(namelength);
     fprintf(['\n%-',int2str(namelengthmax),'s'],'');
     for jc=1:nc
         fprintf('  %-8s',DispList{1,jc});
     end
     fprintf('\n');
-    for jp=1:dsge.n.(Pj)
-        fprintf(['%',int2str(namelengthmax),'s'],dsge.(Pj).Names{jp});
+    for jp=1:obj.(Pj).N
+        fprintf(['%',int2str(namelengthmax),'s'],obj.(Pj).Names{jp});
         for jc=1:nc
-            fprintf('  %8.4f',Prior.(Pj).(DispList{2,jc})(jp));
+            fprintf('  %8.4f',obj.(Pj).(DispList{2,jc})(jp));
         end
         fprintf('\n');
     end
 end
 fprintf('\n');
-% save(dsge.FileName.PriorSample,'xd','xdAux')
-
 
 %% Make Prior Report
 
-fprintf('Making report: %s\n',dsge.Report.Prior);
-fid = vcCreateTex(dsge.Report.Prior,ReportTitle);
+fprintf('Making report: %s\n',ReportFileName);
+fid = vcCreateTex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Parameters}\n');
-str = [' & %.',int2str(opTable.Precision),'f'];
-TableBreaks = opTable.MaxRows:opTable.MaxRows:dsge.n.Param;
-if ~ismember(dsge.n.Param,TableBreaks), TableBreaks(end+1) = dsge.n.Param; end
+str = [' & %.',int2str(obj.TablePrecision),'f'];
+TableBreaks = obj.SetTableBreaks(obj.Param.N);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
@@ -350,7 +319,7 @@ for jBreak=1:nBreaks
         fprintf(fid,'\\section{Parameters (Cont)}\n');
     end
     fprintf(fid,'\\begin{equation*}\n');
-    if opTable.MoveLeft
+    if obj.TableMoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
     fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
@@ -361,8 +330,8 @@ for jBreak=1:nBreaks
     fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'%s',dsge.Param.PrettyNames{jr});
-        fprintf(fid,' & %s', dsge.Param.PriorDist{jr});
+        fprintf(fid,'%s',obj.Param.PrettyNames{jr});
+        fprintf(fid,' & %s', obj.Param.PriorDist{jr});
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMode(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorMean(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorSD(jr));
@@ -370,12 +339,12 @@ for jBreak=1:nBreaks
         fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc500(jr));
         fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc950(jr));
         fprintf(fid,' &');
-        fprintf(fid,str,Prior.Param.PriorMean(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc050(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc500(jr));
-        fprintf(fid,str,Prior.Param.PriorPrc950(jr));
+        fprintf(fid,str,obj.Param.PriorMean(jr));
+        fprintf(fid,str,obj.Param.PriorPrc050(jr));
+        fprintf(fid,str,obj.Param.PriorPrc500(jr));
+        fprintf(fid,str,obj.Param.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,opTable.Lines) && jr~=idxPar(end)
+        if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
@@ -386,9 +355,8 @@ for jBreak=1:nBreaks
 end
 
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
-str = [' & %.',int2str(opTable.Precision),'f'];
-TableBreaks = opTable.MaxRows:opTable.MaxRows:dsge.n.AuxParam;
-if ~ismember(dsge.n.Param,TableBreaks), TableBreaks(end+1) = dsge.n.AuxParam; end
+str = [' & %.',int2str(obj.TablePrecision),'f'];
+TableBreaks = obj.SetTableBreaks(obj.AuxParam.N);
 idxPar = 0;
 nBreaks = length(TableBreaks);
 for jBreak=1:nBreaks
@@ -403,13 +371,13 @@ for jBreak=1:nBreaks
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'%s',dsge.AuxParam.PrettyNames{jr});
-        fprintf(fid,str,Prior.AuxParam.PriorMean(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc050(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
-        fprintf(fid,str,Prior.AuxParam.PriorPrc950(jr));
+        fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
+        fprintf(fid,str,obj.AuxParam.PriorMean(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc050(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc500(jr));
+        fprintf(fid,str,obj.AuxParam.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
-        if ismember(jr,opTable.Lines) && jr~=idxPar(end)
+        if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
         end        
     end
@@ -421,17 +389,15 @@ end
 
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
-pdflatex(dsge.Report.Prior)
-
+pdflatex(ReportFileName)
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-dsge.Status.(Action) = 1;
-dsge.TimeElapsed.(Action) = toc-dsge.TimeElapsed.(Action);
-fprintf('\n%s %s\n\n',Action,vctoc([],dsge.TimeElapsed.(Action)))
+obj = obj.TrackTime(action,0);
 
-%% -------------------------------------------------------------------
+end
 
 function f = igamsolve(a,pmean,psd)
-f = 1./(a-1).*(pmean*gamma(a)./gamma(a-1/2)).^2-pmean^2-psd^2;
+    f = 1./(a-1).*(pmean*gamma(a)./gamma(a-1/2)).^2-pmean^2-psd^2;
+end

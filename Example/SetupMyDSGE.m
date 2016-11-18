@@ -1,14 +1,9 @@
-% RunMyDSGE
+% SetupMyDSGE
 %
-% This file gives an example of how to use the VC_DSGE package
+% This file gives an example of how to use the vcDSGE package
 %
-% Note: the structure with the DSGE in the workspace does not have to be called
-%       "m", it can take any name (that does not conflict with other workspace 
-%       variable names).
-%
-%   
 % See also:
-% vcDSGE
+% DSGE
 %
 % ...........................................................................
 %
@@ -22,8 +17,6 @@
 clear all
 tic
 SetPath
-
-%% Use latex interpreter in figures
 set(0,'defaultTextInterpreter','latex');
 
 %% Initiate parallel pool
@@ -32,7 +25,9 @@ set(0,'defaultTextInterpreter','latex');
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = CreateDSGE('MyDSGE');
+m = DSGE('MyDSGE');
+mkdir(m.Name)
+cd(m.Name)
 
 %% Setup the model
 
@@ -56,15 +51,21 @@ m.Param = {...
     'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
     };
 
-% Uncomment the following lines to show how NumSolveParam works: 
-% m.NumSolveParam.Names = {...
-%     'rA','$r^A$',1;
-%     'rB','$r^B$',1;
-%     };
-% m.NumSolveParam.Eq = {'(rA+rB)/2-r';'rA+0.5/400-rB'};
+m.FixParam = {...
+    'beta', 0.99,'$\beta$';
+    };
 
-m.AuxParam = {...
-    'beta','0.99','$\beta$';
+% Uncomment the following lines to show how Param.NumSolve works: 
+m.NumSolveParam = {...
+    {...
+        'rA',1,'$r^A$';
+        'rB',1,'$r^B$';
+    },{...
+        '(rA+rB)/2-r';
+        'rA+0.5/400-rB';
+      }};
+
+m.CompoundParam = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -136,21 +137,27 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-m = PrepModel(m);
-Mats = feval(m.FileName.Mats,m.Param.PriorMean);
+m = m.GenMats;
 
-m = PriorAnalysis(m);
+Mats = m.Mats(m.Param.PriorMean);
 
-m.Options.Sim.UseDist = 'PriorDraws';
-m = MakeIRF(m);
+m = m.AnalyzePrior;
+
+m.SimDist = 'PriorDraws';
+m.SimNDraws = 100;
+m = m.MakeIRF;
+
 
 %% -------------------------------------------------------------------
 
 %% Finish up
-m = CloseDSGE(m);
 fprintf('\n%s\n\n',vctoc)
+save(m.Name)
+cd ..
 
 % delete(gcp)
+
 % exit
 
 %% -------------------------------------------------------------------
+

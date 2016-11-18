@@ -1,4 +1,5 @@
-% setPath
+function SetPath
+% SetPath
 
 MyPath.Root = fullfile(pwd,'../../../Matlab/');
 MyPath.List = {...
@@ -15,6 +16,3 @@ for j=1:length(MyPath.List)
     MyPath.Add{j} = [MyPath.Root,MyPath.List{j}];
 end
 addpath(MyPath.Add{:})
-clear MyPath
-
-
