@@ -235,7 +235,8 @@ BadDraws = false(1,obj.PriorNDraws);
 xd = obj.DrawPrior(obj.PriorNDraws);
 fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
-parfor jd=1:obj.PriorNDraws
+for jd=1:obj.PriorNDraws
+    jd
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~all(Matsj.REE.eu==1) || ...
         (isfield(Matsj,'KF') && Matsj.KF.sig00rc~=0);
