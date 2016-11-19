@@ -225,7 +225,7 @@ if obj.NumSolveParam.N>0
     end
     fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
                      'NumSolveGuess,[],%e,%.0f);\n'],...
-            m.NumPrecision,m.NumSolveMaxIterations);
+            obj.NumPrecision,obj.NumSolveMaxIterations);
     fprintf(fidMats,'Mats.NumSolveParamRC = NumSolveRC;\n');
     fprintf(fidMats,'if NumSolveRC~=0\n');
     fprintf(fidMats,'    Mats.Status = 0;\n');
