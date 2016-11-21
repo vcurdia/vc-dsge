@@ -124,21 +124,37 @@ classdef DSGE
         end
     
         function obj = set.ObsVar(obj,p)
-            obj.ObsVar = SetNames('ObsVar',p);
+            if isstruct(p)
+                obj.ObsVar = p;
+            else
+                obj.ObsVar = SetNames('ObsVar',p);
+            end
         end
     
         function obj = set.StateVar(obj,p)
-            obj.StateVar = SetNames('StateVar',p);
+            if isstruct(p)
+                obj.StateVar = p;
+            else
+                obj.StateVar = SetNames('StateVar',p);
+            end
         end
     
         function obj = set.ShockVar(obj,p)
-            obj.ShockVar = SetNames('ShockVar',p);
+            if isstruct(p)
+                obj.ShockVar = p;
+            else
+                obj.ShockVar = SetNames('ShockVar',p);
+            end
         end
     
         function obj = set.AuxVar(obj,p)
-            obj.AuxVar = SetNames('AuxVar',p);
-            if obj.AuxVar.N>0
-                obj.AuxEq = p(:,2);
+            if isstruct(p)
+                obj.AuxVar = p;
+            else
+                obj.AuxVar = SetNames('AuxVar',p);
+                if obj.AuxVar.N>0
+                    obj.AuxEq = p(:,2);
+                end
             end
         end
         
