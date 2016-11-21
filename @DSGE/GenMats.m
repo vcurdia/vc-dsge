@@ -253,8 +253,8 @@ if obj.NumSolveParam.N>0
 %     fprintf(fidMats,'if NumSolveRC~=0\n');
     fprintf(fidMats,'if NumSolveRC~=1\n');
     fprintf(fidMats,'    Mats.Status = 0;\n');
-    txt = 'NumSolveParam solution not normal!';
-    fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s];\n',...
+    txt = 'NumSolveParam solution not normal.';
+    fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
             txt);
     fprintf(fidMats,'    if op.verbose\n');
     fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
@@ -389,7 +389,7 @@ fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'    if ~all(REE.eu==1);\n');
 fprintf(fidMats,'        Mats.Status = 0;\n');
 fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
-                 'solution not normal!''];\n']);
+                 'solution not normal.''];\n']);
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 
@@ -438,7 +438,7 @@ if obj.ObsVar.N>0
         fprintf(fidMats,...
                 '    sig00 = real(sig00); sig00 = (sig00+sig00'')/2;\n');
         fprintf(fidMats,'    if sig00rc~=0\n');
-        txt = 'Could not find unconditional variance!';
+        txt = 'Could not find unconditional variance.';
         fprintf(fidMats,...
                 '        Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
                 txt);
