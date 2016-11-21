@@ -32,8 +32,8 @@ classdef DSGE
         Prior
         Post
         GensysAuthor = 'CS';
-        NumPrecision = 1e-8;
-        NumSolveMaxIterations = 1000;
+        NumSolvePrecision = 1e-6;
+        NumSolveMaxIterations = 500;
         TablePrecision = 3;
         TableMaxRows = 35;
         TableMoveLeft = 1; 

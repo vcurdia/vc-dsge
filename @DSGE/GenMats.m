@@ -193,6 +193,15 @@ end
 for j=1:obj.FixParam.N
     fprintf(fidMats,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.Param.N+j);
 end
+fprintf(fidMats,'if op.StoreParam\n');
+for j=1:obj.Param.N
+    fprintf(fidMats,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
+end
+for j=1:obj.FixParam.N
+    fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
+            obj.FixParam.Names{j});
+end
+fprintf(fidMats,'end\n');
 
 if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
     fprintf(fidMats,'\n%% Initialize compound parameters\n');
@@ -219,18 +228,33 @@ if obj.NumSolveParam.N>0
     end
     fprintf(fidMats,'    end\n');
     fprintf(fidMats,'end\n');
+    fprintf(fidMats,'NumSolveGuess = [...\n');
     for j=1:obj.NumSolveParam.N
-        fprintf(fidMats,'NumSolveGuess(%.0f,1) = %.16f;\n',...
-                j,obj.NumSolveParam.Guess(j));
+        fprintf(fidMats,'    %.16f;\n',obj.NumSolveParam.Guess(j));
     end
-    fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
-                     'NumSolveGuess,[],%e,%.0f);\n'],...
-            obj.NumPrecision,obj.NumSolveMaxIterations);
+    fprintf(fidMats,'    ];\n');
+%     fprintf(fidMats,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
+%                      'NumSolveGuess,[],%e,%.0f);\n'],...
+%             obj.NumPrecision,obj.NumSolveMaxIterations);
+    fprintf(fidMats,['NumSolveOptions = optimoptions(@fsolve);\n']);
+    fprintf(fidMats,'NumSolveOptions.Display = ''off'';\n');
+%     fprintf(fidMats,'NumSolveOptions.MaxIterations = %f;\n',...
+%             obj.NumSolveMaxIterations);
+%     fprintf(fidMats,'NumSolveOptions.FunctionTolerance = %f;\n',...
+%             obj.NumSolvePrecision);
+%     fprintf(fidMats,'NumSolveOptions.OptimalityTolerance = %f;\n',...
+%             obj.NumSolvePrecision);
+%     fprintf(fidMats,'NumSolveOptions.StepTolerance = %f;\n',...
+%             obj.NumSolvePrecision);
+    fprintf(fidMats,['[NumSolveSolution,NumSolveResidual,NumSolveRC,',...
+                     'NumSolveOutput] = ',...
+                     'fsolve(@NumSolveEq,NumSolveGuess,NumSolveOptions);\n']);
     fprintf(fidMats,'Mats.NumSolveParamRC = NumSolveRC;\n');
-    fprintf(fidMats,'if NumSolveRC~=0\n');
+%     fprintf(fidMats,'if NumSolveRC~=0\n');
+    fprintf(fidMats,'if NumSolveRC~=1\n');
     fprintf(fidMats,'    Mats.Status = 0;\n');
     txt = 'NumSolveParam solution not normal!';
-    fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
+    fprintf(fidMats,'    Mats.StatusMessage = [Mats.StatusMessage,''%s];\n',...
             txt);
     fprintf(fidMats,'    if op.verbose\n');
     fprintf(fidMats,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
@@ -252,9 +276,12 @@ if obj.CompoundParam.N>0
     fprintf(fidMats,'\n%% Map compound parameters\n');
     if obj.NumSolveParam.N>0
         fprintf(fidMats,'function EvalCompoundParam \n');
+        txt = '    ';
+    else
+        txt = '';
     end
     for j=1:obj.CompoundParam.N
-        fprintf(fidMats,'%s = %s;\n',obj.CompoundParam.Names{j},...
+        fprintf(fidMats,'%s%s = %s;\n',txt,obj.CompoundParam.Names{j},...
                 obj.CompoundParam.Expressions{j});
     end
     if obj.NumSolveParam.N>0
@@ -271,12 +298,13 @@ obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
 
 fprintf(fidMats,'if op.StoreParam\n');
-for j=1:obj.Param.N
-    fprintf(fidMats,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-end
-for j=1:obj.AuxParam.N
+for j=1:obj.NumSolveParam.N
     fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
-            obj.AuxParam.Names{j});
+            obj.NumSolveParam.Names{j});
+end
+for j=1:obj.CompoundParam.N
+    fprintf(fidMats,'    Mats.AuxParam.%1$s = %1$s;\n',...
+            obj.CompoundParam.Names{j});
 end
 fprintf(fidMats,'end\n');
 
@@ -361,7 +389,7 @@ fprintf(fidMats,'    Mats.REE = REE;\n');
 fprintf(fidMats,'    if ~all(REE.eu==1);\n');
 fprintf(fidMats,'        Mats.Status = 0;\n');
 fprintf(fidMats,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
-                 'solution not normal!\\n''];\n']);
+                 'solution not normal!''];\n']);
 fprintf(fidMats,'    end\n');
 fprintf(fidMats,'end\n');
 
@@ -412,7 +440,7 @@ if obj.ObsVar.N>0
         fprintf(fidMats,'    if sig00rc~=0\n');
         txt = 'Could not find unconditional variance!';
         fprintf(fidMats,...
-                '        Mats.StatusMessage = [Mats.StatusMessage,''%s\\n''];\n',...
+                '        Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
                 txt);
         fprintf(fidMats,'        if op.verbose\n');
         fprintf(fidMats,...

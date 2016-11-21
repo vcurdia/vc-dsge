@@ -55,6 +55,8 @@ end
 p.PriorLPdfCmd = cell(np,1);
 p.PriorPdfCmd = cell(np,1);
 p.PriorRndCmd = cell(np,1);
+pOptions = optimoptions(@fsolve);
+pOptions.Display = 'off';
 for j=1:np
     if strcmp(p.PriorDist{j},'N')
         pmean = p.PriorMean(j);
@@ -133,8 +135,10 @@ for j=1:np
         if psd==inf
             a = 1;
         else
-            [a,rc] = csolvevb(@(x)igamsolve(x,pmean,psd),5,[],1e-10,1000);
-            if rc~=0, 
+%             [a,rc] = csolvevb(@(x)igamsolve(x,pmean,psd),5,[],1e-10,1000);
+            [a,~,rc] = fsolve(@(x)igamsolve(x,pmean,psd),5,pOptions);
+%             if rc~=0, 
+            if rc~=1, 
                 error('Search for iGam parameters failed, rc=%.0f',rc), 
             end
         end
@@ -235,16 +239,18 @@ BadDraws = false(1,obj.PriorNDraws);
 xd = obj.DrawPrior(obj.PriorNDraws);
 fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
-for jd=1:obj.PriorNDraws
-    jd
+% Matsd = cell(obj.PriorNDraws);
+parfor jd=1:obj.PriorNDraws
+%     jd
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~all(Matsj.REE.eu==1) || ...
         (isfield(Matsj,'KF') && Matsj.KF.sig00rc~=0);
     for jp=1:nAux
         xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
     end
+%     Matsd{jd} = Matsj;
 end
-
+% keyboard
 Prior.NDraws = obj.PriorNDraws;
 Prior.NBadDraws = sum(BadDraws);
 Prior.FractionBadDraws = Prior.NBadDraws/obj.PriorNDraws;
