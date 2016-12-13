@@ -137,15 +137,39 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
+%% Generate Mats
 m = m.GenMats;
-
 Mats = m.Mats(m.Param.PriorMean);
 
+%% Analyze Prior
 m = m.AnalyzePrior;
 
 m.SimDist = 'PriorDraws';
 m.SimNDraws = 100;
 m = m.MakeIRF;
+
+%% Data
+m.FileName.Data = '../../Data/Data_1987q3_2009q3.csv';
+m.DataStart = '1987q3';
+m.DataEnd = '2009q3';
+m.DataPostStart = '1987q3';
+m.DataTick = {'1990q1','1995q1','2000q1','2005q1'};
+m.DataTickLabels = {'1990q1','1995q1','2000q1','2005q1'};
+m = m.LoadData;
+
+TimeIdx = TimeIdxCreate(DateLabels.Start,DateLabels.End);
+DateLabels.XTick = find(ismember(TimeIdx,DateLabels.XTickLabels));
+nPreSample = find(ismember(TimeIdxCreate(DateLabels.DataStart,DateLabels.End),...
+  DateLabels.Start))-1;
+
+DateLabels.DataStart = '1987q2';
+DateLabels.Start = '1987q2';
+DateLabels.End = '2015q4'; 
+DateLabels.XTickLabels = {'1990q1','1995q1','2000q1','2005q1','2010q1','2015q1'};
+TimeIdx = TimeIdxCreate(DateLabels.Start,DateLabels.End);
+DateLabels.XTick = find(ismember(TimeIdx,DateLabels.XTickLabels));
+nPreSample = find(ismember(TimeIdxCreate(DateLabels.DataStart,DateLabels.End),...
+                           DateLabels.Start))-1;
 
 
 %% -------------------------------------------------------------------
