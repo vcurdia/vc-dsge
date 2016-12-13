@@ -112,7 +112,8 @@ if obj.AuxVar.N>0, PanelList{end+1} = 'AuxVar';end
 jP = 0;
 for jList=1:length(PanelList)
     Listj = PanelList{jList};
-    for j=(1:ceil(obj.(Listj).N/obj.FigPanelMaxVar))
+    nPanelj = ceil(obj.(Listj).N/obj.FigPanelMaxVar);
+    for j=1:nPanelj
         jP = jP+1;
         if obj.FigPanelMaxVar==1
             obj.FigPanels(jP).Var = obj.(Listj).Names(j);
@@ -120,7 +121,11 @@ for jList=1:length(PanelList)
             obj.FigPanels(jP).Title = sprintf('%s_%s',Listj,...
                                           obj.FigPanels(jP).Var{1});
         else
-            obj.FigPanels(jP).Title = sprintf('%s_%.0f',Listj,j);
+            if nPanelj>1
+                obj.FigPanels(jP).Title = sprintf('%s_%.0f',Listj,j);
+            else
+                obj.FigPanels(jP).Title = sprintf('%s',Listj);
+            end
             obj.FigPanels(jP).Var = obj.(Listj).Names(...
                 (j-1)*obj.FigPanelMaxVar+1:min(j*obj.FigPanelMaxVar,...
                                            obj.(Listj).N));
