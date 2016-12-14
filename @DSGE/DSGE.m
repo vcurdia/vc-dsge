@@ -33,8 +33,8 @@ classdef DSGE
         DataTick
         DataTickLabels
         TimeIdx
-        NData
-        NPreSample
+        T
+        NPreSample = 0;
         KFInitState
         KFInitVariance
         Prior
@@ -174,6 +174,22 @@ classdef DSGE
         function obj = set.StateEq(obj,eq)
             obj.StateEq = eq;
             CheckEq(obj,'State')
+        end
+        
+        function obj = set.DataPeriod(obj,Dates)
+            obj.DataPeriod = Dates;
+            obj.TimeIdx = TimeIdxCreate(Dates{:});
+            obj.T = length(obj.TimeIdx);
+        end
+        
+        function obj = set.SampleStart(obj,Start)
+            obj.SampleStart = Start;
+            obj.NPreSample = find(ismember(obj.TimeIdx,Start))-1;
+        end
+        
+        function obj = set.DataTickLabels(obj,Dates)
+            obj.DataTickLabels = Dates;
+            obj.DataTick = find(ismember(obj.TimeIdx,Dates));
         end
         
         function out = Mats(obj,x,varargin)
