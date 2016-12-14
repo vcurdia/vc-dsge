@@ -27,6 +27,14 @@ classdef DSGE
         ObsEq
         StateEq
         AuxEq
+        Data
+        DataPeriod
+        SampleStart
+        DataTick
+        DataTickLabels
+        TimeIdx
+        NData
+        NPreSample
         KFInitState
         KFInitVariance
         Prior

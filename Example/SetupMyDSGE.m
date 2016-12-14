@@ -150,9 +150,8 @@ m = m.MakeIRF;
 
 %% Data
 m.FileName.Data = '../../Data/Data_1987q3_2009q3.csv';
-m.DataStart = '1987q3';
-m.DataEnd = '2009q3';
-m.DataPostStart = '1987q3';
+m.DataPeriod = {'1987q3','2009q3'};
+m.SampleStart = '1987q3';
 m.DataTick = {'1990q1','1995q1','2000q1','2005q1'};
 m.DataTickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 m = m.LoadData;
