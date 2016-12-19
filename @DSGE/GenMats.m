@@ -318,6 +318,15 @@ if obj.ObsVar.N>0
     H0 = -jacobian(ObsEq,ObsVar_t);
     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
     SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
+    idxEq = ( any(jacobian(ObsEq,StateVar_tF)~=0,2) ...
+            & any(jacobian(ObsEq,StateVar_tL)~=0,2) ...
+            & any(jacobian(ObsEq,ShockVar_t)~=0,2) );
+    if any(idxEq)
+        fprintf(2,'Equations violating model structure rules:\n');
+        fprintf(2,'Obs Eq #%.0f\n',find(idxEq));
+        fclose(fidMats);
+        error('Cannot have leads, lags, or shocks in Obs equations.')
+    end
     MatNames = fieldnames(SymMats.ObsEq);
     nCols = [1,obj.StateVar.N];
     fprintf(fidMats,'if op.StoreObsEq || op.StoreKF\n');
@@ -350,13 +359,13 @@ SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
-idxFL = (any(SymMats.StateEq.Gamma0~=0,2) & any(SymMats.StateEq.Gamma4~=0,2));
-if any(idxFL)
-    fprintf(2,['The following equations have both leads (''_tF'') and ',...
-               'lags (''_tL'')\n']);
-    fprintf(2,'State Eq #%.0f\n',find(idxFL));
+idxEq = ( any(SymMats.StateEq.Gamma0~=0,2) ...
+          & any(SymMats.StateEq.Gamma4~=0,2) );
+if any(idxEq)
+    fprintf(2,'Equations violating model structure rules:\n');
+    fprintf(2,'State Eq #%.0f\n',find(idxEq));
     fclose(fidMats);
-    error('Cannot have both leads and lags in same equation.')
+    error('Cannot have both leads and lags in same State equation.')
 end
 
 MatNames = fieldnames(SymMats.StateEq);
