@@ -350,6 +350,15 @@ SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
+idxFL = (any(SymMats.StateEq.Gamma0~=0,2) & any(SymMats.StateEq.Gamma4~=0,2));
+if any(idxFL)
+    fprintf(2,['The following equations have both leads (''_tF'') and ',...
+               'lags (''_tL'')\n']);
+    fprintf(2,'State Eq #%.0f\n',find(idxFL));
+    fclose(fidMats);
+    error('Cannot have both leads and lags in same equation.')
+end
+
 MatNames = fieldnames(SymMats.StateEq);
 nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N,obj.ShockVar.N];
 for jM=1:length(MatNames)
