@@ -71,7 +71,6 @@ fprintf(fid,'if post==-inf, post = inf; return, end;\n\n');
 
 fprintf(fid,'\n%% Get Mats\n');
 fprintf(fid,'Mats = %s([x;xFix],op);\n',obj.FileName.Mats);
-% fprintf(fid,'if ~all(Mats.REE.eu==1),post = %s;return,end\n\n',BigNumber);
 fprintf(fid,'if ~all(Mats.REE.eu==1) || Mats.KF.sig00rc~=0\n');
 fprintf(fid,'    post = inf;\n');
 fprintf(fid,'    return\n');
@@ -113,6 +112,7 @@ fclose(fid);
 %% Test Posterior
 fprintf('Testing posterior function...\n');
 post = -feval(obj.FileName.Post,obj.Param.PriorMean,obj.Data);
+%post = -feval(obj.FileName.Post,obj.Prior.UnconstrainedParam.PriorMean,obj.Data);
 fprintf('The log-posterior value using the prior mean is %0.4f.\n',post);
 
 %% -------------------------------------------------------------------
