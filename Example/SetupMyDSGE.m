@@ -144,9 +144,9 @@ Mats = m.Mats(m.Param.PriorMean);
 %% Analyze Prior
 m = m.AnalyzePrior;
 
-m.SimDist = 'PriorDraws';
-m.SimNDraws = 100;
-m = m.MakeIRF;
+% m.SimDist = 'PriorDraws';
+% m.SimNDraws = 100;
+% m = m.MakeIRF;
 
 %% Data
 m.FileName.Data = '../Data/Data_1987q3_2009q3.csv';
@@ -155,6 +155,8 @@ m.SampleStart = '1987q3';
 m.DataTickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 m = m.AnalyzeData;
 
+%% Create posterior
+m = m.GenPost;
 
 %% -------------------------------------------------------------------
 
