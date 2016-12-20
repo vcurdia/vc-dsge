@@ -255,8 +255,7 @@ Prior.LogTruncationCorrection = -log(1-Prior.FractionBadDraws);
 xd(:,BadDraws) = [];
 Prior.NDraws = size(xd,2);
 fprintf('Number of accepted draws: %.0f\n',Prior.NDraws);
-fprintf('Percent of rejected draws: %.2f%%\n',...
-        Prior.FractionBadDraws*100);
+fprintf('Percent of rejected draws: %.2f%%\n',Prior.FractionBadDraws*100);
 fprintf('log-prior correction: %.6f\n',Prior.LogTruncationCorrection);
 
 p.PriorMean = mean(xd,2);
