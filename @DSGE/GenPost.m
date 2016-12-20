@@ -112,7 +112,6 @@ fclose(fid);
 %% Test Posterior
 fprintf('Testing posterior function...\n');
 post = -feval(obj.FileName.Post,obj.Param.PriorMean,obj.Data);
-%post = -feval(obj.FileName.Post,obj.Prior.UnconstrainedParam.PriorMean,obj.Data);
 fprintf('The log-posterior value using the prior mean is %0.4f.\n',post);
 
 %% -------------------------------------------------------------------
