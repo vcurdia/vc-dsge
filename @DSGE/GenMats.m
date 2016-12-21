@@ -176,17 +176,7 @@ fprintf(fid,'op.verbose = 0;\n');
 fprintf(fid,'op.gensys = {};\n');
 
 fprintf(fid,'\n%% Update options\n');
-fprintf(fid,'if length(varargin)>0 && isstruct(varargin{1})\n');
-fprintf(fid,'    opnew = varargin{1};\n');
-fprintf(fid,'    opnewfields = fieldnames(opnew);\n');
-fprintf(fid,'    for jop=1:length(opnewfields)\n');
-fprintf(fid,'        op.(opnewfields{jop}) = opnew.(opnewfields{jop});\n');
-fprintf(fid,'    end\n');
-fprintf(fid,'    varargin(1) = [];\n');
-fprintf(fid,'end\n');
-fprintf(fid,'for jop=1:(length(varargin)/2)\n'); 
-fprintf(fid,'    op.(varargin{(jop-1)*2+1}) = varargin{jop*2};\n');
-fprintf(fid,'end\n');
+fprintf(fid,'op = UpdateOptions(op,varargin);\n');
 
 fprintf(fid,'\n%% Verify options\n');
 fprintf(fid,'if op.StoreKF, op.SolveREE = 1; end\n');
