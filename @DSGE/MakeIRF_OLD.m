@@ -17,7 +17,8 @@ function obj = MakeIRF(obj)
 
 %% Preamble
 
-tt = TimeTracker;
+action = 'IRF';
+obj = obj.TrackTime(action,1);
 
 fprintf('\n*** Making IRF\n')
 
@@ -56,6 +57,8 @@ end
 
 %% Generate IRF
 fprintf('Generating IRFs...\n');
+% fnmats = @(x)feval(obj.FileName.Mats,x,...
+%                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 fnmats = @(x)obj.Mats(x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 IRFCheck = ones(1,nDraws);
@@ -106,73 +109,32 @@ nDrawsUsed = length(IRFCheck);
 fprintf('Plotting IRFs...\n');
 Fig = obj.Fig;
 Fig.PlotBands = (nDrawsUsed>1);
-if Fig.PlotBands
-    Bands = sort(obj.Fig.Plot.Bands2Show,'descend');
-    nBands = length(Bands);
-    prc = nan(1,1+2*nBands);
-    prc(1) = 50;
-    for jB=1:nBands
-        prc(1+(jB-1)*2+[1,2]) = 50+Bands(jB)/2*[-1,1];
-    end
-end
 Fig.XTick = 1:4:nSteps;
 Fig.XTickLabel = 0:4:(nSteps-1);
 VarNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
 nPanels = length(obj.FigPanels);
-for jP = 1:nPanels
-    Pj = obj.FigPanels(jP);
-    Figj = Fig;
-    Figj.TitleList = Pj.PrettyNames;
-    if isfield(Pj,'FigShape');
-        Figj.FigShape = Pj.FigShape;
-    end
-    PlotData = nan(nDrawsUsed,nSteps,Pj.NVar,nShocks2Show);
-    if Fig.PlotBands
-        BandsData = nan(1+2*nBands,nSteps,Pj.NVar,nShocks2Show);
-    end
-    YLim = zeros(Pj.NVar,2);
-    for jV=1:Pj.NVar
-        Vj = Pj.Var{jV};
-        [tf,idxV] = ismember(Vj,VarNames);
-        if tf
-            for jS=1:nShocks2Show
-                PlotData(:,:,jV,jS) = obj.VarScale*Pj.Scale(jV)*...
-                    obj.IRFShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
-            end
-            if Fig.PlotBands
-                BandsData(:,:,jV,:) = prctile(PlotData(:,:,jV,:),prc,1);
-                dd = BandsData(:,:,jV,:);
-            else
-                dd = PlotData(:,:,jV,:);
-            end
-            YLim(jV,:) = [min(dd(:)),max(dd(:))];
-%            YLim(jV,:) = [min(dd(:))-Figj.YSlack,max(dd(:))+Figj.YSlack];
-        end
-    end
-    for jS=1:nShocks2Show
-        if jS==1
-            OutFigj = vcFigure(PlotData(:,:,:,jS),Figj);
-            for jV=1:Pj.NVar
-                OutFigj.SubPlot(jV).YLim = YLim(jV,:);
-            end
-        else
-            for jV=1:Pj.NVar
-                if Fig.PlotBands
-                    OutFigj.Plot{jV}.Lines.Lines{1}.YData = ...
-                        squeeze(BandsData(1,:,jV,jS));
-                    for jB=1:nBands
-                        OutFigj.Plot{jV}.Bands(jB).Vertices(:,2) = ...
-                            [BandsData(1+(jB-1)*2+1,:,jV,jS),...
-                             BandsData(1+(jB-1)*2+2,end:-1:1,jV,jS)]';
-                    end
-                else
-                    OutFigj.Plot{jV}.Lines{1}.YData = ...
-                        squeeze(PlotData(:,:,jV,jS));
-                end
+for jS=1:nShocks2Show
+    Sj = obj.Shocks2Show{jS};
+    for jP = 1:nPanels
+        Pj = obj.FigPanels(jP);
+        PlotData = nan(nDrawsUsed,nSteps,Pj.NVar);
+        for jV=1:Pj.NVar
+            Vj = Pj.Var{jV};
+            [tf,idxV] = ismember(Vj,VarNames);
+            if tf
+               PlotData(:,:,jV) = Pj.Scale(jV)*obj.IRFShockSize(jS)*...
+                   squeeze(IRF(idxV,:,jS,:))';
             end
         end
+        PlotData = obj.VarScale*PlotData;
+        Figj = Fig;
+        Figj.TitleList = Pj.PrettyNames;
+        if isfield(Pj,'FigShape');
+            Figj.FigShape = Pj.FigShape;
+        end
+        OutFigj = vcFigure(PlotData,Figj);
         vcPrintPDF([obj.PlotDir.IRF,PlotFileName,...
-             '_',Pj.Title,'_',obj.Shocks2Show{jS}],Fig.KeepEPS,Fig.OpenPDF)
+             '_',Pj.Title,'_',Sj],Fig.KeepEPS,Fig.OpenPDF)
     end
 end
 
@@ -208,7 +170,7 @@ if strcmp(Fig.Visible,'off')
 end
 
 %% Finish up
-tt.Show
+obj = obj.TrackTime(action,0);
 
 end
 %% -------------------------------------------------------------------
