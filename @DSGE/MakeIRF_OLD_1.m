@@ -53,7 +53,6 @@ else
     end
     xd = obj.Param.(obj.SimDist);
 end
-nDraws = size(xd,2);
 
 %% Generate IRF
 fprintf('Generating IRFs...\n');
@@ -107,6 +106,15 @@ nDrawsUsed = length(IRFCheck);
 fprintf('Plotting IRFs...\n');
 Fig = obj.Fig;
 Fig.PlotBands = (nDrawsUsed>1);
+if Fig.PlotBands
+    Bands = sort(obj.Fig.Bands2Show,'descend');
+    nBands = length(Bands);
+    prc = nan(1,1+2*nBands);
+    prc(1) = 50;
+    for jB=1:nBands
+        prc(1+(jB-1)*2+[1,2]) = 50+Bands(jB)/2*[-1,1];
+    end
+end
 Fig.XTick = 1:4:nSteps;
 Fig.XTickLabel = 0:4:(nSteps-1);
 VarNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
@@ -119,10 +127,10 @@ for jP = 1:nPanels
         Figj.FigShape = Pj.FigShape;
     end
     PlotData = nan(nDrawsUsed,nSteps,Pj.NVar,nShocks2Show);
-%     if Fig.PlotBands
-%         BandsData = nan(1+2*nBands,nSteps,Pj.NVar,nShocks2Show);
-%     end
-%     YLim = zeros(Pj.NVar,2);
+    if Fig.PlotBands
+        BandsData = nan(1+2*nBands,nSteps,Pj.NVar,nShocks2Show);
+    end
+    YLim = zeros(Pj.NVar,2);
     for jV=1:Pj.NVar
         Vj = Pj.Var{jV};
         [tf,idxV] = ismember(Vj,VarNames);
@@ -131,33 +139,32 @@ for jP = 1:nPanels
                 PlotData(:,:,jV,jS) = obj.VarScale*Pj.Scale(jV)*...
                     obj.IRFShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
             end
-%             if Fig.PlotBands
-%                 BandsData(:,:,jV,:) = prctile(PlotData(:,:,jV,:),prc,1);
-%                 dd = BandsData(:,:,jV,:);
-%             else
-%                 dd = PlotData(:,:,jV,:);
-%             end
+            if Fig.PlotBands
+                BandsData(:,:,jV,:) = prctile(PlotData(:,:,jV,:),prc,1);
+                dd = BandsData(:,:,jV,:);
+            else
+                dd = PlotData(:,:,jV,:);
+            end
         end
     end
     for jS=1:nShocks2Show
         if jS==1
             h = vcFigure(PlotData(:,:,:,jS),Figj);
         else
-            h = vcFigureUpdate(h,PlotData(:,:,:,jS));
-%             for jV=1:Pj.NVar
-%                 if Fig.PlotBands
-%                     h.Plot(jV).Lines(1).YData = ...
-%                         squeeze(BandsData(1,:,jV,jS));
-%                     for jB=1:nBands
-%                         h.Plot(jV).Bands(jB).Vertices(:,2) = ...
-%                             [BandsData(1+(jB-1)*2+1,:,jV,jS),...
-%                              BandsData(1+(jB-1)*2+2,end:-1:1,jV,jS)]';
-%                     end
-%                 else
-%                     h.Plot(jV).Lines(1).YData = squeeze(PlotData(:,:,jV,jS));
-%                 end
-%                 subplot(h.SubPlot(jV)), axis tight
-%             end
+            for jV=1:Pj.NVar
+                if Fig.PlotBands
+                    h.Plot(jV).Lines(1).YData = ...
+                        squeeze(BandsData(1,:,jV,jS));
+                    for jB=1:nBands
+                        h.Plot(jV).Bands(jB).Vertices(:,2) = ...
+                            [BandsData(1+(jB-1)*2+1,:,jV,jS),...
+                             BandsData(1+(jB-1)*2+2,end:-1:1,jV,jS)]';
+                    end
+                else
+                    h.Plot(jV).Lines(1).YData = squeeze(PlotData(:,:,jV,jS));
+                end
+                subplot(h.SubPlot(jV)), axis tight
+            end
         end
         vcPrintPDF([obj.PlotDir.IRF,PlotFileName,...
              '_',Pj.Title,'_',obj.Shocks2Show{jS}],Fig.KeepEPS,Fig.OpenPDF)
