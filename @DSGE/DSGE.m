@@ -46,7 +46,6 @@ classdef DSGE
         TableMaxRows = 35;
         TableMoveLeft = 1; 
         TableLines = [];
-        Bands2Show = [50,70,90];
         Shocks2Show
         FigPanelMaxVar = 16;
         FigPanels
@@ -55,7 +54,8 @@ classdef DSGE
             'YSlack',0.05,... 
             'YMinScale',0,... 
             'KeepEPS',0,... 
-            'OpenPDF',0);
+            'OpenPDF',0,...
+            'Bands2Show',[50,70,90]);
         ParamPercentiles = [0.01, 0.025, 0.05, 0.5, 0.95, 0.975, 0.99];
         PriorNDraws = 1000;
         SimDist = 'PriorMean';

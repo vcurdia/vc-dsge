@@ -179,11 +179,11 @@ for j=1:np
     end
 end
 obj.Param = p;
-Prior.UnconstrainedParam = p;
+% Prior.UnconstrainedParam = p;
 
 %% display results on screen
-fprintf('\nPrior (Unconstrained):')
-fprintf('\n----------------------\n')
+fprintf('\nPrior:')
+fprintf('\n------\n')
 namelength = [cellfun('length',p.Names)];
 namelengthmax = max(namelength);
 DispList = {'','Names';
@@ -241,7 +241,6 @@ fh = @(x)obj.Mats(x);
 AuxNames = obj.AuxParam.Names;
 % Matsd = cell(obj.PriorNDraws);
 parfor jd=1:obj.PriorNDraws
-%     jd
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~Matsj.Status==1;
     for jp=1:nAux
@@ -249,7 +248,6 @@ parfor jd=1:obj.PriorNDraws
     end
 %     Matsd{jd} = Matsj;
 end
-% keyboard
 Prior.NDraws = obj.PriorNDraws;
 Prior.NBadDraws = sum(BadDraws);
 Prior.FractionBadDraws = Prior.NBadDraws/obj.PriorNDraws;
@@ -257,8 +255,7 @@ Prior.LogTruncationCorrection = -log(1-Prior.FractionBadDraws);
 xd(:,BadDraws) = [];
 Prior.NDraws = size(xd,2);
 fprintf('Number of accepted draws: %.0f\n',Prior.NDraws);
-fprintf('Percent of rejected draws: %.2f%%\n',...
-        Prior.FractionBadDraws*100);
+fprintf('Percent of rejected draws: %.2f%%\n',Prior.FractionBadDraws*100);
 fprintf('log-prior correction: %.6f\n',Prior.LogTruncationCorrection);
 
 p.PriorMean = mean(xd,2);
@@ -266,8 +263,8 @@ p.PriorSD = std(xd,0,2);
 for jPrc=1:nPrc
     p.(PrcList{jPrc}) = prctile(xd,100*obj.ParamPercentiles(jPrc),2);
 end
-% Prior.Param = p;
-obj.Param = p;
+Prior.Param = p;
+% obj.Param = p;
 
 xdAux(:,BadDraws) = [];
 pAux = obj.AuxParam;
@@ -276,8 +273,8 @@ pAux.PriorSD = std(xdAux,0,2);
 for jPrc=1:nPrc
     pAux.(PrcList{jPrc}) = prctile(xdAux,100*obj.ParamPercentiles(jPrc),2);
 end
-obj.AuxParam = pAux;
-% Prior.AuxParam = pAux;
+Prior.AuxParam = pAux;
+% obj.AuxParam = pAux;
 
 obj.Prior = Prior;
 
@@ -302,7 +299,7 @@ for jP=1:length(pList)
     for jp=1:obj.(Pj).N
         fprintf(['%',int2str(namelengthmax),'s'],obj.(Pj).Names{jp});
         for jc=1:nc
-            fprintf('  %8.4f',obj.(Pj).(DispList{2,jc})(jp));
+            fprintf('  %8.4f',Prior.(Pj).(DispList{2,jc})(jp));
         end
         fprintf('\n');
     end
@@ -330,7 +327,7 @@ for jBreak=1:nBreaks
     end
     fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-    fprintf(fid,'& \\multicolumn{7}{c}{Unconstrained Prior} ');
+    fprintf(fid,'& \\multicolumn{7}{c}{Prior Definition} ');
     fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
     fprintf(fid,'& Dist & Mode & Mean & SD & 5\\%% & Median & 95\\%% ');
     fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
@@ -338,17 +335,17 @@ for jBreak=1:nBreaks
     for jr=idxPar
         fprintf(fid,'%s',obj.Param.PrettyNames{jr});
         fprintf(fid,' & %s', obj.Param.PriorDist{jr});
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorMode(jr));
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorMean(jr));
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorSD(jr));
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc050(jr));
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc500(jr));
-        fprintf(fid,str,Prior.UnconstrainedParam.PriorPrc950(jr));
-        fprintf(fid,' &');
+        fprintf(fid,str,obj.Param.PriorMode(jr));
         fprintf(fid,str,obj.Param.PriorMean(jr));
+        fprintf(fid,str,obj.Param.PriorSD(jr));
         fprintf(fid,str,obj.Param.PriorPrc050(jr));
         fprintf(fid,str,obj.Param.PriorPrc500(jr));
         fprintf(fid,str,obj.Param.PriorPrc950(jr));
+        fprintf(fid,' &');
+        fprintf(fid,str,Prior.Param.PriorMean(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc050(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc500(jr));
+        fprintf(fid,str,Prior.Param.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
         if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
@@ -378,10 +375,10 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
         fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
-        fprintf(fid,str,obj.AuxParam.PriorMean(jr));
-        fprintf(fid,str,obj.AuxParam.PriorPrc050(jr));
-        fprintf(fid,str,obj.AuxParam.PriorPrc500(jr));
-        fprintf(fid,str,obj.AuxParam.PriorPrc950(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorMean(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc050(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc500(jr));
+        fprintf(fid,str,Prior.AuxParam.PriorPrc950(jr));
         fprintf(fid,' \\\\\n');
         if ismember(jr,obj.TableLines) && jr~=idxPar(end)
             fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');

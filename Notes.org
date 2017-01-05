@@ -84,6 +84,89 @@ relations), then let's proceed as follows:
 Note: we can use nested function so that each evaluation of AuxParam changes
 its value in workspace, and the same with NumSolveParam
 
+
+* 2016-12-21: Multiple objects
+Can split DSGE object into several smaller objects that are more self contained
+
+Can do this using a package folder structure so that all objects are associated
+with the DSGE (or dsge)
+Objects to consider:
+- Model
+- Data
+- Prior
+- Posterior
+- Options.ParTable
+- Options.Sim
+- Options.Fig
+- Options.IRF
+- TimeElapsed
+...
+
+The key advantage of having multiple objects is that if in simulations we want
+to use different data we don't need to modify the entire DSGE object, just the
+data part, can have multiple models, without them being linked to same data,
+prior and so on.
+
+Can also consider the case in which model Param refers to the entire set of
+Param inputs, while Prior refers only to those that get estimated.
+
+** handle subclasses
+If I consider these to all be handle classes then can specify an additional
+object that serves as the umbrella of all of this and keep everything
+connected:
+- Spec
+
+For example, if options for simulations are not initialized and I run IRF, then
+it will initialize those options and they stay there available to other sims.
+
+But notice that even in a value class, the master object may contain subobjects
+as properties, which can be passed around. The key difference is that each time
+they are passed a new copy is created and if they get modified then the
+original object is not modified, unless explicitly passed as output.
+
+** Sim object
+consider case in which we have one sim class in which the object is a given set
+of simulations (sim actions). This way the model mats are created only once for
+each sim object, regardless of how many actions are performed.
+I think that this is not efficient. Better to create sim options object
+
+
+
+* 2016-12-28: Multiple objects
+The idea is to break the full system in objects that make sense on their
+own. 
+
+** Model object
+All equations, variables and parameters. 
+
+Parameters are based on model input, let the estimation decide which ones to
+estimate. This way it's independent of whether it gets estimated or not, from a
+model perspective. The estimation will determine which ones to estimate, based
+on the prior settings---which are set when defining the parameters. Use 'C' for
+fixed/calibrated parameters.
+
+Methods: eval/mats
+
+** Data obj
+Defines everything about the data, including time index, start, end, T, and
+Sample start/number of pre sample.
+
+methods: Plot?
+
+** Estimation obj
+Include estimation information, including prior, posterior, status of
+estimation, and settings of estimation.
+
+methods: drawprior, evalpost, findmode, mcmc, ...
+
+** Options (not an object)
+Some should be outside the objects, such as general fig options, which can
+still be passed to revelant functions if needed.
+
+
+
+
+
 * References
 #+LATEX_HEADER: \usepackage{color}
 #+LATEX_HEADER: \hypersetup{
