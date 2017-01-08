@@ -59,6 +59,23 @@ classdef Model < handle
             disp(p)
         end
         
+        function SetParam(obj,ParNames,ParValues)
+            if ischar(ParNames), ParNames = {ParNames}; end
+            np = length(ParNames);
+            nv = length(ParValues);
+            if np>0 && np==nv
+                [tf,idxp] = ismember(ParNames,obj.Param.Names);
+                obj.Param.Values(idxp(tf)) = ParValues(tf);
+                if ~all(tf)
+                    fprintf('Invalid parameter names ignored:\n')
+                    fprintf('  %s\n',ParNames{~tf})
+                end
+            else
+                error(['List of parameter names is empty or has different ' ...
+                       'length from list of values.'])
+            end
+        end
+        
         function set.NumSolveParam(obj,p)
             if isstruct(p)
                 obj.NumSolveParam = p;
