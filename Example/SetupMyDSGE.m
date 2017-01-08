@@ -164,6 +164,8 @@ m.GenMats
 TimeElapsed.Stop('GenMats')
 Mats = m.Mats(m.Param.Values);
 
+MakeIRF(m)
+
 save(m.Name)
 cd ..
 TimeElapsed.Show
@@ -171,7 +173,7 @@ return
 
 
 %% Analyze Prior
-m = m.AnalyzePrior;
+m.AnalyzePrior;
 
 % m.SimDist = 'PriorDraws';
 % m.SimNDraws = 100;
