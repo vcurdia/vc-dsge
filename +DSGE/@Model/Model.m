@@ -1,4 +1,4 @@
-classdef Model
+classdef Model < handle
 % DSGE.Model class
 % 
 % See also:
@@ -12,12 +12,9 @@ classdef Model
     
     properties
         Name = '';
-        FileName = struct;
-        PlotDir = struct;
-        TimeElapsed = struct;
         Param = InitiateNames;
-        FixParam = InitiateNames;
         NumSolveParam = InitiateNames;
+        NumSolveEq
         CompoundParam = InitiateNames;
         AuxParam = InitiateNames;
         ObsVar = InitiateNames;
@@ -32,6 +29,8 @@ classdef Model
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
+        Mats
+        MatsFN
     end
    
     methods
@@ -41,54 +40,46 @@ classdef Model
             end
         end
         
-        function obj = set.Param(obj,p)
+        function set.Param(obj,p)
             if isstruct(p)
                 obj.Param = p;
             else
                 obj.Param = SetNames('Param',p);
                 if obj.Param.N>0
-                    obj.Param.PriorDist = p(:,2);
-                    obj.Param.PriorMean = [p{:,3}]';
-                    obj.Param.PriorSD = [p{:,4}]';
+                    obj.Param.Values = [p{:,2}]';
                 end
             end
         end
         
-        function obj = set.FixParam(obj,p)
-            if isstruct(p)
-                obj.FixParam = p;
-            else
-                obj.FixParam = SetNames('FixParam',p);
-                if obj.FixParam.N>0
-                    obj.FixParam.Values = [p{:,2}]';
-                end
+        function ShowParamValues(obj)
+            p = struct;
+            for j=1:obj.Param.N
+                p.(obj.Param.Names{j}) = obj.Param.Values(j);
             end
+            disp(p)
         end
-    
-        function obj = set.NumSolveParam(obj,p)
+        
+        function set.NumSolveParam(obj,p)
             if isstruct(p)
                 obj.NumSolveParam = p;
             else
-                if length(p)<2
-                    error(['Need to specify NumSolveParam as cell array ',...
-                           'with two elements.'])
-                end
-                eq = p{2};
-                p = p{1};
                 obj.NumSolveParam = SetNames('NumSolveParam',p);
                 if obj.NumSolveParam.N>0
                     obj.NumSolveParam.Guess = [p{:,2}]';
-                    if isempty(eq) || (length(eq)<obj.NumSolveParam.N)
-                        error(['Not enough equations specified for ',...
-                               'NumSolveParam.'])
-                    else
-                        obj.NumSolveParam.Eq = eq;
-                    end
                 end
             end
         end
+        
+        function set.NumSolveEq(obj,eq)
+            obj.NumSolveEq = eq;
+            neq = length(eq);
+            if neq~=obj.NumSolveParam.N
+                error(['Number of NumSolveEq (%i) does not match number of ',...
+                       'NumSolveParam (%i).'],neq,obj.NumSolveParam.N)
+            end
+        end
     
-        function obj = set.CompoundParam(obj,p)
+        function set.CompoundParam(obj,p)
             if isstruct(p)
                 obj.CompoundParam = p;
             else
@@ -99,7 +90,7 @@ classdef Model
             end
         end
     
-        function obj = set.ObsVar(obj,p)
+        function set.ObsVar(obj,p)
             if isstruct(p)
                 obj.ObsVar = p;
             else
@@ -107,7 +98,7 @@ classdef Model
             end
         end
     
-        function obj = set.StateVar(obj,p)
+        function set.StateVar(obj,p)
             if isstruct(p)
                 obj.StateVar = p;
             else
@@ -115,7 +106,7 @@ classdef Model
             end
         end
     
-        function obj = set.ShockVar(obj,p)
+        function set.ShockVar(obj,p)
             if isstruct(p)
                 obj.ShockVar = p;
             else
@@ -123,7 +114,7 @@ classdef Model
             end
         end
     
-        function obj = set.AuxVar(obj,p)
+        function set.AuxVar(obj,p)
             if isstruct(p)
                 obj.AuxVar = p;
             else
@@ -134,18 +125,14 @@ classdef Model
             end
         end
         
-        function obj = set.ObsEq(obj,eq)
+        function set.ObsEq(obj,eq)
             obj.ObsEq = eq;
             CheckEq(obj,'Obs')
         end
     
-        function obj = set.StateEq(obj,eq)
+        function set.StateEq(obj,eq)
             obj.StateEq = eq;
             CheckEq(obj,'State')
-        end
-        
-        function out = Mats(obj,x,varargin)
-            out = feval(obj.FileName.Mats,[x;obj.FixParam.Values],varargin{:});
         end
         
     end %methods
@@ -153,19 +140,15 @@ classdef Model
 end %class
 
 function pp = SetNames(pType,p)
-    if ~ismember(pType,{...
-        'Param','FixParam','NumSolveParam','CompoundParam',...
-        'ObsVar','StateVar','ShockVar','AuxVar',...
-                       })
+    if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
+                        'ObsVar','StateVar','ShockVar','AuxVar'})
         error('SetProperty called with invalid type.')
     end
     pp = struct;
     [pp.N,nc] = size(p);
     pp.Names = p(:,1);
     if nc==(2+... 
-            ismember(pType,{'FixParam','NumSolveParam','CompoundParam',...
-                            'AuxVar'})+...
-            3*strcmp(pType,'Param'))
+            ismember(pType,{'Param','NumSolveParam','CompoundParam','AuxVar'}))
         pp.PrettyNames = p(:,nc);
     else
         pp.PrettyNames = pp.Names;
