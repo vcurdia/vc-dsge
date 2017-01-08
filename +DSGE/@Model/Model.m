@@ -51,7 +51,7 @@ classdef Model < handle
             end
         end
         
-        function ShowParamValues(obj)
+        function ShowParam(obj)
             p = struct;
             for j=1:obj.Param.N
                 p.(obj.Param.Names{j}) = obj.Param.Values(j);

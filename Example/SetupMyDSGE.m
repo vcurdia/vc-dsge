@@ -17,7 +17,6 @@
 clear all
 SetPath
 set(0,'defaultTextInterpreter','latex');
-
 TimeElapsed = TimeTracker;
 
 %% Initiate parallel pool
@@ -158,12 +157,17 @@ m.StateEq = {...
     'YAeL_t-YAe_tL';
     };
 
-TimeElapsed.Show;
-return
 
 %% Generate Mats
-m.GenMats;
-Mats = m.Mats(m.Param.PriorMean);
+TimeElapsed.Start('GenMats')
+m.GenMats
+TimeElapsed.Stop('GenMats')
+Mats = m.Mats(m.Param.Values);
+
+save(m.Name)
+TimeElapsed.Show
+return
+
 
 %% Analyze Prior
 m = m.AnalyzePrior;
@@ -185,7 +189,7 @@ m = m.GenPost;
 %% -------------------------------------------------------------------
 
 %% Finish up
-TimeElapsed.Show;
+TimeElapsed.Show
 save(m.Name)
 cd ..
 
