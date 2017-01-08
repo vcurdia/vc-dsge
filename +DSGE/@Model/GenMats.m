@@ -216,12 +216,6 @@ if obj.NumSolveParam.N>0
         fprintf(fid,'%s = NumSolveSolution(%.0f);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
-    fprintf(fid,'if op.StoreParam\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
-                obj.NumSolveParam.Names{j});
-    end
-    fprintf(fid,'end\n');
 end
 
 if obj.CompoundParam.N>0
