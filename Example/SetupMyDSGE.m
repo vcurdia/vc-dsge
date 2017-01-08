@@ -165,6 +165,7 @@ TimeElapsed.Stop('GenMats')
 Mats = m.Mats(m.Param.Values);
 
 save(m.Name)
+cd ..
 TimeElapsed.Show
 return
 
