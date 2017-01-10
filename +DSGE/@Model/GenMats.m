@@ -138,9 +138,6 @@ fprintf(fid,'op.gensys = {};\n');
 fprintf(fid,'\n%% Update options\n');
 fprintf(fid,'op = UpdateOptions(op,varargin);\n');
 
-fprintf(fid,'\n%% Verify options\n');
-fprintf(fid,'if op.StoreKF, op.SolveREE = 1; end\n');
-
 fprintf(fid,'\n%% Initiate Status\n');
 fprintf(fid,'Mats.Status = 1;\n');
 fprintf(fid,'Mats.StatusMessage = '''';\n');
@@ -357,7 +354,7 @@ fprintf(fid,'end\n');
 
 if obj.ObsVar.N>0
     fprintf(fid,'\n%% Kalman Filter matrices\n');
-    fprintf(fid,'if op.StoreKF\n');
+    fprintf(fid,'if op.SolveREE && op.StoreKF\n');
     fprintf(fid,'    if all(Mats.REE.GBar(:)==0)\n');
     fprintf(fid,'        KF.StateVarBar = zeros(%.0f,1);\n',...
             obj.StateVar.N);
@@ -440,6 +437,9 @@ if obj.AuxVar.N>0
         end
         fprintf(fid,'        ];\n\n');
     end
+    fprintf(fid,'    if op.StoreAuxEq\n');
+    fprintf(fid,'        Mats.AuxEq = AuxEq;\n');
+    fprintf(fid,'    end\n');
     fprintf(fid,'    if op.SolveREE && op.StoreAuxREE\n');
     fprintf(fid,'        if ~isempty(REE.G1)\n');
     fprintf(fid,['            AuxREE.GBar = ',...
@@ -456,11 +456,6 @@ if obj.AuxVar.N>0
     fprintf(fid,'            AuxREE.G2 = [];\n');
     fprintf(fid,'        end\n');
     fprintf(fid,'    end\n');
-    fprintf(fid,'end\n');
-    fprintf(fid,'if op.StoreAuxEq\n');
-    fprintf(fid,'    Mats.AuxEq = AuxEq;\n');
-    fprintf(fid,'end\n');
-    fprintf(fid,'if op.StoreAuxREE\n');
     fprintf(fid,'    Mats.AuxREE = AuxREE;\n');
     fprintf(fid,'end\n');
 end
