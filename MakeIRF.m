@@ -11,7 +11,7 @@ function obj = MakeIRF(obj)
 % 
 % Created: November 17, 2016 by Vasco Curdia
 % 
-% Copyright 2016 by Vasco Curdia
+% Copyright 2016-2017 by Vasco Curdia
 
 %-----------------------------------------------------------------------------%
 
@@ -119,10 +119,6 @@ for jP = 1:nPanels
         Figj.FigShape = Pj.FigShape;
     end
     PlotData = nan(nDrawsUsed,nSteps,Pj.NVar,nShocks2Show);
-%     if Fig.PlotBands
-%         BandsData = nan(1+2*nBands,nSteps,Pj.NVar,nShocks2Show);
-%     end
-%     YLim = zeros(Pj.NVar,2);
     for jV=1:Pj.NVar
         Vj = Pj.Var{jV};
         [tf,idxV] = ismember(Vj,VarNames);
@@ -131,12 +127,6 @@ for jP = 1:nPanels
                 PlotData(:,:,jV,jS) = obj.VarScale*Pj.Scale(jV)*...
                     obj.IRFShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
             end
-%             if Fig.PlotBands
-%                 BandsData(:,:,jV,:) = prctile(PlotData(:,:,jV,:),prc,1);
-%                 dd = BandsData(:,:,jV,:);
-%             else
-%                 dd = PlotData(:,:,jV,:);
-%             end
         end
     end
     for jS=1:nShocks2Show
@@ -144,20 +134,6 @@ for jP = 1:nPanels
             h = vcFigure(PlotData(:,:,:,jS),Figj);
         else
             h = vcFigureUpdate(h,PlotData(:,:,:,jS));
-%             for jV=1:Pj.NVar
-%                 if Fig.PlotBands
-%                     h.Plot(jV).Lines(1).YData = ...
-%                         squeeze(BandsData(1,:,jV,jS));
-%                     for jB=1:nBands
-%                         h.Plot(jV).Bands(jB).Vertices(:,2) = ...
-%                             [BandsData(1+(jB-1)*2+1,:,jV,jS),...
-%                              BandsData(1+(jB-1)*2+2,end:-1:1,jV,jS)]';
-%                     end
-%                 else
-%                     h.Plot(jV).Lines(1).YData = squeeze(PlotData(:,:,jV,jS));
-%                 end
-%                 subplot(h.SubPlot(jV)), axis tight
-%             end
         end
         vcPrintPDF([obj.PlotDir.IRF,PlotFileName,...
              '_',Pj.Title,'_',obj.Shocks2Show{jS}],Fig.KeepEPS,Fig.OpenPDF)
@@ -178,9 +154,6 @@ for jS=1:nShocks2Show
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
                 obj.PlotDir.IRF,PlotFileName,Pj,Sj);
-%         fprintf(fid,'\\includegraphics[width = \\textwidth,');
-%         fprintf(fid,'viewport = 60 200 560 600, clip]{%s%s_%s_%s.pdf}\n',...
-%                 obj.PlotDir.IRF,PlotFileName,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
     end
