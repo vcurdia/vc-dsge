@@ -12,7 +12,7 @@ classdef Model < handle
     
     properties
         Name = '';
-        Param = InitiateNames;
+        Param
         NumSolveParam = InitiateNames;
         NumSolveEq
         CompoundParam = InitiateNames;
@@ -40,16 +40,16 @@ classdef Model < handle
             end
         end
         
-        function set.Param(obj,p)
-            if isstruct(p)
-                obj.Param = p;
-            else
-                obj.Param = SetNames('Param',p);
-                if obj.Param.N>0
-                    obj.Param.Values = [p{:,2}]';
-                end
-            end
-        end
+%         function set.Param(obj,p)
+%             if isstruct(p)
+%                 obj.Param = p;
+%             else
+%                 obj.Param = SetNames('Param',p);
+%                 if obj.Param.N>0
+%                     obj.Param.Values = [p{:,2}]';
+%                 end
+%             end
+%         end
         
         function ShowParam(obj)
             p = struct;

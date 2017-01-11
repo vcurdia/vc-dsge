@@ -12,6 +12,7 @@ classdef Sim < handle
     
     properties
         Model
+        FigPanels
         Test
     end
    

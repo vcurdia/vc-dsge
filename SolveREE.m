@@ -22,7 +22,7 @@ REE.GBar = [];
 REE.G1 = [];
 REE.G2 = [];
 REE.eu = [0;0];
-if ~exist('Author','var'), Author = 'CS'; end
+if ~exist('Author','var') || isempty(Author), Author = 'CS'; end
 
 %% Run JW
 if strcmp(Author,'JW')
