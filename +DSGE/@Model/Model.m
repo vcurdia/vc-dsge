@@ -40,25 +40,6 @@ classdef Model < handle
             end
         end
         
-%         function set.Param(obj,p)
-%             if isstruct(p)
-%                 obj.Param = p;
-%             else
-%                 obj.Param = SetNames('Param',p);
-%                 if obj.Param.N>0
-%                     obj.Param.Values = [p{:,2}]';
-%                 end
-%             end
-%         end
-        
-        function ShowParam(obj)
-            p = struct;
-            for j=1:obj.Param.N
-                p.(obj.Param.Names{j}) = obj.Param.Values(j);
-            end
-            disp(p)
-        end
-        
         function SetParam(obj,ParNames,ParValues)
             if ischar(ParNames), ParNames = {ParNames}; end
             np = length(ParNames);
@@ -157,7 +138,7 @@ classdef Model < handle
 end %class
 
 function pp = SetNames(pType,p)
-    if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
+    if ~ismember(pType,{'NumSolveParam','CompoundParam',...
                         'ObsVar','StateVar','ShockVar','AuxVar'})
         error('SetProperty called with invalid type.')
     end
@@ -165,7 +146,7 @@ function pp = SetNames(pType,p)
     [pp.N,nc] = size(p);
     pp.Names = p(:,1);
     if nc==(2+... 
-            ismember(pType,{'Param','NumSolveParam','CompoundParam','AuxVar'}))
+            ismember(pType,{'NumSolveParam','CompoundParam','AuxVar'}))
         pp.PrettyNames = p(:,nc);
     else
         pp.PrettyNames = pp.Names;
