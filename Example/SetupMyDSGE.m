@@ -25,14 +25,14 @@ TimeElapsed = TimeTracker;
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = DSGE.Model('MyDSGE');
-mkdir(m.Name)
-cd(m.Name)
+Model = DSGE.Model('MyDSGE');
+mkdir(Model.Name)
+cd(Model.Name)
 
 %% Setup the model
 
 % example for calibrated model
-p = DSGE.Param(m,{...
+Param = DSGE.Param(Model,{...
     'beta', 0.99,'$\beta$';
     'omega', 1,'$\omega$';
     'xi', 0.1, '$\xi$';
@@ -54,7 +54,7 @@ p = DSGE.Param(m,{...
                  });
 
 % % example for model w/ prior, to be estimated
-% p = DSGE.Param(m,{...
+% Param = DSGE.Param(m,{...
 %     'beta', 'C', 0.99, [], '$\beta$';
 %     'omega', 'G', 1, 0.2, '$\omega$';
 %     'xi', 'G', 0.1, 0.05, '$\xi$';
@@ -76,16 +76,16 @@ p = DSGE.Param(m,{...
 %                  });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-m.NumSolveParam = {...
+Model.NumSolveParam = {...
     'rA',1,'$r^A$';
     'rB',1,'$r^B$';
                   };
-m.NumSolveEq = {...
+Model.NumSolveEq = {...
     '(rA+rB)/2-r';
     'rA+0.5/400-rB';
                };
 
-m.CompoundParam = {...
+Model.CompoundParam = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -94,12 +94,12 @@ m.CompoundParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
     };
 
-m.ObsVar = {...
+Model.ObsVar = {...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
     'FFR', 'FFR'};
 
-m.StateVar = {...
+Model.StateVar = {...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -117,22 +117,22 @@ m.StateVar = {...
     'YAeL', '$Y_{A,t-1}^e$';
     };
 
-m.ShockVar = {...
+Model.ShockVar = {...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
              }; 
 
-m.AuxVar = {'r','ir_t-pi_tF','$r$'};
+Model.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
-m.ObsEq = {...
+Model.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
     };
 
-m.StateEq = {...
+Model.StateEq = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -160,13 +160,13 @@ m.StateEq = {...
 
 %% Generate Mats
 TimeElapsed.Start('GenMats')
-m.GenMats
+Model.GenMats
 TimeElapsed.Stop('GenMats')
-Mats = m.Mats(m.Param.Values);
+Mats = Model.Mats(Model.Param.Values);
 
 %MakeIRF(m)
 
-save(m.Name)
+save(Model.Name)
 TimeElapsed.Show
 return
 
