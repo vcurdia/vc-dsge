@@ -1,4 +1,4 @@
-function obj = MakeIRF(obj)
+function obj = MakeIRF(obj,op)
 
 % MakeIRF
 % 
@@ -40,19 +40,7 @@ ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,obj.SimDist);
 %% -------------------------------------------------------------------
 
 %% Prepare Draws
-nDraws = obj.SimNDraws;
-if strcmp(obj.SimDist,'PriorDraws')
-    xd = obj.DrawPrior(nDraws);
-elseif strcmp(obj.SimDist,'PostDraws')
-    load(obj.FileName.MCMCDrawsRedux,'xd')
-    xd = xd(:,randi(size(xd,2),1,nDraws));
-else
-    if ~isfield(obj.Param,obj.SimDist)
-        fprintf(2,'Did not recognize distribution to use. Cannot proceed.\n');
-        return
-    end
-    xd = obj.Param.(obj.SimDist);
-end
+xd = obj.Param.GenDraws(op.Dist,op.NDraws);
 nDraws = size(xd,2);
 
 %% Generate IRF
