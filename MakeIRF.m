@@ -21,21 +21,24 @@ tt = TimeTracker;
 
 fprintf('\n*** Making IRF\n')
 
-%% Options
+%% Default Options
+op.FigPanels = [];
+op.Shocks2Show = obj.ShockVar.Names;
+op.ShockSize = [];
+op.Dist = 'Values';
+op.nDraws = 1;
+op.PlotDir = 'Plots_IRF/';
+op.KeepPlots = 0;
 
-% Check options
+%% Check options
 obj = obj.CheckFigPanels;
-nShocks2Show = length(obj.Shocks2Show);
+nShocks2Show = length(op.Shocks2Show);
+if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 
-if isempty(obj.IRFShockSize), obj.IRFShockSize = ones(1,nShocks2Show); end
-
-if ~isfield(obj.PlotDir,'IRF')
-    obj.PlotDir.IRF = 'Plots_IRF/';
-end
-mkdir(obj.PlotDir.IRF)
-PlotFileName = sprintf('%s_IRF_%s',obj.Name,obj.SimDist); 
-ReportFileName = sprintf('%s_Report_IRF_%s',obj.Name,obj.SimDist);
-ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,obj.SimDist);
+mkdir(op.PlotDir)
+PlotFileName = sprintf('%s_IRF_%s',obj.Name,op.Dist); 
+ReportFileName = sprintf('%s_Report_IRF_%s',obj.Name,op.Dist);
+ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,op.Dist);
 
 %% -------------------------------------------------------------------
 
@@ -152,11 +155,9 @@ pdflatex(ReportFileName)
 
 %% -------------------------------------------------------------------
 
-if strcmp(Fig.Visible,'off')
-    close all
-end
-
 %% Finish up
+close all
+if ~op.KeepPlots, rmdir(op.PlotDir,'s'), end
 tt.Show
 
 end
