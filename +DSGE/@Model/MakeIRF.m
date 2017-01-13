@@ -1,4 +1,4 @@
-function obj = MakeIRF(obj,op)
+function MakeIRF(obj,op)
 
 % MakeIRF
 % 
@@ -28,7 +28,6 @@ op.ShockSize = [];
 op.Dist = 'Values';
 op.nDraws = 1;
 op.PlotDir = 'Plots_IRF/';
-op.KeepPlots = 0;
 
 %% Check options
 obj = obj.CheckFigPanels;
@@ -157,7 +156,6 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-if ~op.KeepPlots, rmdir(op.PlotDir,'s'), end
 tt.Show
 
 end
