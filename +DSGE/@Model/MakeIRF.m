@@ -13,7 +13,6 @@ function MakeIRF(obj,op)
 % 
 % Copyright 2016-2017 by Vasco Curdia
 
-%-----------------------------------------------------------------------------%
 
 %% Preamble
 
@@ -152,11 +151,9 @@ fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
 
-%% -------------------------------------------------------------------
 
 %% Finish up
 close all
 tt.Show
 
 end
-%% -------------------------------------------------------------------
