@@ -164,7 +164,7 @@ Model.GenMats
 TimeElapsed.Stop('GenMats')
 Mats = Model.Mats(Model.Param.Values);
 
-%MakeIRF(m)
+% Model.MakeIRF
 
 save(Model.Name)
 TimeElapsed.Show

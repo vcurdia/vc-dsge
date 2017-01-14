@@ -21,7 +21,7 @@ tt = TimeTracker;
 fprintf('\n*** Making IRF\n')
 
 %% Default Options
-op.FigPanels = [];
+op.FigPanels = obj.SetVarFigPanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Dist = 'Values';
@@ -103,17 +103,22 @@ nPanels = length(obj.FigPanels);
 for jP = 1:nPanels
     Pj = obj.FigPanels(jP);
     Figj = Fig;
-    Figj.TitleList = Pj.PrettyNames;
+    if isfield(Pj,'PrettyNames')
+        Figj.TitleList = Pj.PrettyNames;
+    else
+        Figj.TitleList = Pj.Names;
+    end
     if isfield(Pj,'FigShape');
         Figj.FigShape = Pj.FigShape;
     end
-    PlotData = nan(nDrawsUsed,nSteps,Pj.NVar,nShocks2Show);
-    for jV=1:Pj.NVar
-        Vj = Pj.Var{jV};
+    nVar = length(Pj.Names);
+    PlotData = nan(nDrawsUsed,nSteps,nVar,nShocks2Show);
+    for jV=1:nVar
+        Vj = Pj.Names{jV};
         [tf,idxV] = ismember(Vj,VarNames);
         if tf
             for jS=1:nShocks2Show
-                PlotData(:,:,jV,jS) = obj.VarScale*Pj.Scale(jV)*...
+                PlotData(:,:,jV,jS) = Pj.Scale(jV)*...
                     obj.IRFShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
             end
         end
