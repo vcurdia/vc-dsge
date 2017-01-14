@@ -18,16 +18,8 @@ function GenMats(obj)
 % 
 % Copyright (C) 2016-2017 Vasco Curdia
 
-%% -------------------------------------------------------------------
-
 %% Preamble
-
 fprintf('\n*** Generate DSGE mats\n')
-
-%% -------------------------------------------------------------------
-
-%% Prepare parameters, variables and equations
-
 fprintf('Generating symbolic variables and systems of equations\n')
 
 %% basic check
@@ -41,7 +33,6 @@ for j=1:length(list)
     jstr = [list{j},'Param'];
     if obj.(jstr).N>0, vcSym(obj.(jstr).Names{:}), end
 end
-
 
 %% Constant
 vcSym('one')
@@ -467,5 +458,3 @@ fclose(fid);
 %% Save handle to function
 obj.Mats = str2func(obj.MatsFN);
 
-    
-%% -------------------------------------------------------------------
