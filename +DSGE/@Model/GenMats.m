@@ -21,7 +21,7 @@ function GenMats(obj)
 %% Preamble
 fprintf('\n*** Generate DSGE mats\n')
 fprintf('Generating symbolic variables and systems of equations\n')
-tt = timeTracker;
+tt = TimeTracker;
 
 %% basic check
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
@@ -108,11 +108,11 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-obj.MatsFN = sprintf('%s_Mats',obj.Name);
+MatsFN = sprintf('%s_Mats',obj.Name);
 
 % Initiate file
-fid = fopen([obj.MatsFN,'.m'],'wt');
-fprintf(fid,'function Mats = %s(x,varargin)\n\n',obj.MatsFN);
+fid = fopen([MatsFN,'.m'],'wt');
+fprintf(fid,'function Mats = %s(x,varargin)\n\n',MatsFN);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
 fprintf(fid,'\n%% Default options\n');
@@ -457,7 +457,7 @@ fprintf(fid,'end\n');
 fclose(fid);
 
 %% Save handle to function
-obj.Mats = str2func(obj.MatsFN);
+obj.Mats = str2func(MatsFN);
 
 %% Save timer
 tt.Show

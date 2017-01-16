@@ -30,7 +30,6 @@ classdef Model < handle
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
         Mats
-        MatsFN
     end
    
     methods
