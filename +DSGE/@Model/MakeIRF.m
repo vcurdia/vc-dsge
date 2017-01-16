@@ -16,31 +16,31 @@ function MakeIRF(obj,op)
 
 %% Preamble
 
+fprintf('\n*** Making IRF\n')
 tt = TimeTracker;
 
-fprintf('\n*** Making IRF\n')
-
 %% Default Options
+op.Dist = 'Values';
+op.NDraws = [];
+op.NSteps = 25;
+op.TickStep = 4;
 op.FigPanels = obj.SetVarFigPanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
-op.Dist = 'Values';
-op.nDraws = 1;
 op.PlotDir = 'Plots_IRF/';
+op.Fig = struct;
 
 %% Check options
-obj = obj.CheckFigPanels;
 nShocks2Show = length(op.Shocks2Show);
 if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
+if ~isfield(op.Fig,'Visible'), op.Fig.Visible = 'off'; end
 
 mkdir(op.PlotDir)
 PlotFileName = sprintf('%s_IRF_%s',obj.Name,op.Dist); 
 ReportFileName = sprintf('%s_Report_IRF_%s',obj.Name,op.Dist);
 ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,op.Dist);
 
-%% -------------------------------------------------------------------
-
-%% Prepare Draws
+%% Prepare for IRF
 xd = obj.Param.GenDraws(op.Dist,op.NDraws);
 nDraws = size(xd,2);
 
@@ -49,14 +49,14 @@ fprintf('Generating IRFs...\n');
 fnmats = @(x)obj.Mats(x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 IRFCheck = ones(1,nDraws);
-nSteps = obj.IRFNSteps;
+nSteps = op.NSteps;
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
 nAuxVar = obj.AuxVar.N;
 IRF = nan(nStateVar+nObsVar+nAuxVar,nSteps,nShocks2Show,nDraws);
 ShockIdx = zeros(nShocks2Show,1);
 for j = 1:nShocks2Show
-    ShockIdx(j) = find(ismember(obj.ShockVar.Names,obj.Shocks2Show(j)));
+    ShockIdx(j) = find(ismember(obj.ShockVar.Names,op.Shocks2Show(j)));
 end   
 parfor jd=1:nDraws
     matj = fnmats(xd(:,jd));
@@ -94,14 +94,14 @@ nDrawsUsed = length(IRFCheck);
 
 %% Plot IRFs
 fprintf('Plotting IRFs...\n');
-Fig = obj.Fig;
-Fig.PlotBands = (nDrawsUsed>1);
-Fig.XTick = 1:4:nSteps;
-Fig.XTickLabel = 0:4:(nSteps-1);
+Fig = op.Fig;
+Fig.PlotBands = (nDraws>1);
+Fig.XTick = 1:op.TickStep:nSteps;
+Fig.XTickLabel = 0:op.TickStep:(nSteps-1);
 VarNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
-nPanels = length(obj.FigPanels);
+nPanels = length(op.FigPanels);
 for jP = 1:nPanels
-    Pj = obj.FigPanels(jP);
+    Pj = op.FigPanels(jP);
     Figj = Fig;
     if isfield(Pj,'PrettyNames')
         Figj.TitleList = Pj.PrettyNames;
@@ -119,7 +119,7 @@ for jP = 1:nPanels
         if tf
             for jS=1:nShocks2Show
                 PlotData(:,:,jV,jS) = Pj.Scale(jV)*...
-                    obj.IRFShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
+                    op.ShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
             end
         end
     end
@@ -129,8 +129,8 @@ for jP = 1:nPanels
         else
             h = vcFigureUpdate(h,PlotData(:,:,:,jS));
         end
-        vcPrintPDF([obj.PlotDir.IRF,PlotFileName,...
-             '_',Pj.Title,'_',obj.Shocks2Show{jS}],Fig.KeepEPS,Fig.OpenPDF)
+        vcPrintPDF([op.PlotDir,PlotFileName,...
+                    '_',Pj.Title,'_',op.Shocks2Show{jS}])
     end
 end
 
@@ -139,15 +139,15 @@ fprintf('Making report: %s\n',ReportFileName);
 fid = vcCreateTex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jS=1:nShocks2Show
-    Sj = obj.Shocks2Show{jS};
+    Sj = op.Shocks2Show{jS};
     fprintf(fid,'\\section{Shock: %s}\n',strrep(Sj,'_',''));
     for jP = 1:nPanels
-        Pj = obj.FigPanels(jP).Title;
+        Pj = op.FigPanels(jP).Title;
         fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
-                obj.PlotDir.IRF,PlotFileName,Pj,Sj);
+                op.PlotDir,PlotFileName,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
     end
@@ -160,5 +160,3 @@ pdflatex(ReportFileName)
 %% Finish up
 close all
 tt.Show
-
-end

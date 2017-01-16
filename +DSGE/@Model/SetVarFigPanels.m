@@ -24,8 +24,8 @@ op = UpdateOptions(op,varargin{:});
 %% Check options
 if isempty(op.PanelList)
     if obj.ObsVar.N>0, op.PanelList{end+1} = 'ObsVar'; end
-    op.PanelNames{end+1} = 'StateVar';
-    if obj.AuxVar.N>0, op.PanelNames{end+1} = 'AuxVar';end
+    op.PanelList{end+1} = 'StateVar';
+    if obj.AuxVar.N>0, op.PanelList{end+1} = 'AuxVar';end
 end
 nList = length(op.PanelList);
 if isempty(op.FigShape), op.FigShape = cell(1,nList); end
@@ -43,7 +43,7 @@ if ~iscell(op.Scale)
 end
 for j=1:nList
     if ~isempty(op.FigShape{j}), continue, end
-    nVarj = length(obj.(PanelList{j}.N);
+    nVarj = obj.(op.PanelList{j}).N;
     if nVarj==1
         op.FigShape{j} = [1,1];
     elseif nVarj<=4*2

@@ -159,12 +159,9 @@ Model.StateEq = {...
 
 
 %% Generate Mats
-TimeElapsed.Start('GenMats')
 Model.GenMats
-TimeElapsed.Stop('GenMats')
 Mats = Model.Mats(Model.Param.Values);
-
-% Model.MakeIRF
+Model.MakeIRF
 
 save(Model.Name)
 TimeElapsed.Show
