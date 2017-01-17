@@ -25,7 +25,7 @@ if nargin<2 || isempty(nDraws)
 end
 
 if strcmp(Dist,'PriorDraws')
-    xd = obj.Prior.Draw(nDraws);
+    xd = obj.DrawPrior(nDraws);
 elseif strcmp(Dist,'PostDraws')
     xd = obj.Post.Draw(nDraws);
 %         load(obj.FileName.MCMCDrawsRedux,'xd')

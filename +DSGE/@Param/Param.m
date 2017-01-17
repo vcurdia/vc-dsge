@@ -16,19 +16,17 @@ classdef Param < handle
         Names = {};
         PrettyNames = {};
         Values
-        PriorDist
-        PriorMean
-        PriorSD
-        PriorMode
-        PriorMedian
-        PostMean
-        PostSD
-        PostMode
-        PostMedian
         Prior
         Post
         IsCalibrated
         EstimateIdx
+        Percentiles = [0.01, 0.025, 0.05, 0.15, 0.25, ...
+                       0.75, 0.85, 0.95, 0.975, 0.99];
+        PriorNDraws = 1000;
+        TablePrecision = 3;
+        TableMaxRows = 35;
+        TableMoveLeft = 1; 
+        TableLines = [];
     end
    
     methods
@@ -49,12 +47,17 @@ classdef Param < handle
                     obj.IsCalibrated = 1;
                     obj.Values = [p{:,2}]';
                 else
-                    obj.PriorDist = p(:,2);
-                    obj.EstimateIdx = ~ismember(obj.PriorDist,{'C'});
+                    obj.Prior.Dist = p(:,2);
+                    obj.Prior.Mean = [p{:,3}]';
+                    for j=1:obj.N
+                        if isempty(p{j,4})
+                            p{j,4} = 0;
+                        end
+                    end
+                    obj.Prior.SD = [p{:,4}]';
+                    obj.Values = obj.Prior.Mean;
+                    obj.EstimateIdx = ~ismember(obj.Prior.Dist,{'C'});
                     obj.IsCalibrated = ~any(obj.EstimateIdx);
-                    obj.PriorMean = p(:,3);
-                    obj.PriorSD = p(:,4);
-                    obj.Values = obj.PriorMean;
                 end
             end
         end

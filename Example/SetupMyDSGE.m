@@ -31,49 +31,49 @@ cd(Model.Name)
 
 %% Setup the model
 
-% example for calibrated model
-Param = DSGE.Param(Model,{...
-    'beta', 0.99,'$\beta$';
-    'omega', 1,'$\omega$';
-    'xi', 0.1, '$\xi$';
-    'eta', 0.6, '$\eta$';
-    'zeta', 0.6,'$\zeta$';
-    'rho', 0.7, '$\rho$';
-    'phipi', 1.5, '$\phi_\pi$';
-    'phix', 0.5, '$\phi_x$';
-    'pistar', 2, '$\pi^*$';
-    'ra', 2,'$r^a$';
-    'gammaa', 3,'$400\gamma$';
-    'rhodelta', 0.5, '$\rho_\delta$';
-    'rhogamma', 0.5, '$\rho_\gamma$';
-    'rhou', 0.5, '$\rho_u$';
-    'sigmadelta', 0.5,'$\sigma_\delta$';
-    'sigmagamma', 0.5,'$\sigma_\gamma$';
-    'sigmau', 0.5, '$\sigma_u$';
-    'sigmai', 0.5, '$\sigma_i$';
-                 });
-
-% % example for model w/ prior, to be estimated
-% Param = DSGE.Param(m,{...
-%     'beta', 'C', 0.99, [], '$\beta$';
-%     'omega', 'G', 1, 0.2, '$\omega$';
-%     'xi', 'G', 0.1, 0.05, '$\xi$';
-%     'eta', 'B', 0.6, 0.2, '$\eta$';
-%     'zeta', 'B', 0.6, 0.2, '$\zeta$';
-%     'rho', 'B', 0.7, 0.15, '$\rho$';
-%     'phipi', 'N', 1.5, 0.25, '$\phi_\pi$';
-%     'phix', 'N', 0.5, 0.2, '$\phi_x$';
-%     'pistar', 'N', 2, 1, '$\pi^*$';
-%     'ra', 'N', 2, 1, '$r^a$';
-%     'gammaa', 'N', 3, 0.35, '$400\gamma$';
-%     'rhodelta', 'B', 0.5, 0.2, '$\rho_\delta$';
-%     'rhogamma', 'B', 0.5, 0.2, '$\rho_\gamma$';
-%     'rhou', 'B', 0.5, 0.2, '$\rho_u$';
-%     'sigmadelta', 'IG1', 0.5, 2, '$\sigma_\delta$';
-%     'sigmagamma', 'IG1', 0.5, 2, '$\sigma_\gamma$';
-%     'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
-%     'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
+% % example for calibrated model
+% Param = DSGE.Param(Model,{...
+%     'beta', 0.99,'$\beta$';
+%     'omega', 1,'$\omega$';
+%     'xi', 0.1, '$\xi$';
+%     'eta', 0.6, '$\eta$';
+%     'zeta', 0.6,'$\zeta$';
+%     'rho', 0.7, '$\rho$';
+%     'phipi', 1.5, '$\phi_\pi$';
+%     'phix', 0.5, '$\phi_x$';
+%     'pistar', 2, '$\pi^*$';
+%     'ra', 2,'$r^a$';
+%     'gammaa', 3,'$400\gamma$';
+%     'rhodelta', 0.5, '$\rho_\delta$';
+%     'rhogamma', 0.5, '$\rho_\gamma$';
+%     'rhou', 0.5, '$\rho_u$';
+%     'sigmadelta', 0.5,'$\sigma_\delta$';
+%     'sigmagamma', 0.5,'$\sigma_\gamma$';
+%     'sigmau', 0.5, '$\sigma_u$';
+%     'sigmai', 0.5, '$\sigma_i$';
 %                  });
+
+% example for model w/ prior, to be estimated
+Param = DSGE.Param(Model,{...
+    'beta', 'C', 0.99, [], '$\beta$';
+    'omega', 'G', 1, 0.2, '$\omega$';
+    'xi', 'G', 0.1, 0.05, '$\xi$';
+    'eta', 'B', 0.6, 0.2, '$\eta$';
+    'zeta', 'B', 0.6, 0.2, '$\zeta$';
+    'rho', 'B', 0.7, 0.15, '$\rho$';
+    'phipi', 'N', 1.5, 0.25, '$\phi_\pi$';
+    'phix', 'N', 0.5, 0.2, '$\phi_x$';
+    'pistar', 'N', 2, 1, '$\pi^*$';
+    'ra', 'N', 2, 1, '$r^a$';
+    'gammaa', 'N', 3, 0.35, '$400\gamma$';
+    'rhodelta', 'B', 0.5, 0.2, '$\rho_\delta$';
+    'rhogamma', 'B', 0.5, 0.2, '$\rho_\gamma$';
+    'rhou', 'B', 0.5, 0.2, '$\rho_u$';
+    'sigmadelta', 'IG1', 0.5, 2, '$\sigma_\delta$';
+    'sigmagamma', 'IG1', 0.5, 2, '$\sigma_\gamma$';
+    'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
+    'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
+                 });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
 Model.NumSolveParam = {...
@@ -163,17 +163,14 @@ Model.GenMats
 Mats = Model.Mats(Model.Param.Values);
 Model.MakeIRF
 
+%% Analyze Prior
+Param.AnalyzePrior;
+Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
+
 save(Model.Name)
 TimeElapsed.Show
 return
 
-
-%% Analyze Prior
-m.AnalyzePrior;
-
-% m.SimDist = 'PriorDraws';
-% m.SimNDraws = 100;
-% m = m.MakeIRF;
 
 %% Data
 m.FileName.Data = '../Data/Data_1987q3_2009q3.csv';
