@@ -1,4 +1,4 @@
-function MakeIRF(obj,op)
+function MakeIRF(obj,varargin)
 
 % MakeIRF
 % 
@@ -29,6 +29,9 @@ op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.PlotDir = 'Plots_IRF/';
 op.Fig = struct;
+
+%% Update options
+op = UpdateOptions(op,varargin{:});
 
 %% Check options
 nShocks2Show = length(op.Shocks2Show);
