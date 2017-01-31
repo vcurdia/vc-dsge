@@ -167,8 +167,12 @@ Model.MakeIRF
 Param.AnalyzePrior;
 Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
 
+%% Finish up
 save(Model.Name)
 TimeElapsed.Show
+cd ..
+% delete(gcp)
+% exit
 return
 
 
@@ -182,16 +186,4 @@ m = m.AnalyzeData;
 %% Create posterior
 m = m.GenPost;
 
-%% -------------------------------------------------------------------
-
-%% Finish up
-TimeElapsed.Show
-save(m.Name)
-cd ..
-
-% delete(gcp)
-
-% exit
-
-%% -------------------------------------------------------------------
 
