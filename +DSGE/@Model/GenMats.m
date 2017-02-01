@@ -125,6 +125,7 @@ fprintf(fid,'op.StoreAuxREE = 1;\n');
 fprintf(fid,'op.SolveREE = 1;\n');
 fprintf(fid,'op.fid = 1;\n');
 fprintf(fid,'op.verbose = 0;\n');
+fprintf(fid,'op.GensysAuthor = ''%s'';\n',obj.GensysAuthor);
 fprintf(fid,'op.gensys = {};\n');
 
 fprintf(fid,'\n%% Update options\n');
@@ -334,8 +335,7 @@ fprintf(fid,'if op.SolveREE\n');
 fprintf(fid,...
         '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fid,...
-        '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
-        obj.GensysAuthor);
+        '        op.GensysAuthor,op.fid,op.verbose,op.gensys{:});\n');
 fprintf(fid,'    Mats.REE = REE;\n');
 fprintf(fid,'    if ~all(REE.eu==1);\n');
 fprintf(fid,'        Mats.Status = 0;\n');
