@@ -39,24 +39,7 @@ classdef Model < handle
             end
         end
         
-        function SetParam(obj,ParNames,ParValues)
-            if ischar(ParNames), ParNames = {ParNames}; end
-            np = length(ParNames);
-            nv = length(ParValues);
-            if np>0 && np==nv
-                [tf,idxp] = ismember(ParNames,obj.Param.Names);
-                obj.Param.Values(idxp(tf)) = ParValues(tf);
-                if ~all(tf)
-                    fprintf('Invalid parameter names ignored:\n')
-                    fprintf('  %s\n',ParNames{~tf})
-                end
-            else
-                error(['List of parameter names is empty or has different ' ...
-                       'length from list of values.'])
-            end
-        end
-        
-        function set.NumSolveParam(obj,p)
+        function SetNumSolveParam(obj,p)
             if isstruct(p)
                 obj.NumSolveParam = p;
             else
@@ -67,7 +50,7 @@ classdef Model < handle
             end
         end
         
-        function set.NumSolveEq(obj,eq)
+        function SetNumSolveEq(obj,eq)
             obj.NumSolveEq = eq;
             neq = length(eq);
             if neq~=obj.NumSolveParam.N
@@ -76,7 +59,7 @@ classdef Model < handle
             end
         end
     
-        function set.CompoundParam(obj,p)
+        function SetCompoundParam(obj,p)
             if isstruct(p)
                 obj.CompoundParam = p;
             else
@@ -87,7 +70,7 @@ classdef Model < handle
             end
         end
     
-        function set.ObsVar(obj,p)
+        function SetObsVar(obj,p)
             if isstruct(p)
                 obj.ObsVar = p;
             else
@@ -95,7 +78,7 @@ classdef Model < handle
             end
         end
     
-        function set.StateVar(obj,p)
+        function SetStateVar(obj,p)
             if isstruct(p)
                 obj.StateVar = p;
             else
@@ -103,7 +86,7 @@ classdef Model < handle
             end
         end
     
-        function set.ShockVar(obj,p)
+        function SetShockVar(obj,p)
             if isstruct(p)
                 obj.ShockVar = p;
             else
@@ -111,7 +94,7 @@ classdef Model < handle
             end
         end
     
-        function set.AuxVar(obj,p)
+        function SetAuxVar(obj,p)
             if isstruct(p)
                 obj.AuxVar = p;
             else
@@ -122,12 +105,12 @@ classdef Model < handle
             end
         end
         
-        function set.ObsEq(obj,eq)
+        function SetObsEq(obj,eq)
             obj.ObsEq = eq;
             CheckEq(obj,'Obs')
         end
     
-        function set.StateEq(obj,eq)
+        function SetStateEq(obj,eq)
             obj.StateEq = eq;
             CheckEq(obj,'State')
         end

@@ -76,30 +76,31 @@ Param = DSGE.Param(Model,{...
                  });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-Model.NumSolveParam = {...
+Model.SetNumSolveParam({...
     'rA',1,'$r^A$';
     'rB',1,'$r^B$';
-                  };
-Model.NumSolveEq = {...
+                   });
+Model.SetNumSolveEq({...
     '(rA+rB)/2-r';
     'rA+0.5/400-rB';
-               };
+               });
 
-Model.CompoundParam = {...
+Model.SetCompoundParam({...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
     'etagammatil','exp(gamma)/(exp(gamma)-eta)','$\tilde{\eta}_\gamma$';
     'phigamma','phigammatil*etagammatil','$\phi_\gamma$';
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
-    };
+                   });
 
-Model.ObsVar = {...
+Model.SetObsVar({...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
-    'FFR', 'FFR'};
+    'FFR', 'FFR';
+                });
 
-Model.StateVar = {...
+Model.SetStateVar({...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -115,24 +116,24 @@ Model.StateVar = {...
     % a couple of artificial variables
     'YAL', '$Y_{A,t-1}$';
     'YAeL', '$Y_{A,t-1}^e$';
-    };
+                  });
 
-Model.ShockVar = {...
+Model.SetShockVar({...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
-             }; 
+                  }); 
 
-Model.AuxVar = {'r','ir_t-pi_tF','$r$'};
+Model.SetAuxVar({'r','ir_t-pi_tF','$r$'});
 
-Model.ObsEq = {...
+Model.SetObsEq({...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
-    };
+               });
 
-Model.StateEq = {...
+Model.SetStateEq({...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -155,7 +156,7 @@ Model.StateEq = {...
     % Auxiliary equations
     'YAL_t-YA_tL'; 
     'YAeL_t-YAe_tL';
-    };
+                 });
 
 
 %% Generate Mats
