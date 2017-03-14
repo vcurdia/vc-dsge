@@ -162,11 +162,11 @@ Model.SetStateEq({...
 %% Generate Mats
 Model.GenMats
 Mats = Model.Mats(Model.Param.Values);
-Model.MakeIRF
+% Model.MakeIRF
 
 %% Analyze Prior
 Param.AnalyzePrior;
-Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
+% Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
 
 %% Finish up
 save(Model.Name)
