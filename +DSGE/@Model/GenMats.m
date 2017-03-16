@@ -21,7 +21,7 @@ function GenMats(obj)
 %% Preamble
 fprintf('\n*** Generate DSGE mats\n')
 fprintf('Generating symbolic variables and systems of equations\n')
-tt = TimeTracker;
+TimeElapsed = tic;
 
 %% basic check
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
@@ -460,4 +460,4 @@ fclose(fid);
 obj.Mats = str2func(MatsFN);
 
 %% Save timer
-tt.Show
+fprintf('GenMats: '), vctoc(TimeElapsed)

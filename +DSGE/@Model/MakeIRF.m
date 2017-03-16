@@ -17,7 +17,8 @@ function MakeIRF(obj,varargin)
 %% Preamble
 
 fprintf('\n*** Making IRF\n')
-tt = TimeTracker;
+TimeElapsed = tic;
+
 
 %% Default Options
 op.Dist = 'Values';
@@ -162,4 +163,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-tt.Show
+fprintf('IRF: '), vctoc(TimeElapsed)

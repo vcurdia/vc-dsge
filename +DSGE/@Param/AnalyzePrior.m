@@ -17,7 +17,7 @@ function AnalyzePrior(obj)
 %% Preamble
 
 fprintf('\n*** Analyzing DSGE Prior distribution\n')
-tt = TimeTracker;
+TimeElapsed = tic;
 
 %% Options
 
@@ -388,7 +388,7 @@ fclose(fid);
 pdflatex(ReportFileName)
 
 %% Finish up
-tt.Show
+fprintf('\nAnalyzePrior: '), vctoc(TimeElapsed)
 
 end
 

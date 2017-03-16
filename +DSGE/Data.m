@@ -33,6 +33,8 @@ classdef Data < handle
         end
         
         function Load(obj)
+            fprintf('\n*** Loading data\n')
+            TimeElapsed = tic;
             Raw = importdata(obj.Source);
             Raw.TimeIdx = Raw.textdata(2:end,1)';
             Raw.TimeStart = Raw.TimeIdx{1};
@@ -77,6 +79,8 @@ classdef Data < handle
             if isempty(obj.Tick)
                 obj.SetTick
             end
+            
+            fprintf('DataLoad: '), vctoc(TimeElapsed)
             
         end
         

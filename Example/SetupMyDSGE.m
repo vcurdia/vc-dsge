@@ -17,7 +17,7 @@
 clear all
 SetPath
 set(0,'defaultTextInterpreter','latex');
-TimeElapsed = TimeTracker;
+TimeElapsed = tic;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -177,18 +177,16 @@ Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
 Data.Var = Model.ObsVar.Names;
 Data.Load
 
+%% Create posterior
+% m = m.GenPost;
 
 
 %% Finish up
 save(Model.Name)
-TimeElapsed.Show
 cd ..
+fprintf('\n'), vctoc(TimeElapsed)
+
 % delete(gcp)
 % exit
-return
-
-
-%% Create posterior
-m = m.GenPost;
 
 
