@@ -18,10 +18,10 @@ classdef Data < handle
         T
         SampleStart
         NPreSample
-        Model
         Var
         NVar
         Values
+        Tick
         TickLabels
     end
    
@@ -53,31 +53,72 @@ classdef Data < handle
             obj.TimeIdx = TimeIdxCreate(obj.TimeStart,obj.TimeEnd);
             [tfDates,idxDates] = ismember(obj.TimeIdx,Raw.TimeIdx);
             if ~all(tfDates)
-                error('Data require time periods outside data file!')
+                error('Requested time periods outside data file!')
             end
             obj.T = length(obj.TimeIdx);
             
             if isempty(obj.SampleStart)
                 obj.SampleStart = obj.TimeStart;
             end
-            obj.NPreSample = find(ismember(obj.TimeStart,obj.SampleStart);
+            obj.NPreSample = ...
+                max(0,find(ismember(obj.TimeIdx,obj.SampleStart))-1);
             
-            if isempty(obj.Model)
+            if isempty(obj.Var)
                 obj.Var = Raw.Var;
-            else
-                obj.Var = obj.Model.ObsVar.Names;
             end
             obj.NVar = length(obj.Var);
-            [tfVar,idxVar] = ismember(obj.Model.ObsVar.Names,Raw.Var);
+            [tfVar,idxVar] = ismember(obj.Var,Raw.Var);
             if ~all(tfVar)
-                error('Observable names do not match csv headers!')
+                error('Variable names do not match csv headers!')
             end
             
             obj.Values = Raw.Values(idxDates,idxVar);
-
+            
+            if isempty(obj.Tick)
+                obj.SetTick
+            end
+            
+        end
+        
+        function SetTickLabels(obj,tDates)
+            tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
+            obj.TickLabels = tDates;
+            if isempty(obj.Tick) ...
+                    || ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
+                obj.SetTick
+            end
+        end
+        
+        function SetTick(obj,idx)
+            if nargin<2
+                idx = obj.FindFirstQ4:4:obj.T;
+            end
+            if iscell(idx)
+                idx = find(ismember(obj.TimeIdx,idx));
+            end
+            idx = idx(idx>0);
+            idx = idx(idx<obj.T);
+            obj.Tick = idx;
+            if isempty(obj.TickLabels)
+                tStep = ceil(obj.T/4);
+                while mod(tStep,4), tStep = tStep-1; end
+                obj.SetTickLabels(obj.TimeIdx(obj.FindFirstQ4:tStep:obj.T))
+            end
+            TickLabels = obj.TimeIdx(idx);
+            TickLabels(~ismember(TickLabels,obj.TickLabels)) = {''};
+            obj.TickLabels = TickLabels;
+        end
+        
+        function t = FindFirstQ4(obj)
+            for t=1:obj.T
+                if strcmp(obj.TimeIdx{t}(end),int2str(4))
+                    break
+                end
+            end
         end
         
     end %methods
     
 end %class
+
 

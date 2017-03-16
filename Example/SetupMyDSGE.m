@@ -168,6 +168,17 @@ Mats = Model.Mats(Model.Param.Values);
 Param.AnalyzePrior;
 % Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
 
+%% Data
+Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
+Data.TimeStart = '1987q3';
+Data.TimeEnd = '2009q3';
+Data.SampleStart = '1987q3';
+Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
+Data.Var = Model.ObsVar.Names;
+Data.Load
+
+
+
 %% Finish up
 save(Model.Name)
 TimeElapsed.Show
@@ -176,13 +187,6 @@ cd ..
 % exit
 return
 
-
-%% Data
-m.FileName.Data = '../Data/Data_1987q3_2009q3.csv';
-m.DataPeriod = {'1987q3','2009q3'};
-m.SampleStart = '1987q3';
-m.DataTickLabels = {'1990q1','1995q1','2000q1','2005q1'};
-m = m.AnalyzeData;
 
 %% Create posterior
 m = m.GenPost;
