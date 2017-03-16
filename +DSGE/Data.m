@@ -13,23 +13,33 @@ classdef Data < handle
     properties
         Source
         TimeIdx
-        TimeStart
-        TimeEnd
-        T
         SampleStart
         NPreSample
         Var
-        NVar
         Values
         Tick
         TickLabels
     end
-   
+
+    properties (SetAccess=protected)
+        TimeStart
+        TimeEnd
+        T
+        NVar
+    end
+    
     methods
         function obj = Data(fn)
             if nargin>0
                 obj.Source = fn;
             end
+        end
+        
+        function SetTime(obj,TimeStart,TimeEnd)
+            obj.TimeStart = TimeStart;
+            obj.TimeEnd = TimeEnd;
+            obj.TimeIdx = TimeIdxCreate(TimeStart,TimeEnd);
+            obj.T = length(obj.TimeIdx);
         end
         
         function Load(obj)
@@ -44,15 +54,9 @@ classdef Data < handle
             Raw.NVar = length(Raw.Var);
             Raw.Values = [Raw.data;nan(Raw.T-size(Raw.data,1),Raw.NVar)];
             
-            if isempty(obj.TimeStart)
-                obj.TimeStart = Raw.TimeStart
+            if isempty(obj.TimeIdx)
+                obj.SetTime(Raw.TimeIdx{1,end});
             end
-            
-            if isempty(obj.TimeEnd)
-                obj.TimeEnd = Raw.TimeEnd;
-            end
-            
-            obj.TimeIdx = TimeIdxCreate(obj.TimeStart,obj.TimeEnd);
             [tfDates,idxDates] = ismember(obj.TimeIdx,Raw.TimeIdx);
             if ~all(tfDates)
                 error('Requested time periods outside data file!')
@@ -87,9 +91,11 @@ classdef Data < handle
         function SetTickLabels(obj,tDates)
             tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
             obj.TickLabels = tDates;
-            if isempty(obj.Tick) ...
-                    || ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
+            if isempty(obj.Tick) 
                 obj.SetTick
+            end
+            if ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
+                obj.SetTick(obj.TickLabels)
             end
         end
         
