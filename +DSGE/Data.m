@@ -12,7 +12,6 @@ classdef Data < handle
     
     properties
         Source
-        TimeIdx
         SampleStart
         NPreSample
         Var
@@ -22,6 +21,7 @@ classdef Data < handle
     end
 
     properties (SetAccess=protected)
+        TimeIdx
         TimeStart
         TimeEnd
         T
@@ -32,14 +32,8 @@ classdef Data < handle
         function obj = Data(fn)
             if nargin>0
                 obj.Source = fn;
+                obj.Load
             end
-        end
-        
-        function SetTime(obj,TimeStart,TimeEnd)
-            obj.TimeStart = TimeStart;
-            obj.TimeEnd = TimeEnd;
-            obj.TimeIdx = TimeIdxCreate(TimeStart,TimeEnd);
-            obj.T = length(obj.TimeIdx);
         end
         
         function Load(obj)
@@ -64,7 +58,7 @@ classdef Data < handle
             obj.T = length(obj.TimeIdx);
             
             if isempty(obj.SampleStart)
-                obj.SampleStart = obj.TimeStart;
+                obj.SetPreSample(0)
             end
             obj.NPreSample = ...
                 max(0,find(ismember(obj.TimeIdx,obj.SampleStart))-1);
@@ -86,6 +80,24 @@ classdef Data < handle
             
             fprintf('DataLoad: '), vctoc(TimeElapsed)
             
+        end
+        
+        function SetTime(obj,TimeStart,TimeEnd)
+            obj.TimeStart = TimeStart;
+            obj.TimeEnd = TimeEnd;
+            obj.TimeIdx = TimeIdxCreate(TimeStart,TimeEnd);
+            obj.T = length(obj.TimeIdx);
+        end
+        
+        function SetPreSample(obj,op)
+            if ischar(op)
+                obj.SampleStart = op;
+                obj.NPreSample = ...
+                    max(0,find(ismember(obj.TimeIdx,obj.SampleStart))-1);
+            else
+                obj.SampleStart = obj.TimeIdx(op+1);
+                obj.NPreSample = op;
+            end
         end
         
         function SetTickLabels(obj,tDates)
