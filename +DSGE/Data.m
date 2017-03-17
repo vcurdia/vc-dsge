@@ -12,108 +12,118 @@ classdef Data < handle
     
     properties
         Source
+        TimeStart
+        TimeEnd
         SampleStart
-        NPreSample
         Var
-        Values
-        Tick
-        TickLabels
     end
 
     properties (SetAccess=protected)
+        Values
         TimeIdx
-        TimeStart
-        TimeEnd
         T
+        NPreSample
         NVar
+        Tick
+        TickLabels
     end
     
     methods
         function obj = Data(fn)
             if nargin>0
+                fprintf('\n*** Loading data from:\n%s\n',fn)
                 obj.Source = fn;
-                obj.Load
+                Raw = importdata(obj.Source);
+                obj.Var = {Raw.textdata{1,2:end}};
+                obj.Values = [...
+                    Raw.data;
+                    NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
+                obj.setTimeIdx(Raw.textdata(2:end,1)')
+                obj.setTick
             end
         end
         
-        function Load(obj)
-            fprintf('\n*** Loading data\n')
-            TimeElapsed = tic;
-            Raw = importdata(obj.Source);
-            Raw.TimeIdx = Raw.textdata(2:end,1)';
-            Raw.TimeStart = Raw.TimeIdx{1};
-            Raw.TimeEnd = Raw.TimeIdx{end};
-            Raw.T = length(Raw.TimeIdx);
-            Raw.Var = {Raw.textdata{1,2:end}};
-            Raw.NVar = length(Raw.Var);
-            Raw.Values = [Raw.data;nan(Raw.T-size(Raw.data,1),Raw.NVar)];
-            
-            if isempty(obj.TimeIdx)
-                obj.SetTime(Raw.TimeIdx{1,end});
+        function set.Var(obj,Var)
+            if ~isempty(obj.Var)
+                [tf,idx] = ismember(Var,obj.Var);
+                if ~all(tf)
+                    error('Variables not found in data.')
+                end
+                obj.Values = obj.Values(:,idx);
             end
-            [tfDates,idxDates] = ismember(obj.TimeIdx,Raw.TimeIdx);
-            if ~all(tfDates)
-                error('Requested time periods outside data file!')
-            end
-            obj.T = length(obj.TimeIdx);
-            
-            if isempty(obj.SampleStart)
-                obj.SetPreSample(0)
-            end
-            obj.NPreSample = ...
-                max(0,find(ismember(obj.TimeIdx,obj.SampleStart))-1);
-            
-            if isempty(obj.Var)
-                obj.Var = Raw.Var;
-            end
-            obj.NVar = length(obj.Var);
-            [tfVar,idxVar] = ismember(obj.Var,Raw.Var);
-            if ~all(tfVar)
-                error('Variable names do not match csv headers!')
-            end
-            
-            obj.Values = Raw.Values(idxDates,idxVar);
-            
-            if isempty(obj.Tick)
-                obj.SetTick
-            end
-            
-            fprintf('DataLoad: '), vctoc(TimeElapsed)
-            
+            obj.Var = Var;
+            obj.NVar = length(Var);
         end
         
-        function SetTime(obj,TimeStart,TimeEnd)
-            obj.TimeStart = TimeStart;
-            obj.TimeEnd = TimeEnd;
-            obj.TimeIdx = TimeIdxCreate(TimeStart,TimeEnd);
-            obj.T = length(obj.TimeIdx);
-        end
-        
-        function SetPreSample(obj,op)
-            if ischar(op)
-                obj.SampleStart = op;
-                obj.NPreSample = ...
-                    max(0,find(ismember(obj.TimeIdx,obj.SampleStart))-1);
-            else
-                obj.SampleStart = obj.TimeIdx(op+1);
-                obj.NPreSample = op;
+        function setTimeIdx(obj,tid)
+            if nargin==1
+                tid = {obj.TimeStart,obj.TimeEnd};
+            end
+            if length(tid)==2
+                tid = TimeIdxCreate(tid{:});
+            end
+            if ~isempty(obj.TimeIdx)
+                obj.Values = obj.Values(ismember(obj.TimeIdx,tid),:);
+            end
+            obj.TimeIdx = tid;
+            obj.T = length(tid);
+            if isempty(obj.TimeStart)
+                obj.TimeStart = tid{1};
+            end
+            if isempty(obj.TimeEnd)
+                obj.TimeEnd = tid{end};
+            end
+            if isempty(obj.SampleStart) ...
+                    || ~ismember(obj.SampleStart,obj.TimeIdx)
+                obj.SampleStart = obj.TimeStart;
             end
         end
         
-        function SetTickLabels(obj,tDates)
+        function set.TimeStart(obj,t)
+            if ~ismember(t,obj.TimeIdx)
+                error('Requested TimeStart out of data scope.')
+            end
+            obj.TimeStart = t;
+            if ~isempty(obj.TimeEnd)
+                obj.setTimeIdx
+            end
+        end
+        
+        function set.TimeEnd(obj,t)
+            if ~ismember(t,obj.TimeIdx)
+                error('Requested TimeEnd out of data scope.')
+            end
+            obj.TimeEnd = t;
+            if ~isempty(obj.TimeStart)
+                obj.setTimeIdx 
+            end
+        end
+        
+        function set.SampleStart(obj,t)
+            if ~ismember(t,obj.TimeIdx)
+                error('Requested SampleStart out of data scope.')
+            end
+            obj.SampleStart = t;
+            obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
+        end
+        
+        function setTickLabels(obj,tDates)
             tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
             obj.TickLabels = tDates;
             if isempty(obj.Tick) 
-                obj.SetTick
+                obj.setTick
             end
             if ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
-                obj.SetTick(obj.TickLabels)
+                obj.setTick(obj.TickLabels)
             end
+            tDates = obj.TimeIdx(obj.Tick);
+            tDates(~ismember(tDates,obj.TickLabels)) = {''};
+            obj.TickLabels = tDates;
         end
         
-        function SetTick(obj,idx)
+        function setTick(obj,idx)
             if nargin<2
-                idx = obj.FindFirstQ4:4:obj.T;
+                idx = obj.findfirstq4:4:obj.T;
             end
             if iscell(idx)
                 idx = find(ismember(obj.TimeIdx,idx));
@@ -124,14 +134,14 @@ classdef Data < handle
             if isempty(obj.TickLabels)
                 tStep = ceil(obj.T/4);
                 while mod(tStep,4), tStep = tStep-1; end
-                obj.SetTickLabels(obj.TimeIdx(obj.FindFirstQ4:tStep:obj.T))
+                obj.setTickLabels(obj.TimeIdx(obj.findfirstq4:tStep:obj.T))
             end
             TickLabels = obj.TimeIdx(idx);
             TickLabels(~ismember(TickLabels,obj.TickLabels)) = {''};
             obj.TickLabels = TickLabels;
         end
         
-        function t = FindFirstQ4(obj)
+        function t = findfirstq4(obj)
             for t=1:obj.T
                 if strcmp(obj.TimeIdx{t}(end),int2str(4))
                     break
@@ -139,6 +149,15 @@ classdef Data < handle
             end
         end
         
+        function new = copy(obj)
+            new = DSGE.Data;
+            % Copy all non-hidden properties.
+            pList = properties(obj);
+            for i = 1:length(pList)
+                new.(pList{i}) = obj.(pList{i});
+            end
+        end
+    
     end %methods
     
 end %class
