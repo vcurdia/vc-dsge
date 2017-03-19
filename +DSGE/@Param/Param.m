@@ -62,34 +62,6 @@ classdef Param < handle
             end
         end
         
-        function Show(obj,PropName)
-            p = struct;
-            if nargin==0 || isempty(PropName)
-                PropName = 'Values'; 
-            end
-            for j=1:obj.N
-                p.(obj.Names{j}) = obj.(PropName)(j);
-            end
-            fprintf('Parameter %s:\n',PropName)
-            disp(p)
-        end
-        
-        function SetValues(obj,ParNames,ParValues)
-            if ischar(ParNames), ParNames = {ParNames}; end
-            np = length(ParNames);
-            nv = length(ParValues);
-            if np>0 && np==nv
-                [tf,idxp] = ismember(ParNames,obj.Names);
-                obj.Values(idxp(tf)) = ParValues(tf);
-                if ~all(tf)
-                    fprintf('Invalid parameter names ignored:\n')
-                    fprintf('  %s\n',ParNames{~tf})
-                end
-            else
-                error(['List of parameter names is empty or has different ' ...
-                       'length from list of values.'])
-            end
-        end
         
         
     end %methods

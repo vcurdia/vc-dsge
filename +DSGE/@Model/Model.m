@@ -12,15 +12,15 @@ classdef Model < handle
     
     properties
         Name = '';
-        Param = initiatenames;
-        NumSolveParam = initiatenames;
+        Param = InitiateNames;
+        NumSolveParam = InitiateNames;
         NumSolveEq
-        CompoundParam = initiatenames;
-        AuxParam = initiatenames;
-        ObsVar = initiatenames;
-        StateVar = initiatenames;
-        ShockVar = initiatenames;
-        AuxVar = initiatenames;
+        CompoundParam = InitiateNames;
+        AuxParam = InitiateNames;
+        ObsVar = InitiateNames;
+        StateVar = InitiateNames;
+        ShockVar = InitiateNames;
+        AuxVar = InitiateNames;
         ObsEq
         StateEq
         AuxEq
@@ -33,6 +33,10 @@ classdef Model < handle
         Prior
         Posterior
         TimeElapsed = TimeTracker;
+        TablePrecision = 3;
+        TableMaxRows = 35;
+        TableMoveLeft = 1; 
+        TableLines = [];
     end
     
     properties (SetAccess = protected)
@@ -50,7 +54,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.SolveParam = p;
             else
-                obj.Param = setnames('Param',p);
+                obj.Param = SetNames('Param',p);
                 if obj.Param.N>0
                     obj.Param.Values = [p{:,2}]';
                 end
@@ -133,11 +137,37 @@ classdef Model < handle
             CheckEq(obj,'State')
         end
         
+        function showparamvalues(obj)
+            p = struct;
+            for j=1:obj.Param.N
+                p.(obj.Param.Names{j}) = obj.Param.Values(j);
+            end
+            fprintf('Parameter values:\n')
+            disp(p)
+        end
+        
+        function setparamvalues(obj,ParNames,ParValues)
+            if ischar(ParNames), ParNames = {ParNames}; end
+            np = length(ParNames);
+            nv = length(ParValues);
+            if np>0 && np==nv
+                [tf,idxp] = ismember(ParNames,obj.Param.Names);
+                obj.Param.Values(idxp(tf)) = ParValues(tf);
+                if ~all(tf)
+                    fprintf('Invalid parameter names ignored:\n')
+                    fprintf('  %s\n',ParNames{~tf})
+                end
+            else
+                error(['List of parameter names is empty or has different ' ...
+                       'length from list of values.'])
+            end
+        end
+        
     end %methods
     
 end %class
 
-function pp = setnames(pType,p)
+function pp = SetNames(pType,p)
     if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
                         'ObsVar','StateVar','ShockVar','AuxVar'})
         error('SetProperty called with invalid type.')
@@ -153,7 +183,7 @@ function pp = setnames(pType,p)
     end
 end
         
-function checkeq(obj,eqType)
+function CheckEq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.([eqType,'Var']).N;
     if nEq~=nVar
@@ -162,7 +192,7 @@ function checkeq(obj,eqType)
     end
 end
 
-function s = initiatenames
+function s = InitiateNames
     s.Names = {};
     s.PrettyNames = {};
     s.N = 0;
