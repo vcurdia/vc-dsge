@@ -19,6 +19,7 @@ function AnalyzeDist(obj)
 %% Analyze Parameters
 np = length(obj.Dist);
 pNames = obj.Model.Param.Names;
+obj.Median = nan(np,1);
 obj.Mode = nan(np,1);
 obj.DistParams = cell(np,1);
 obj.LPdfCmd = cell(np,1);
@@ -29,6 +30,7 @@ pOptions.Display = 'off';
 for j=1:np
 
     if strcmp(obj.Dist{j},'C')
+        obj.Median(j) = obj.Prior.Mean(j);
         obj.Mode(j) = obj.Mean(j);
         obj.SD(j) = 0;
         obj.LPdfCmd{j} = 0;
@@ -38,6 +40,7 @@ for j=1:np
     elseif strcmp(obj.Dist{j},'N')
         pmean = obj.Mean(j);
         psd = obj.SD(j);
+        obj.Median(j) = pmean;
         obj.Mode(j) = pmean;
         obj.DistParams{j} = [pmean,psd];
         obj.LPdfCmd{j} = sprintf('log(normpdf(%s,%.16f,%.16f))',...
@@ -57,6 +60,7 @@ for j=1:np
         obj.Mean(j) = pmean + psd*alambda;
         obj.SD(j) = psd*(1-adelta)^(1/2);
         obj.Mode(j) = max(0,pmean);
+        obj.Median(j) = norminv(0.5*aZ+acdf,pmean,psd);
         obj.DistParams{j} = [pmean,psd];
         obj.LPdfCmd{j} = sprintf(...
             ['log((%1$s>=0)'...
@@ -74,6 +78,7 @@ for j=1:np
         a = pmean*(pmean-pmean^2-psd^2)/psd^2;
         b = a*(1/pmean-1);
         obj.Mode(j) = min(max(0,(a-1)/(a+b-2)),1);
+        obj.Median(j) = betainv(0.5,a,b);
         obj.DistParams{j} = [a,b];
         obj.LPdfCmd{j} = sprintf('log(betapdf(%s,%.16f,%.16f))',pNames{j},a,b);
         obj.PdfCmd{j} = sprintf('betapdf(%%.16f,%.16f,%.16f)',a,b);
@@ -89,6 +94,7 @@ for j=1:np
         else
             obj.Mode(j) = NaN;
         end
+        obj.Median(j) = gaminv(0.5,a,b);
         obj.DistParams{j} = [a,b];
         obj.LPdfCmd{j} = sprintf('log(gampdf(%s,%.16f,%.16f))',pNames{j},a,b);
         obj.PdfCmd{j} = sprintf('gampdf(%%.16f,%.16f,%.16f)',a,b);
@@ -109,6 +115,7 @@ for j=1:np
         end
         b = (gamma(a-1/2)/pmean/gamma(a))^2;
         obj.Mode(j) = (1/b/(a+1/2))^(1/2);
+        obj.Median(j) = gaminv(0.5,a,b)^(-1/2);
         obj.DistParams{j} = [a,b];
         obj.LPdfCmd{j} = sprintf(...
             'log((%1$s>0)*(gampdf(%1$s^(-2),%2$.16f,%3$.16f)*2/%1$s^3))',...
@@ -128,6 +135,7 @@ for j=1:np
         end
         b = 1/pmean/(a-1);
         obj.Mode(j) = 1/b/(a+1);
+        obj.Median(j) = gaminv(0.5,a,b)^(-1);
         obj.DistParams{j} = [a,b];
         obj.LPdfCmd{j} = sprintf(...
             'log((%1$s>0)*(gampdf(%1$s^(-1),%2$.16f,%3$.16f)/%1$s^2))',...

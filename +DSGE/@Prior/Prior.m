@@ -18,6 +18,7 @@ classdef Prior < handle
     end
    
     properties (SetAccess = protected)
+        Median
         Mode
         Sample
         DistParams
