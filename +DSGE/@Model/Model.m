@@ -52,7 +52,7 @@ classdef Model < handle
         
         function set.Param(obj,p)
             if isstruct(p)
-                obj.SolveParam = p;
+                obj.Param = p;
             else
                 obj.Param = SetNames('Param',p);
                 if obj.Param.N>0

@@ -135,8 +135,8 @@ classdef Data < handle
             new = DSGE.Data;
             % Copy all non-hidden properties.
             pList = properties(obj);
-            for i = 1:length(pList)
-                new.(pList{i}) = obj.(pList{i});
+            for j = 1:length(pList)
+                new.(pList{j}) = obj.(pList{j});
             end
         end
     
