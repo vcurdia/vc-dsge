@@ -29,6 +29,12 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
+        Data
+        Prior
+        Posterior
+    end
+    
+    properties (SetAccess = protected)
         Mats
     end
    
