@@ -12,20 +12,20 @@ classdef Data < handle
     
     properties
         Source
-        TimeStart
-        TimeEnd
-        SampleStart
+        Values
+        TimeIdx
         Var
+        SampleStart
+        Tick
+        TickLabels
     end
 
     properties (SetAccess=protected)
-        Values
-        TimeIdx
+        TimeStart
+        TimeEnd
         T
         NPreSample
         NVar
-        Tick
-        TickLabels
     end
     
     methods
@@ -38,8 +38,8 @@ classdef Data < handle
                 obj.Values = [...
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
-                obj.setTimeIdx(Raw.textdata(2:end,1)')
-                obj.setTick
+                obj.TimeIdx = Raw.textdata(2:end,1)';
+                obj.setticklabels;
             end
         end
         
@@ -55,10 +55,7 @@ classdef Data < handle
             obj.NVar = length(Var);
         end
         
-        function setTimeIdx(obj,tid)
-            if nargin==1
-                tid = {obj.TimeStart,obj.TimeEnd};
-            end
+        function set.TimeIdx(obj,tid)
             if length(tid)==2
                 tid = TimeIdxCreate(tid{:});
             end
@@ -67,35 +64,11 @@ classdef Data < handle
             end
             obj.TimeIdx = tid;
             obj.T = length(tid);
-            if isempty(obj.TimeStart)
-                obj.TimeStart = tid{1};
-            end
-            if isempty(obj.TimeEnd)
-                obj.TimeEnd = tid{end};
-            end
+            obj.TimeStart = tid{1};
+            obj.TimeEnd = tid{end};
             if isempty(obj.SampleStart) ...
                     || ~ismember(obj.SampleStart,obj.TimeIdx)
                 obj.SampleStart = obj.TimeStart;
-            end
-        end
-        
-        function set.TimeStart(obj,t)
-            if ~ismember(t,obj.TimeIdx)
-                error('Requested TimeStart out of data scope.')
-            end
-            obj.TimeStart = t;
-            if ~isempty(obj.TimeEnd)
-                obj.setTimeIdx
-            end
-        end
-        
-        function set.TimeEnd(obj,t)
-            if ~ismember(t,obj.TimeIdx)
-                error('Requested TimeEnd out of data scope.')
-            end
-            obj.TimeEnd = t;
-            if ~isempty(obj.TimeStart)
-                obj.setTimeIdx 
             end
         end
         
@@ -107,46 +80,55 @@ classdef Data < handle
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
         end
         
-        function setTickLabels(obj,tDates)
+        function set.TickLabels(obj,tDates)
             tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
             obj.TickLabels = tDates;
-            if isempty(obj.Tick) 
-                obj.setTick
-            end
-            if ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
-                obj.setTick(obj.TickLabels)
+            if isempty(obj.Tick) ...
+                    || ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
+                obj.Tick = obj.TickLabels;
             end
             tDates = obj.TimeIdx(obj.Tick);
             tDates(~ismember(tDates,obj.TickLabels)) = {''};
             obj.TickLabels = tDates;
         end
         
-        function setTick(obj,idx)
-            if nargin<2
-                idx = obj.findfirstq4:4:obj.T;
-            end
+        function set.Tick(obj,idx)
             if iscell(idx)
                 idx = find(ismember(obj.TimeIdx,idx));
             end
             idx = idx(idx>0);
             idx = idx(idx<obj.T);
             obj.Tick = idx;
-            if isempty(obj.TickLabels)
-                tStep = ceil(obj.T/4);
-                while mod(tStep,4), tStep = tStep-1; end
-                obj.setTickLabels(obj.TimeIdx(obj.findfirstq4:tStep:obj.T))
-            end
             TickLabels = obj.TimeIdx(idx);
+            if isempty(obj.TickLabels)...
+                    || ~any(ismember(obj.TickLabels,TickLabels))
+                obj.TickLabels = TickLabels;
+            end
             TickLabels(~ismember(TickLabels,obj.TickLabels)) = {''};
             obj.TickLabels = TickLabels;
         end
         
-        function t = findfirstq4(obj)
+        function settickannual(obj,q)
+            if nargin<2, q = 4; end
+            obj.Tick = obj.findfirstquarter(q):4:obj.T;
+        end
+        
+        function t = findfirstquarter(obj,q)
+            if nargin<2, q = 4; end
             for t=1:obj.T
-                if strcmp(obj.TimeIdx{t}(end),int2str(4))
+                if strcmp(obj.TimeIdx{t}(end),int2str(q))
                     break
                 end
             end
+        end
+        
+        function setticklabels(obj,n,q)
+            if nargin<2, n = 5; end
+            if nargin<3, q = 4; end
+            obj.settickannual(q);
+            tStep = ceil(obj.T/(n-1));
+            while mod(tStep,4), tStep = tStep-1; end
+            obj.TickLabels = obj.TimeIdx(obj.findfirstquarter(q):tStep:obj.T);
         end
         
         function new = copy(obj)

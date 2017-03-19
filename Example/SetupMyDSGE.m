@@ -170,12 +170,9 @@ Param.AnalyzePrior;
 
 %% Data
 Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
-Data.TimeStart = '1987q3';
-Data.TimeEnd = '2009q3';
-Data.SampleStart = '1987q3';
+Data.TimeIdx = {'1987q3','2009q3'};
 Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
 Data.Var = Model.ObsVar.Names;
-Data.Load
 
 %% Create posterior
 % m = m.GenPost;
