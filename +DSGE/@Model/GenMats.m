@@ -1,4 +1,4 @@
-function obj = GenMats(obj)
+function GenMats(obj)
 
 % GenMats
 %
@@ -16,38 +16,24 @@ function obj = GenMats(obj)
 %
 % Created: January 22, 2016 by Vasco Curdia
 % 
-% Copyright (C) 2016 Vasco Curdia
-
-%% -------------------------------------------------------------------
+% Copyright (C) 2016-2017 Vasco Curdia
 
 %% Preamble
-
-action = 'GenMats';
-obj = obj.TrackTime(action,1);
-
 fprintf('\n*** Generate DSGE mats\n')
-
-%% -------------------------------------------------------------------
-
-%% Prepare parameters, variables and equations
-
 fprintf('Generating symbolic variables and systems of equations\n')
+TimeElapsed = tic;
 
 %% basic check
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
-    error('Cannot without specifying state variables and states')
+    error('Cannot proceed without specifying state variables and equations')
 end
 
 %% Sym Params
-list = {'','Fix','NumSolve','Compound'};
+list = {'','NumSolve','Compound'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
     if obj.(jstr).N>0, vcSym(obj.(jstr).Names{:}), end
 end
-if obj.FixParam.N==0
-    obj.FixParam.Values = [];
-end
-
 
 %% Constant
 vcSym('one')
@@ -79,7 +65,6 @@ for j=1:obj.ShockVar.N
     vcSym(vj)
     ShockVar_t(j) = eval(vj);
 end
-obj.Shocks2Show = obj.ShockVar.Names;
 
 %% Aux Var and Eq
 nV = obj.AuxVar.N;
@@ -104,39 +89,6 @@ if nV>0
     end
 end
 
-%% Set default FigPanels
-PanelList = {};
-if obj.ObsVar.N>0, PanelList{end+1} = 'ObsVar';end
-PanelList{end+1} = 'StateVar';
-if obj.AuxVar.N>0, PanelList{end+1} = 'AuxVar';end
-jP = 0;
-for jList=1:length(PanelList)
-    Listj = PanelList{jList};
-    nPanelj = ceil(obj.(Listj).N/obj.FigPanelMaxVar);
-    for j=1:nPanelj
-        jP = jP+1;
-        if obj.FigPanelMaxVar==1
-            obj.FigPanels(jP).Var = obj.(Listj).Names(j);
-            obj.FigPanels(jP).PrettyNames = obj.(Listj).PrettyNames(j);
-            obj.FigPanels(jP).Title = sprintf('%s_%s',Listj,...
-                                          obj.FigPanels(jP).Var{1});
-        else
-            if nPanelj>1
-                obj.FigPanels(jP).Title = sprintf('%s_%.0f',Listj,j);
-            else
-                obj.FigPanels(jP).Title = sprintf('%s',Listj);
-            end
-            obj.FigPanels(jP).Var = obj.(Listj).Names(...
-                (j-1)*obj.FigPanelMaxVar+1:min(j*obj.FigPanelMaxVar,...
-                                           obj.(Listj).N));
-            obj.FigPanels(jP).PrettyNames = obj.(Listj).PrettyNames(...
-                (j-1)*obj.FigPanelMaxVar+1:min(j*obj.FigPanelMaxVar,...
-                                           obj.(Listj).N));
-        end
-    end
-end
-
-
 %% Build Observation equations
 if obj.ObsVar.N>0
     ObsEq = sym(zeros(obj.ObsVar.N,1));
@@ -156,11 +108,11 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-obj.FileName.Mats = sprintf('%s_Mats',obj.Name);
+MatsFN = sprintf('%s_Mats',obj.Name);
 
 % Initiate file
-fid = fopen([obj.FileName.Mats,'.m'],'wt');
-fprintf(fid,'function Mats = %s(x,varargin)\n\n',obj.FileName.Mats);
+fid = fopen([MatsFN,'.m'],'wt');
+fprintf(fid,'function Mats = %s(x,varargin)\n\n',MatsFN);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
 fprintf(fid,'\n%% Default options\n');
@@ -173,13 +125,11 @@ fprintf(fid,'op.StoreAuxREE = 1;\n');
 fprintf(fid,'op.SolveREE = 1;\n');
 fprintf(fid,'op.fid = 1;\n');
 fprintf(fid,'op.verbose = 0;\n');
+fprintf(fid,'op.GensysAuthor = ''%s'';\n',obj.GensysAuthor);
 fprintf(fid,'op.gensys = {};\n');
 
 fprintf(fid,'\n%% Update options\n');
 fprintf(fid,'op = UpdateOptions(op,varargin);\n');
-
-fprintf(fid,'\n%% Verify options\n');
-fprintf(fid,'if op.StoreKF, op.SolveREE = 1; end\n');
 
 fprintf(fid,'\n%% Initiate Status\n');
 fprintf(fid,'Mats.Status = 1;\n');
@@ -189,16 +139,9 @@ fprintf(fid,'\n%% Map parameters\n');
 for j=1:obj.Param.N
     fprintf(fid,'%s = x(%.0f);\n',obj.Param.Names{j},j);
 end
-for j=1:obj.FixParam.N
-    fprintf(fid,'%s = x(%.0f);\n',obj.FixParam.Names{j},obj.Param.N+j);
-end
 fprintf(fid,'if op.StoreParam\n');
 for j=1:obj.Param.N
     fprintf(fid,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-end
-for j=1:obj.FixParam.N
-    fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
-            obj.FixParam.Names{j});
 end
 fprintf(fid,'end\n');
 
@@ -223,7 +166,7 @@ if obj.NumSolveParam.N>0
     fprintf(fid,'        EvalCompoundParam\n');
     for j=1:obj.NumSolveParam.N
         fprintf(fid,'        f(%.0f,jx) = %s;\n',j,...
-                obj.NumSolveParam.Eq{j});
+                obj.NumSolveEq{j});
     end
     fprintf(fid,'    end\n');
     fprintf(fid,'end\n');
@@ -263,12 +206,6 @@ if obj.NumSolveParam.N>0
         fprintf(fid,'%s = NumSolveSolution(%.0f);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
-    fprintf(fid,'if op.StoreParam\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'    Mats.NumSolveParam.%1$s = %1$s;\n',...
-                obj.NumSolveParam.Names{j});
-    end
-    fprintf(fid,'end\n');
 end
 
 if obj.CompoundParam.N>0
@@ -288,12 +225,10 @@ if obj.CompoundParam.N>0
     end
 end
 
-% Combine Fix, NumSolve, and Compound into AuxParam
-obj.AuxParam.N = obj.FixParam.N + obj.NumSolveParam.N + obj.CompoundParam.N;
-obj.AuxParam.Names = [obj.FixParam.Names;
-                    obj.NumSolveParam.Names;obj.CompoundParam.Names];
-obj.AuxParam.PrettyNames = [obj.FixParam.PrettyNames;
-                    obj.NumSolveParam.PrettyNames;
+% Combine NumSolve, and Compound into AuxParam
+obj.AuxParam.N = obj.NumSolveParam.N + obj.CompoundParam.N;
+obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
+obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
 
 fprintf(fid,'if op.StoreParam\n');
@@ -400,8 +335,7 @@ fprintf(fid,'if op.SolveREE\n');
 fprintf(fid,...
         '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
 fprintf(fid,...
-        '        ''%s'',op.fid,op.verbose,op.gensys{:});\n',...
-        obj.GensysAuthor);
+        '        op.GensysAuthor,op.fid,op.verbose,op.gensys{:});\n');
 fprintf(fid,'    Mats.REE = REE;\n');
 fprintf(fid,'    if ~all(REE.eu==1);\n');
 fprintf(fid,'        Mats.Status = 0;\n');
@@ -412,7 +346,7 @@ fprintf(fid,'end\n');
 
 if obj.ObsVar.N>0
     fprintf(fid,'\n%% Kalman Filter matrices\n');
-    fprintf(fid,'if op.StoreKF\n');
+    fprintf(fid,'if op.SolveREE && op.StoreKF\n');
     fprintf(fid,'    if all(Mats.REE.GBar(:)==0)\n');
     fprintf(fid,'        KF.StateVarBar = zeros(%.0f,1);\n',...
             obj.StateVar.N);
@@ -495,6 +429,9 @@ if obj.AuxVar.N>0
         end
         fprintf(fid,'        ];\n\n');
     end
+    fprintf(fid,'    if op.StoreAuxEq\n');
+    fprintf(fid,'        Mats.AuxEq = AuxEq;\n');
+    fprintf(fid,'    end\n');
     fprintf(fid,'    if op.SolveREE && op.StoreAuxREE\n');
     fprintf(fid,'        if ~isempty(REE.G1)\n');
     fprintf(fid,['            AuxREE.GBar = ',...
@@ -511,11 +448,6 @@ if obj.AuxVar.N>0
     fprintf(fid,'            AuxREE.G2 = [];\n');
     fprintf(fid,'        end\n');
     fprintf(fid,'    end\n');
-    fprintf(fid,'end\n');
-    fprintf(fid,'if op.StoreAuxEq\n');
-    fprintf(fid,'    Mats.AuxEq = AuxEq;\n');
-    fprintf(fid,'end\n');
-    fprintf(fid,'if op.StoreAuxREE\n');
     fprintf(fid,'    Mats.AuxREE = AuxREE;\n');
     fprintf(fid,'end\n');
 end
@@ -523,11 +455,9 @@ end
 % close file
 fprintf(fid,'end\n');
 fclose(fid);
-    
-%% -------------------------------------------------------------------
 
-%% Finish up
-obj = obj.TrackTime(action,0);
+%% Save handle to function
+obj.Mats = str2func(MatsFN);
 
-
-%% -------------------------------------------------------------------
+%% Save timer
+fprintf('GenMats: '), vctoc(TimeElapsed)

@@ -15,9 +15,9 @@
 
 %% Preamble
 clear all
-tic
 SetPath
 set(0,'defaultTextInterpreter','latex');
+TimeElapsed = tic;
 
 %% Initiate parallel pool
 % parpool(2)
@@ -25,61 +25,82 @@ set(0,'defaultTextInterpreter','latex');
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-m = DSGE('MyDSGE');
-mkdir(m.Name)
-cd(m.Name)
+Model = DSGE.Model('MyDSGE');
+mkdir(Model.Name)
+cd(Model.Name)
 
 %% Setup the model
 
-m.Param = {...
-    'omega', 'G', 1, 0.2,'$\omega$';
-    'xi', 'G', 0.1, 0.05,'$\xi$';
-    'eta', 'B', 0.6, 0.2,'$\eta$';
-    'zeta', 'B', 0.6, 0.2,'$\zeta$';
-    'rho', 'B', 0.7, 0.15,'$\rho$';
-    'phipi', 'N', 1.5, 0.25,'$\phi_\pi$';
-    'phix', 'N', 0.5, 0.2,'$\phi_x$';
-    'pistar', 'N', 2, 1,'$\pi^*$';
-    'ra', 'N', 2, 1,'$r^a$';
-    'gammaa', 'N', 3, .35,'$400\gamma$';
-    'rhodelta', 'B', 0.5, 0.2,'$\rho_\delta$';
-    'rhogamma', 'B', 0.5, 0.2,'$\rho_\gamma$';
-    'rhou', 'B', 0.5, 0.2,'$\rho_u$';
-    'sigmadelta', 'IG1', 0.5, 2,'$\sigma_\delta$';
-    'sigmagamma', 'IG1', 0.5, 2,'$\sigma_\gamma$';
-    'sigmau', 'IG1', 0.5, 2,'$\sigma_u$';
-    'sigmai', 'IG1', 0.5, 2,'$\sigma_i$';
-    };
+% % example for calibrated model
+% Param = DSGE.Param(Model,{...
+%     'beta', 0.99,'$\beta$';
+%     'omega', 1,'$\omega$';
+%     'xi', 0.1, '$\xi$';
+%     'eta', 0.6, '$\eta$';
+%     'zeta', 0.6,'$\zeta$';
+%     'rho', 0.7, '$\rho$';
+%     'phipi', 1.5, '$\phi_\pi$';
+%     'phix', 0.5, '$\phi_x$';
+%     'pistar', 2, '$\pi^*$';
+%     'ra', 2,'$r^a$';
+%     'gammaa', 3,'$400\gamma$';
+%     'rhodelta', 0.5, '$\rho_\delta$';
+%     'rhogamma', 0.5, '$\rho_\gamma$';
+%     'rhou', 0.5, '$\rho_u$';
+%     'sigmadelta', 0.5,'$\sigma_\delta$';
+%     'sigmagamma', 0.5,'$\sigma_\gamma$';
+%     'sigmau', 0.5, '$\sigma_u$';
+%     'sigmai', 0.5, '$\sigma_i$';
+%                  });
 
-m.FixParam = {...
-    'beta', 0.99,'$\beta$';
-    };
+% example for model w/ prior, to be estimated
+Param = DSGE.Param(Model,{...
+    'beta', 'C', 0.99, [], '$\beta$';
+    'omega', 'G', 1, 0.2, '$\omega$';
+    'xi', 'G', 0.1, 0.05, '$\xi$';
+    'eta', 'B', 0.6, 0.2, '$\eta$';
+    'zeta', 'B', 0.6, 0.2, '$\zeta$';
+    'rho', 'B', 0.7, 0.15, '$\rho$';
+    'phipi', 'N', 1.5, 0.25, '$\phi_\pi$';
+    'phix', 'N', 0.5, 0.2, '$\phi_x$';
+    'pistar', 'N', 2, 1, '$\pi^*$';
+    'ra', 'N', 2, 1, '$r^a$';
+    'gammaa', 'N', 3, 0.35, '$400\gamma$';
+    'rhodelta', 'B', 0.5, 0.2, '$\rho_\delta$';
+    'rhogamma', 'B', 0.5, 0.2, '$\rho_\gamma$';
+    'rhou', 'B', 0.5, 0.2, '$\rho_u$';
+    'sigmadelta', 'IG1', 0.5, 2, '$\sigma_\delta$';
+    'sigmagamma', 'IG1', 0.5, 2, '$\sigma_\gamma$';
+    'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
+    'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
+                 });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-m.NumSolveParam = {...
-    {...
-        'rA',1,'$r^A$';
-        'rB',1,'$r^B$';
-    },{...
-        '(rA+rB)/2-r';
-        'rA+0.5/400-rB';
-      }};
+Model.SetNumSolveParam({...
+    'rA',1,'$r^A$';
+    'rB',1,'$r^B$';
+                   });
+Model.SetNumSolveEq({...
+    '(rA+rB)/2-r';
+    'rA+0.5/400-rB';
+               });
 
-m.CompoundParam = {...
+Model.SetCompoundParam({...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
     'etagammatil','exp(gamma)/(exp(gamma)-eta)','$\tilde{\eta}_\gamma$';
     'phigamma','phigammatil*etagammatil','$\phi_\gamma$';
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
-    };
+                   });
 
-m.ObsVar = {...
+Model.SetObsVar({...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
-    'FFR', 'FFR'};
+    'FFR', 'FFR';
+                });
 
-m.StateVar = {...
+Model.SetStateVar({...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -95,24 +116,24 @@ m.StateVar = {...
     % a couple of artificial variables
     'YAL', '$Y_{A,t-1}$';
     'YAeL', '$Y_{A,t-1}^e$';
-    };
+                  });
 
-m.ShockVar = {...
+Model.SetShockVar({...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
-             }; 
+                  }); 
 
-m.AuxVar = {'r','ir_t-pi_tF','$r$'};
+Model.SetAuxVar({'r','ir_t-pi_tF','$r$'});
 
-m.ObsEq = {...
+Model.SetObsEq({...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
-    };
+               });
 
-m.StateEq = {...
+Model.SetStateEq({...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -135,39 +156,34 @@ m.StateEq = {...
     % Auxiliary equations
     'YAL_t-YA_tL'; 
     'YAeL_t-YAe_tL';
-    };
+                 });
+
 
 %% Generate Mats
-m = m.GenMats;
-Mats = m.Mats(m.Param.PriorMean);
+Model.GenMats
+Mats = Model.Mats(Model.Param.Values);
+% Model.MakeIRF
 
 %% Analyze Prior
-m = m.AnalyzePrior;
-
-% m.SimDist = 'PriorDraws';
-% m.SimNDraws = 100;
-% m = m.MakeIRF;
+Param.AnalyzePrior;
+% Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
 
 %% Data
-m.FileName.Data = '../Data/Data_1987q3_2009q3.csv';
-m.DataPeriod = {'1987q3','2009q3'};
-m.SampleStart = '1987q3';
-m.DataTickLabels = {'1990q1','1995q1','2000q1','2005q1'};
-m = m.AnalyzeData;
+Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
+Data.TimeIdx = {'1987q3','2009q3'};
+Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
+Data.Var = Model.ObsVar.Names;
 
 %% Create posterior
-m = m.GenPost;
+% m = m.GenPost;
 
-%% -------------------------------------------------------------------
 
 %% Finish up
-fprintf('\n%s\n\n',vctoc)
-save(m.Name)
+save(Model.Name)
 cd ..
+fprintf('\n'), vctoc(TimeElapsed)
 
 % delete(gcp)
-
 % exit
 
-%% -------------------------------------------------------------------
 
