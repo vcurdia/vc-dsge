@@ -23,10 +23,6 @@ classdef Param < handle
         Percentiles = [0.01, 0.025, 0.05, 0.15, 0.25, ...
                        0.75, 0.85, 0.95, 0.975, 0.99];
         PriorNDraws = 1000;
-        TablePrecision = 3;
-        TableMaxRows = 35;
-        TableMoveLeft = 1; 
-        TableLines = [];
     end
    
     methods

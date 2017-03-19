@@ -15,11 +15,15 @@ classdef Prior < handle
         Dist
         Mean
         SD
-        Mode
-        Sample
     end
    
     properties (SetAccess = protected)
+        Mode
+        Sample
+        DistParams
+        LPdfCmd
+        PdfCmd
+        RndCmd
     end
     
     methods
@@ -37,20 +41,17 @@ classdef Prior < handle
                 else
                     m.Param.PrettyNames = m.Param.Names;
                 end
-                if ismember(nc,[2,3])
-                    m.Param.Values = [p{:,2}]';
-                else
-                    obj.Dist = p(:,2);
-                    obj.Mean = [p{:,3}]';
-                    for j=1:np
-                        if isempty(p{j,4})
-                            p{j,4} = 0;
-                        end
+                obj.Dist = p(:,2);
+                obj.Mean = [p{:,3}]';
+                for j=1:np
+                    if isempty(p{j,4})
+                        p{j,4} = 0;
                     end
-                    obj.SD = [p{:,4}]';
-                    m.Param.Values = obj.Mean;
-                    m.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 end
+                obj.SD = [p{:,4}]';
+                m.Param.Values = obj.Mean;
+                m.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
+                obj.AnalyzeDist
             end
         end
         
