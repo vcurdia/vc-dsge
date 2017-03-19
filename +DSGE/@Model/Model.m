@@ -12,15 +12,15 @@ classdef Model < handle
     
     properties
         Name = '';
-        Param
-        NumSolveParam = InitiateNames;
+        Param = initiatenames;
+        NumSolveParam = initiatenames;
         NumSolveEq
-        CompoundParam = InitiateNames;
-        AuxParam = InitiateNames;
-        ObsVar = InitiateNames;
-        StateVar = InitiateNames;
-        ShockVar = InitiateNames;
-        AuxVar = InitiateNames;
+        CompoundParam = initiatenames;
+        AuxParam = initiatenames;
+        ObsVar = initiatenames;
+        StateVar = initiatenames;
+        ShockVar = initiatenames;
+        AuxVar = initiatenames;
         ObsEq
         StateEq
         AuxEq
@@ -32,6 +32,7 @@ classdef Model < handle
         Data
         Prior
         Posterior
+        TimeElapsed = TimeTracker;
     end
     
     properties (SetAccess = protected)
@@ -42,6 +43,17 @@ classdef Model < handle
         function obj = Model(Name)
             if nargin>0
                 obj.Name = Name;
+            end
+        end
+        
+        function set.Param(obj,p)
+            if isstruct(p)
+                obj.SolveParam = p;
+            else
+                obj.Param = setnames('Param',p);
+                if obj.Param.N>0
+                    obj.Param.Values = [p{:,2}]';
+                end
             end
         end
         
@@ -125,8 +137,8 @@ classdef Model < handle
     
 end %class
 
-function pp = SetNames(pType,p)
-    if ~ismember(pType,{'NumSolveParam','CompoundParam',...
+function pp = setnames(pType,p)
+    if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
                         'ObsVar','StateVar','ShockVar','AuxVar'})
         error('SetProperty called with invalid type.')
     end
@@ -134,14 +146,14 @@ function pp = SetNames(pType,p)
     [pp.N,nc] = size(p);
     pp.Names = p(:,1);
     if nc==(2+... 
-            ismember(pType,{'NumSolveParam','CompoundParam','AuxVar'}))
+            ismember(pType,{'Param','NumSolveParam','CompoundParam','AuxVar'}))
         pp.PrettyNames = p(:,nc);
     else
         pp.PrettyNames = pp.Names;
     end
 end
         
-function CheckEq(obj,eqType)
+function checkeq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.([eqType,'Var']).N;
     if nEq~=nVar
@@ -150,10 +162,10 @@ function CheckEq(obj,eqType)
     end
 end
 
-function s = InitiateNames
-    s.N = 0;
+function s = initiatenames
     s.Names = {};
     s.PrettyNames = {};
+    s.N = 0;
 end
 
 
