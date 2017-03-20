@@ -1,6 +1,6 @@
-function MakeIRF(obj,varargin)
+function makeirf(obj,varargin)
 
-% MakeIRF
+% makeirf
 % 
 % Generates IRF for DSGE model
 % 
@@ -32,7 +32,7 @@ op.PlotDir = 'Plots_IRF/';
 op.Fig = struct;
 
 %% Update options
-op = UpdateOptions(op,varargin{:});
+op = updateoptions(op,varargin{:});
 
 %% Check options
 nShocks2Show = length(op.Shocks2Show);

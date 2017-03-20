@@ -1,4 +1,4 @@
-% SetupMyDSGE
+% setupMyDSGE
 %
 % This file gives an example of how to use the vcDSGE package
 %

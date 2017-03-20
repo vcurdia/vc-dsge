@@ -1,6 +1,6 @@
-function GenMats(obj)
+function genmats(obj)
 
-% GenMats
+% genmats
 %
 % Analyzes the DSGE structure and generates code to evaluate the DSGE for a 
 % given parameter vector.

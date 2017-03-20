@@ -1,6 +1,6 @@
-function FigPanels = SetVarFigPanels(obj,varargin)
+function FigPanels = setvarfigpanels(obj,varargin)
 
-% SetVarFigPanels
+% setvarfigpanels
 % 
 % Generates figure panels to show variables from DSGE model
 % 
@@ -19,7 +19,7 @@ op.FigShape = {};
 op.Scale = 1;
 
 %% Update options
-op = UpdateOptions(op,varargin{:});
+op = updateoptions(op,varargin{:});
 
 %% Check options
 if isempty(op.PanelList)
