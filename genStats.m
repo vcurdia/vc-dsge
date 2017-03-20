@@ -1,6 +1,6 @@
-function dStats = genStats(data,varargin)
+function dStats = genstats(data,varargin)
 
-% genStats
+% genstats
 %
 % Generate descriptive statistics
 %
