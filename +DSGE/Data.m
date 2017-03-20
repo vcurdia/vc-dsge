@@ -57,7 +57,7 @@ classdef Data < handle
         
         function set.TimeIdx(obj,tid)
             if length(tid)==2
-                tid = TimeIdxCreate(tid{:});
+                tid = createTimeIdx(tid{:});
             end
             if ~isempty(obj.TimeIdx)
                 obj.Values = obj.Values(ismember(obj.TimeIdx,tid),:);

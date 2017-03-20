@@ -1,6 +1,6 @@
-function [REE,fmat,fwt,ywt,gev] = solveree(StateEq,Author,varargin)
+function [REE,fmat,fwt,ywt,gev] = solveREE(StateEq,Author,varargin)
 
-% solveree
+% solveREE
 %
 % Uses gensys to solve for the REE
 %
