@@ -12,15 +12,15 @@ classdef Model < handle
     
     properties
         Name = '';
-        Param = InitiateNames;
-        NumSolveParam = InitiateNames;
+        Param = initiatenames;
+        NumSolveParam = initiatenames;
         NumSolveEq
-        CompoundParam = InitiateNames;
-        AuxParam = InitiateNames;
-        ObsVar = InitiateNames;
-        StateVar = InitiateNames;
-        ShockVar = InitiateNames;
-        AuxVar = InitiateNames;
+        CompoundParam = initiatenames;
+        AuxParam = initiatenames;
+        ObsVar = initiatenames;
+        StateVar = initiatenames;
+        ShockVar = initiatenames;
+        AuxVar = initiatenames;
         ObsEq
         StateEq
         AuxEq
@@ -54,7 +54,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.Param = p;
             else
-                obj.Param = SetNames('Param',p);
+                obj.Param = setnames('Param',p);
                 if obj.Param.N>0
                     obj.Param.Values = [p{:,2}]';
                 end
@@ -65,7 +65,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.NumSolveParam = p;
             else
-                obj.NumSolveParam = SetNames('NumSolveParam',p);
+                obj.NumSolveParam = setnames('NumSolveParam',p);
                 if obj.NumSolveParam.N>0
                     obj.NumSolveParam.Guess = [p{:,2}]';
                 end
@@ -85,7 +85,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.CompoundParam = p;
             else
-                obj.CompoundParam = SetNames('CompoundParam',p);
+                obj.CompoundParam = setnames('CompoundParam',p);
                 if obj.CompoundParam.N>0
                     obj.CompoundParam.Expressions = p(:,2);
                 end
@@ -96,7 +96,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.ObsVar = p;
             else
-                obj.ObsVar = SetNames('ObsVar',p);
+                obj.ObsVar = setnames('ObsVar',p);
             end
         end
     
@@ -104,7 +104,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.StateVar = p;
             else
-                obj.StateVar = SetNames('StateVar',p);
+                obj.StateVar = setnames('StateVar',p);
             end
         end
     
@@ -112,7 +112,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.ShockVar = p;
             else
-                obj.ShockVar = SetNames('ShockVar',p);
+                obj.ShockVar = setnames('ShockVar',p);
             end
         end
     
@@ -120,7 +120,7 @@ classdef Model < handle
             if isstruct(p)
                 obj.AuxVar = p;
             else
-                obj.AuxVar = SetNames('AuxVar',p);
+                obj.AuxVar = setnames('AuxVar',p);
                 if obj.AuxVar.N>0
                     obj.AuxEq = p(:,2);
                 end
@@ -129,12 +129,12 @@ classdef Model < handle
         
         function SetObsEq(obj,eq)
             obj.ObsEq = eq;
-            CheckEq(obj,'Obs')
+            checkeq(obj,'Obs')
         end
     
         function SetStateEq(obj,eq)
             obj.StateEq = eq;
-            CheckEq(obj,'State')
+            checkeq(obj,'State')
         end
         
         function showparamvalues(obj)
@@ -167,7 +167,7 @@ classdef Model < handle
     
 end %class
 
-function pp = SetNames(pType,p)
+function pp = setnames(pType,p)
     if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
                         'ObsVar','StateVar','ShockVar','AuxVar'})
         error('SetProperty called with invalid type.')
@@ -183,7 +183,7 @@ function pp = SetNames(pType,p)
     end
 end
         
-function CheckEq(obj,eqType)
+function checkeq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.([eqType,'Var']).N;
     if nEq~=nVar
@@ -192,7 +192,7 @@ function CheckEq(obj,eqType)
     end
 end
 
-function s = InitiateNames
+function s = initiatenames
     s.Names = {};
     s.PrettyNames = {};
     s.N = 0;
