@@ -1,6 +1,6 @@
-function AnalyzeDist(obj)
+function analyzeDist(obj)
 
-% AnalyzeDist
+% analyzeDist
 %
 % Analyzes prior distribution
 %

@@ -39,7 +39,7 @@ classdef Data < handle
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
                 obj.TimeIdx = Raw.textdata(2:end,1)';
-                obj.SetTickLabels;
+                obj.setTickLabels;
             end
         end
         
@@ -57,7 +57,7 @@ classdef Data < handle
         
         function set.TimeIdx(obj,tid)
             if length(tid)==2
-                tid = TimeIdxCreate(tid{:});
+                tid = createTimeIdx(tid{:});
             end
             if ~isempty(obj.TimeIdx)
                 obj.Values = obj.Values(ismember(obj.TimeIdx,tid),:);
@@ -108,12 +108,12 @@ classdef Data < handle
             obj.TickLabels = TickLabels;
         end
         
-        function SetTickAnnual(obj,q)
+        function setTickAnnual(obj,q)
             if nargin<2, q = 4; end
-            obj.Tick = obj.FindFirstQuarter(q):4:obj.T;
+            obj.Tick = obj.findQuarter(q):4:obj.T;
         end
         
-        function t = FindFirstQuarter(obj,q)
+        function t = findQuarter(obj,q)
             if nargin<2, q = 4; end
             for t=1:obj.T
                 if strcmp(obj.TimeIdx{t}(end),int2str(q))
@@ -122,13 +122,13 @@ classdef Data < handle
             end
         end
         
-        function SetTickLabels(obj,n,q)
+        function setTickLabels(obj,n,q)
             if nargin<2, n = 5; end
             if nargin<3, q = 4; end
-            obj.SetTickAnnual(q);
+            obj.setTickAnnual(q);
             tStep = ceil(obj.T/(n-1));
             while mod(tStep,4), tStep = tStep-1; end
-            obj.TickLabels = obj.TimeIdx(obj.FindFirstQuarter(q):tStep:obj.T);
+            obj.TickLabels = obj.TimeIdx(obj.findQuarter(q):tStep:obj.T);
         end
         
         function new = Copy(obj)

@@ -1,8 +1,8 @@
-function out = SumStats(data,varargin)
+function dStats = genstats(data,varargin)
 
-% SumStats
+% genstats
 %
-% Descriptive statistics
+% Generate descriptive statistics
 %
 % ...........................................................................
 % 
@@ -18,14 +18,14 @@ op.Percentiles = [0.01, 0.025, 0.05, 0.15, 0.25, ...
 op = UpdateOptions(op,varargin{:});
 
 %% create stats
-out = struct;
-out.Mean = mean(data,2);
-out.SD = std(data,0,2);
-out.Min = min(data,2);
-out.Max = max(data,2);
-out.Median = prctile(data,50,2);
+dStats = struct;
+dStats.Mean = mean(data,2);
+dStats.SD = std(data,0,2);
+dStats.Min = min(data,2);
+dStats.Max = max(data,2);
+dStats.Median = prctile(data,50,2);
 for jPrc=1:length(op.Percentiles)
-    out.(op.Percentiles{jPrc}) = ...
+    dStats.(op.Percentiles{jPrc}) = ...
         prctile(data,100*op.Percentiles(jPrc),2);
 end
 
