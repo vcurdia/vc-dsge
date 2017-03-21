@@ -15,6 +15,7 @@ classdef Prior < handle
         Dist
         Mean
         SD
+        TimeElapsed = TimeTracker;
     end
    
     properties (SetAccess = protected)
