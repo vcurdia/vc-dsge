@@ -457,7 +457,7 @@ fprintf(fid,'end\n');
 fclose(fid);
 
 %% Save handle to function
-obj.Mats = str2func(MatsFN);
+obj.mats = str2func(MatsFN);
 
 %% Save timer
 obj.TimeElapsed.stop('GenMats')
