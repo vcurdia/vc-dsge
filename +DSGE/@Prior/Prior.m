@@ -52,7 +52,7 @@ classdef Prior < handle
                 obj.SD = [p{:,4}]';
                 m.Param.Values = obj.Mean;
                 m.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
-                obj.analyzeDist
+                obj.analyzedist
             end
         end
         

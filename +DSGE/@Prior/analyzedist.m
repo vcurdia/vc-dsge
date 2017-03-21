@@ -30,7 +30,7 @@ pOptions.Display = 'off';
 for j=1:np
 
     if strcmp(obj.Dist{j},'C')
-        obj.Median(j) = obj.Prior.Mean(j);
+        obj.Median(j) = obj.Mean(j);
         obj.Mode(j) = obj.Mean(j);
         obj.SD(j) = 0;
         obj.LPdfCmd{j} = 0;

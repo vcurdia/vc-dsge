@@ -21,7 +21,7 @@ function genmats(obj)
 %% Preamble
 fprintf('\n*** Generate DSGE mats\n')
 fprintf('Generating symbolic variables and systems of equations\n')
-TimeElapsed = tic;
+obj.TimeElapsed.start('GenMats')
 
 %% basic check
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
@@ -32,17 +32,17 @@ end
 list = {'','NumSolve','Compound'};
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(jstr).N>0, vcSym(obj.(jstr).Names{:}), end
+    if obj.(jstr).N>0, vcsym(obj.(jstr).Names{:}), end
 end
 
 %% Constant
-vcSym('one')
+vcsym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
 for j=1:obj.ObsVar.N
     vj = [obj.ObsVar.Names{j},'_t'];
-    vcSym(vj)
+    vcsym(vj)
     ObsVar_t(j) = eval(vj);
 end
 
@@ -52,7 +52,7 @@ StateVar_tF = sym(zeros(1,obj.StateVar.N));
 StateVar_tL = sym(zeros(1,obj.StateVar.N)); 
 for j=1:obj.StateVar.N
     vj = [obj.StateVar.Names{j},'_t'];
-    vcSym(vj,[vj,'F'],[vj,'L'])
+    vcsym(vj,[vj,'F'],[vj,'L'])
     StateVar_t(j) = eval(vj);
     StateVar_tF(j) = eval([vj,'F']);
     StateVar_tL(j) = eval([vj,'L']);
@@ -62,7 +62,7 @@ end
 ShockVar_t = sym(zeros(1,obj.ShockVar.N)); 
 for j=1:obj.ShockVar.N
     vj = [obj.ShockVar.Names{j},'_t'];
-    vcSym(vj)
+    vcsym(vj)
     ShockVar_t(j) = eval(vj);
 end
 
@@ -129,7 +129,7 @@ fprintf(fid,'op.GensysAuthor = ''%s'';\n',obj.GensysAuthor);
 fprintf(fid,'op.gensys = {};\n');
 
 fprintf(fid,'\n%% Update options\n');
-fprintf(fid,'op = UpdateOptions(op,varargin);\n');
+fprintf(fid,'op = updateoptions(op,varargin);\n');
 
 fprintf(fid,'\n%% Initiate Status\n');
 fprintf(fid,'Mats.Status = 1;\n');
@@ -333,7 +333,7 @@ fprintf(fid,'end\n');
 fprintf(fid,'\n%% Solve REE\n');
 fprintf(fid,'if op.SolveREE\n');
 fprintf(fid,...
-        '    [REE,fmat,fwt,ywt,gev] = SolveREE(StateEq,...\n');
+        '    [REE,fmat,fwt,ywt,gev] = solveree(StateEq,...\n');
 fprintf(fid,...
         '        op.GensysAuthor,op.fid,op.verbose,op.gensys{:});\n');
 fprintf(fid,'    Mats.REE = REE;\n');
@@ -460,4 +460,4 @@ fclose(fid);
 obj.Mats = str2func(MatsFN);
 
 %% Save timer
-fprintf('GenMats: '), vctoc(TimeElapsed)
+obj.TimeElapsed.stop('GenMats')
