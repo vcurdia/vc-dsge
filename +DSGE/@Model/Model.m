@@ -29,9 +29,6 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
-        Data
-        Prior
-        Posterior
         TimeElapsed = TimeTracker;
     end
     

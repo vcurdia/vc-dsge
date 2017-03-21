@@ -165,7 +165,7 @@ Mats = model.mats(model.Param.Values);
 % model.makeirf
 
 %% Describe Prior
-prior.analyze
+prior.analyze(model)
 % model.makeirf('Dist','PriorDraws','NDraws',1000)
 
 %% Data

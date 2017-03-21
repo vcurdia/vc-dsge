@@ -11,7 +11,7 @@ classdef Prior < handle
 % Copyright (C) 2017 Vasco Curdia
     
     properties
-        Model
+        ParamNames
         Dist
         Mean
         SD
@@ -19,11 +19,11 @@ classdef Prior < handle
     end
    
     properties (SetAccess = protected)
+        NParam
         Mode
         Median
         Prc05
         Prc95
-        NParam
         Sample
         DistParam
         LPdfCmd
@@ -33,19 +33,16 @@ classdef Prior < handle
     end
     
     methods
-        function obj = Prior(m,p)
-            if nargin>0
-                obj.Model = m;
-                m.Prior = obj;
-            end
+        function obj = Prior(model,p)
             if nargin>1 && ~isempty(p)
                 [obj.NParam,nc] = size(p);
-                m.Param.N = obj.NParam;
-                m.Param.Names = p(:,1);
+                model.Param.N = obj.NParam;
+                obj.ParamNames = p(:,1);
+                model.Param.Names = obj.ParamNames;
                 if nc==5
-                    m.Param.PrettyNames = p(:,nc);
+                    model.Param.PrettyNames = p(:,nc);
                 else
-                    m.Param.PrettyNames = m.Param.Names;
+                    model.Param.PrettyNames = model.Param.Names;
                 end
                 obj.Dist = p(:,2);
                 obj.Mean = [p{:,3}]';
@@ -55,8 +52,8 @@ classdef Prior < handle
                     end
                 end
                 obj.SD = [p{:,4}]';
-                m.Param.Values = obj.Mean;
-                m.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
+                model.Param.Values = obj.Mean;
+                model.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
             end
         end

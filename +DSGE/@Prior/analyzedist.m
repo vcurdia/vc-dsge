@@ -18,7 +18,7 @@ function analyzedist(obj)
 
 %% Analyze Parameters
 np = obj.NParam;
-pNames = obj.Model.Param.Names;
+pNames = obj.ParamNames;
 obj.Mode = nan(np,1);
 obj.Median = nan(np,1);
 obj.Prc05 = nan(np,1);
