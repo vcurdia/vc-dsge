@@ -17,7 +17,7 @@
 clear all
 setpath
 set(0,'defaultTextInterpreter','latex');
-TimeElapsed = tic;
+tic
 
 %% Initiate parallel pool
 % parpool(2)
@@ -25,14 +25,14 @@ TimeElapsed = tic;
 %% -------------------------------------------------------------------
 
 %% Initiate DSGE
-Model = DSGE.Model('MyDSGE');
-mkdir(Model.Name)
-cd(Model.Name)
+model = DSGE.Model('MyDSGE');
+mkdir(model.Name)
+cd(model.Name)
 
 %% Setup the model
 
 % % example for calibrated model
-% Model.Param = {...
+% model.Param = {...
 %     'beta', 0.99,'$\beta$';
 %     'omega', 1,'$\omega$';
 %     'xi', 0.1, '$\xi$';
@@ -54,7 +54,7 @@ cd(Model.Name)
 %                  };
 
 % example for model w/ prior, to be estimated
-Prior = DSGE.Prior(Model,{...
+prior = DSGE.Prior(model,{...
     'beta', 'C', 0.99, [], '$\beta$';
     'omega', 'G', 1, 0.2, '$\omega$';
     'xi', 'G', 0.1, 0.05, '$\xi$';
@@ -76,16 +76,16 @@ Prior = DSGE.Prior(Model,{...
                  });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
-Model.NumSolveParam = {...
+model.NumSolveParam = {...
     'rA',1,'$r^A$';
     'rB',1,'$r^B$';
                    };
-Model.NumSolveEq = {...
+model.NumSolveEq = {...
     '(rA+rB)/2-r';
     'rA+0.5/400-rB';
                };
 
-Model.CompoundParam = {...
+model.CompoundParam = {...
     'gamma','gammaa/400','$\gamma$';
     'r','ra/400','$r$';
     'phigammatil','exp(gamma)/(exp(gamma)-beta*eta)','$\tilde{\phi}_\gamma$';
@@ -94,13 +94,13 @@ Model.CompoundParam = {...
     'etagamma','eta/exp(gamma)','$\eta_\gamma$';
                    };
 
-Model.ObsVar = {...
+model.ObsVar = {...
     'DGDP', 'GDP Growth';
     'PI', 'Inflation';
     'FFR', 'FFR';
                 };
 
-Model.StateVar = {...
+model.StateVar = {...
     % Regular variables
     'xtil', '$\tilde{x}$';
     'YA', '$Y_A$';
@@ -118,22 +118,22 @@ Model.StateVar = {...
     'YAeL', '$Y_{A,t-1}^e$';
                   };
 
-Model.ShockVar = {...
+model.ShockVar = {...
     'edelta', '$\varepsilon_\delta$';
     'egamma', '$\varepsilon_\gamma$';
     'eu', '$\varepsilon_u$';
     'ei', '$\varepsilon_i$';
                   }; 
 
-Model.AuxVar = {'r','ir_t-pi_tF','$r$'};
+model.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
-Model.ObsEq = {...
+model.ObsEq = {...
     'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
     'pistar*one+400*pi_t - PI_t';
     '(ra+pistar)*one+400*ir_t - FFR_t';
                };
 
-Model.StateEq = {...
+model.StateEq = {...
     % IS Block
     'xtil_tF-phigamma^(-1)*(ir_t-pi_tF-re_t)-xtil_t';
     ['(xe_t-etagamma*(YAL_t-YAeL_t))-beta*etagamma*(xe_tF-etagamma*xe_t)',...
@@ -160,17 +160,18 @@ Model.StateEq = {...
 
 
 %% Generate Mats
-Model.genmats
-Mats = Model.Mats(Model.Param.Values);
-% Model.MakeIRF
+model.genmats
+Mats = model.mats(model.Param.Values);
+% model.makeirf
 
-vctoc(TimeElapsed),return
+%% Describe Prior
+% prior.
+% Param.AnalyzePrior;
+% model.makeirf('Dist','PriorDraws','NDraws',1000)
+
+vctoc,return
 
 
-
-%% Analyze Prior
-Param.AnalyzePrior;
-% Model.MakeIRF('Dist','PriorDraws','NDraws',1000)
 
 %% Data
 Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
@@ -185,7 +186,7 @@ Data.Var = Model.ObsVar.Names;
 %% Finish up
 save(Model.Name)
 cd ..
-fprintf('\n'), vctoc(TimeElapsed)
+fprintf('\n'),vctoc
 
 % delete(gcp)
 % exit
