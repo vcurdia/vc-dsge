@@ -40,7 +40,7 @@ classdef Model < handle
     end
     
     properties (SetAccess = protected)
-        Mats
+        mats
     end
    
     methods
