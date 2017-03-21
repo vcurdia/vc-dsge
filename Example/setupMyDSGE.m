@@ -165,26 +165,21 @@ Mats = model.mats(model.Param.Values);
 % model.makeirf
 
 %% Describe Prior
-% prior.
-% Param.AnalyzePrior;
+prior.analyze
 % model.makeirf('Dist','PriorDraws','NDraws',1000)
-
-vctoc,return
-
-
 
 %% Data
 Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
 Data.TimeIdx = {'1987q3','2009q3'};
 Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
-Data.Var = Model.ObsVar.Names;
+Data.Var = model.ObsVar.Names;
 
 %% Create posterior
 % m = m.GenPost;
 
 
 %% Finish up
-save(Model.Name)
+save(model.Name)
 cd ..
 fprintf('\n'),vctoc
 

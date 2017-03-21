@@ -1,4 +1,4 @@
-function dStats = genstats(data,varargin)
+function dStats = genstats(data,Percentiles)
 
 % genstats
 %
@@ -11,11 +11,9 @@ function dStats = genstats(data,varargin)
 % Copyright 2017 by Vasco Curdia
 
 %% Default Options
-op.Percentiles = [0.01, 0.025, 0.05, 0.15, 0.25, ...
-                       0.75, 0.85, 0.95, 0.975, 0.99];
-
-%% Update options
-op = UpdateOptions(op,varargin{:});
+if nargin<2
+    Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
+end
 
 %% create stats
 dStats = struct;
@@ -24,8 +22,8 @@ dStats.SD = std(data,0,2);
 dStats.Min = min(data,2);
 dStats.Max = max(data,2);
 dStats.Median = prctile(data,50,2);
-for jPrc=1:length(op.Percentiles)
-    dStats.(op.Percentiles{jPrc}) = ...
-        prctile(data,100*op.Percentiles(jPrc),2);
+for jPrc=1:length(Percentiles)
+    dStats.(sprintf('Prc%02.0f',100*Percentiles(jPrc))) = ...
+        prctile(data,100*Percentiles(jPrc),2);
 end
 

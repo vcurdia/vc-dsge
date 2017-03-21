@@ -19,14 +19,17 @@ classdef Prior < handle
     end
    
     properties (SetAccess = protected)
-        Median
         Mode
+        Median
+        Prc05
+        Prc95
         NParam
         Sample
-        DistParams
+        DistParam
         LPdfCmd
         PdfCmd
         RndCmd
+        LPdfCorrection
     end
     
     methods

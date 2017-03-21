@@ -33,10 +33,6 @@ classdef Model < handle
         Prior
         Posterior
         TimeElapsed = TimeTracker;
-        TablePrecision = 3;
-        TableMaxRows = 35;
-        TableMoveLeft = 1; 
-        TableLines = [];
     end
     
     properties (SetAccess = protected)
