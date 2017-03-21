@@ -20,6 +20,7 @@ classdef Prior < handle
     properties (SetAccess = protected)
         Median
         Mode
+        NParam
         Sample
         DistParams
         LPdfCmd
@@ -34,8 +35,8 @@ classdef Prior < handle
                 m.Prior = obj;
             end
             if nargin>1 && ~isempty(p)
-                [np,nc] = size(p);
-                m.Param.N = np;
+                [obj.NParam,nc] = size(p);
+                m.Param.N = obj.NParam;
                 m.Param.Names = p(:,1);
                 if nc==5
                     m.Param.PrettyNames = p(:,nc);
@@ -44,7 +45,7 @@ classdef Prior < handle
                 end
                 obj.Dist = p(:,2);
                 obj.Mean = [p{:,3}]';
-                for j=1:np
+                for j=1:obj.NParam
                     if isempty(p{j,4})
                         p{j,4} = 0;
                     end
@@ -53,6 +54,16 @@ classdef Prior < handle
                 m.Param.Values = obj.Mean;
                 m.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
+            end
+        end
+        
+        function xd = draw(obj,nDraws)
+            if nargin<2 || isempty(nDraws)
+                nDraws = 1; 
+            end
+            xd = nan(obj.NParam,nDraws);
+            for j=1:obj.NParam
+                xd(j,:) = obj.RndCmd{j}(nDraws);
             end
         end
         
