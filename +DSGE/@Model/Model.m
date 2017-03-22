@@ -29,18 +29,11 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
-        Data
-        Prior
-        Posterior
         TimeElapsed = TimeTracker;
-        TablePrecision = 3;
-        TableMaxRows = 35;
-        TableMoveLeft = 1; 
-        TableLines = [];
     end
     
     properties (SetAccess = protected)
-        Mats
+        mats
     end
    
     methods
@@ -61,7 +54,7 @@ classdef Model < handle
             end
         end
         
-        function SetNumSolveParam(obj,p)
+        function set.NumSolveParam(obj,p)
             if isstruct(p)
                 obj.NumSolveParam = p;
             else
@@ -72,7 +65,7 @@ classdef Model < handle
             end
         end
         
-        function SetNumSolveEq(obj,eq)
+        function set.NumSolveEq(obj,eq)
             obj.NumSolveEq = eq;
             neq = length(eq);
             if neq~=obj.NumSolveParam.N
@@ -81,7 +74,7 @@ classdef Model < handle
             end
         end
     
-        function SetCompoundParam(obj,p)
+        function set.CompoundParam(obj,p)
             if isstruct(p)
                 obj.CompoundParam = p;
             else
@@ -92,7 +85,7 @@ classdef Model < handle
             end
         end
     
-        function SetObsVar(obj,p)
+        function set.ObsVar(obj,p)
             if isstruct(p)
                 obj.ObsVar = p;
             else
@@ -100,7 +93,7 @@ classdef Model < handle
             end
         end
     
-        function SetStateVar(obj,p)
+        function set.StateVar(obj,p)
             if isstruct(p)
                 obj.StateVar = p;
             else
@@ -108,7 +101,7 @@ classdef Model < handle
             end
         end
     
-        function SetShockVar(obj,p)
+        function set.ShockVar(obj,p)
             if isstruct(p)
                 obj.ShockVar = p;
             else
@@ -116,7 +109,7 @@ classdef Model < handle
             end
         end
     
-        function SetAuxVar(obj,p)
+        function set.AuxVar(obj,p)
             if isstruct(p)
                 obj.AuxVar = p;
             else
@@ -127,12 +120,12 @@ classdef Model < handle
             end
         end
         
-        function SetObsEq(obj,eq)
+        function set.ObsEq(obj,eq)
             obj.ObsEq = eq;
             checkeq(obj,'Obs')
         end
     
-        function SetStateEq(obj,eq)
+        function set.StateEq(obj,eq)
             obj.StateEq = eq;
             checkeq(obj,'State')
         end

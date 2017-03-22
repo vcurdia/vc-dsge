@@ -1,4 +1,4 @@
-function makeirf(obj,varargin)
+function makeirf(obj,xd,varargin)
 
 % makeirf
 % 
@@ -14,22 +14,15 @@ function makeirf(obj,varargin)
 % Copyright 2016-2017 by Vasco Curdia
 
 
-%% Preamble
-
-fprintf('\n*** Making IRF\n')
-TimeElapsed = tic;
-
-
 %% Default Options
-op.Dist = 'Values';
-op.NDraws = [];
+op.FileNameSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.SetVarFigPanels;
+op.FigPanels = obj.setvarfigpanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.PlotDir = 'Plots_IRF/';
-op.Fig = struct;
+op.Fig.Visible = 'off';
 
 %% Update options
 op = updateoptions(op,varargin{:});
@@ -37,20 +30,29 @@ op = updateoptions(op,varargin{:});
 %% Check options
 nShocks2Show = length(op.Shocks2Show);
 if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
-if ~isfield(op.Fig,'Visible'), op.Fig.Visible = 'off'; end
+
+
+%% Preamble
+
+fprintf('\n*** Making IRF\n')
+ttName = ['IRF',op.FileNameSuffix];
+obj.TimeElapsed.start(ttName)
 
 mkdir(op.PlotDir)
-PlotFileName = sprintf('%s_IRF_%s',obj.Name,op.Dist); 
-ReportFileName = sprintf('%s_Report_IRF_%s',obj.Name,op.Dist);
-ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,op.Dist);
+PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FileNameSuffix); 
+ReportFileName = sprintf('%s_Report_IRF%s',obj.Name,op.FileNameSuffix);
+ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,...
+                      strrep(op.FileNameSuffix,'_',''));
 
 %% Prepare for IRF
-xd = obj.Param.GenDraws(op.Dist,op.NDraws);
+if nargin<2 || isempty(xd)
+    xd = obj.Param.Values;
+end
 nDraws = size(xd,2);
 
 %% Generate IRF
 fprintf('Generating IRFs...\n');
-fnmats = @(x)obj.Mats(x,...
+fnmats = @(x)obj.mats(x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 IRFCheck = ones(1,nDraws);
 nSteps = op.NSteps;
@@ -129,18 +131,18 @@ for jP = 1:nPanels
     end
     for jS=1:nShocks2Show
         if jS==1
-            h = vcFigure(PlotData(:,:,:,jS),Figj);
+            h = vcfigure(PlotData(:,:,:,jS),Figj);
         else
-            h = vcFigureUpdate(h,PlotData(:,:,:,jS));
+            h = vcfigureupdate(h,PlotData(:,:,:,jS));
         end
-        vcPrintPDF([op.PlotDir,PlotFileName,...
+        printpdf([op.PlotDir,PlotFileName,...
                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
     end
 end
 
 %% Make report with IRF
 fprintf('Making report: %s\n',ReportFileName);
-fid = vcCreateTex(ReportFileName,ReportTitle);
+fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jS=1:nShocks2Show
     Sj = op.Shocks2Show{jS};
@@ -163,4 +165,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-fprintf('IRF: '), vctoc(TimeElapsed)
+obj.TimeElapsed.stop(ttName)
