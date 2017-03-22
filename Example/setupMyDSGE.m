@@ -162,7 +162,7 @@ model.StateEq = {...
 %% Generate Mats
 model.genmats
 Mats = model.mats(model.Param.Values);
-% model.makeirf
+model.makeirf
 
 %% Describe Prior
 prior.analyze(model)
