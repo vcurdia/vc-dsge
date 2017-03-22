@@ -29,7 +29,7 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
-        TimeElapsed = TimeTracker;
+        TimeElapsed
     end
     
     properties (SetAccess = protected)
@@ -39,6 +39,7 @@ classdef Model < handle
     methods
         function obj = Model(Name)
             if nargin>0
+                obj.TimeElapsed = TimeTracker;
                 obj.Name = Name;
             end
         end

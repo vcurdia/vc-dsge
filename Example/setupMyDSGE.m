@@ -162,11 +162,11 @@ model.StateEq = {...
 %% Generate Mats
 model.genmats
 Mats = model.mats(model.Param.Values);
-model.makeirf
+% model.makeirf
 
 %% Describe Prior
 prior.analyze(model)
-model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
+% model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
 
 %% Data
 Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');

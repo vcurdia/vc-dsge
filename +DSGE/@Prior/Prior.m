@@ -15,7 +15,6 @@ classdef Prior < handle
         Dist
         Mean
         SD
-        TimeElapsed = TimeTracker;
     end
    
     properties (SetAccess = protected)
@@ -30,11 +29,13 @@ classdef Prior < handle
         PdfCmd
         RndCmd
         LPdfCorrection
+        TimeElapsed
     end
     
     methods
         function obj = Prior(model,p)
             if nargin>1 && ~isempty(p)
+                obj.TimeElapsed = TimeTracker;
                 [obj.NParam,nc] = size(p);
                 model.Param.N = obj.NParam;
                 obj.ParamNames = p(:,1);
