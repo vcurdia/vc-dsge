@@ -98,8 +98,8 @@ fprintf('Percent of rejected draws: %.2f%%\n',...
         obj.Sample.FractionBadDraws*100);
 fprintf('log-prior correction: %.6f\n',obj.LPdfCorrection);
 
-obj.Sample.Param = genstats(xd,op.Percentiles);
-obj.Sample.AuxParam = genstats(xdAux,op.Percentiles);
+obj.Sample.Param = sumstats(xd,op.Percentiles);
+obj.Sample.AuxParam = sumstats(xdAux,op.Percentiles);
 
 pList = {'Param','AuxParam'};
 DispList = {'    Mean','Mean';
