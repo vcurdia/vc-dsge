@@ -166,7 +166,7 @@ model.makeirf
 
 %% Describe Prior
 prior.analyze(model)
-% model.makeirf('Dist','PriorDraws','NDraws',1000)
+model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
 
 %% Data
 Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
