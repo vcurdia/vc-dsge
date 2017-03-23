@@ -173,7 +173,7 @@ if obj.NumSolveParam.N>0
     fprintf(fid,'end\n');
     fprintf(fid,'NumSolveGuess = [...\n');
     for j=1:obj.NumSolveParam.N
-        fprintf(fid,'    %.16f;\n',obj.NumSolveParam.Guess(j));
+        fprintf(fid,'    %.16f;\n',obj.NumSolveParam.Values(j));
     end
     fprintf(fid,'    ];\n');
 %     fprintf(fid,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
@@ -219,7 +219,7 @@ if obj.CompoundParam.N>0
     end
     for j=1:obj.CompoundParam.N
         fprintf(fid,'%s%s = %s;\n',txt,obj.CompoundParam.Names{j},...
-                obj.CompoundParam.Expressions{j});
+                obj.CompoundExpressions{j});
     end
     if obj.NumSolveParam.N>0
         fprintf(fid,'end \n');
@@ -227,7 +227,6 @@ if obj.CompoundParam.N>0
 end
 
 % Combine NumSolve, and Compound into AuxParam
-obj.AuxParam.N = obj.NumSolveParam.N + obj.CompoundParam.N;
 obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
 obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
@@ -459,6 +458,12 @@ fclose(fid);
 
 %% Save handle to function
 obj.mats = str2func(MatsFN);
+
+%% Test function
+Mats = obj.mats(obj.Param.Values);
+if Mats.Status==0
+    fprintf('Warning: REE solution not normal for Param.Values.\n')
+end
 
 %% Save timer
 obj.TimeElapsed.stop(ttName)

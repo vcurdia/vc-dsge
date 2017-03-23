@@ -1,4 +1,4 @@
-function analyze(obj,model,varargin)
+function analyze(obj,varargin)
 
 % analyze
 %
@@ -28,12 +28,12 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin);
 
 %% other settings
-ReportFileName = sprintf('%s_Report_Prior',model.Name);
-ReportTitle = sprintf('Prior Analysis:\\\\%s',model.Name);
+ReportFileName = sprintf('%s_Report_Prior',obj.Model.Name);
+ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Model.Name);
 
 %% useful variables
-np = obj.NParam;
-pNames = obj.ParamNames;
+np = obj.Model.Param.N;
+pNames = obj.Model.Param.Names;
 
 %% display results on screen
 fprintf('\nPrior:')
@@ -73,9 +73,9 @@ fprintf('\n-------------\n\n')
 xj = zeros(np,1);
 BadDraws = false(1,op.NDraws);
 xd = obj.draw(op.NDraws);
-fh = @(x)model.mats(x);
-AuxNames = model.AuxParam.Names;
-nAux = model.AuxParam.N;
+fh = @(x)obj.Model.mats(x);
+AuxNames = obj.Model.AuxParam.Names;
+nAux = obj.Model.AuxParam.N;
 xdAux = zeros(nAux,op.NDraws);
 % Matsd = cell(obj.PriorNDraws);
 parfor jd=1:op.NDraws
@@ -111,16 +111,16 @@ DispList = {'    Mean','Mean';
 nc = size(DispList,1);
 for jP=1:length(pList)
     Pj = pList{jP};
-    psj = model.(Pj);
-    namelength = [cellfun('length',model.(Pj).Names)];
+    psj = obj.Model.(Pj);
+    namelength = [cellfun('length',obj.Model.(Pj).Names)];
     namelengthmax = max(namelength);
     fprintf(['\n%-',int2str(namelengthmax),'s'],'');
     for jc=1:nc
         fprintf('  %-8s',DispList{jc,1});
     end
     fprintf('\n');
-    for jp=1:model.(Pj).N
-        fprintf(['%',int2str(namelengthmax),'s'],model.(Pj).Names{jp});
+    for jp=1:obj.Model.(Pj).N
+        fprintf(['%',int2str(namelengthmax),'s'],obj.Model.(Pj).Names{jp});
         for jc=1:nc
             fprintf('  %8.4f',obj.Sample.(Pj).(DispList{jc,2})(jp));
         end
@@ -156,7 +156,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'%s',model.Param.PrettyNames{jr});
+        fprintf(fid,'%s',obj.Model.Param.PrettyNames{jr});
         fprintf(fid,' & %s', obj.Dist{jr});
         fprintf(fid,str,obj.Mode(jr));
         fprintf(fid,str,obj.Mean(jr));
@@ -197,7 +197,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'%s',model.AuxParam.PrettyNames{jr});
+        fprintf(fid,'%s',obj.Model.AuxParam.PrettyNames{jr});
         fprintf(fid,str,obj.Sample.AuxParam.Mean(jr));
         fprintf(fid,str,obj.Sample.AuxParam.Prc05(jr));
         fprintf(fid,str,obj.Sample.AuxParam.Median(jr));

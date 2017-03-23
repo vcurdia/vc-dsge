@@ -37,6 +37,24 @@ classdef Posterior < handle
             end
         end
         
+        function set.Model(obj,m)
+            if isempty(obj.Mean) || ( length(obj.Mean)==m.Param.N )
+                obj.Model = m;
+            else
+                error(['Cannot link posterior to model with different number ' ...
+                       'of parameters.'])
+            end
+        end
+        
+        function set.Prior(obj,p)
+            if isempty(obj.Mode) || ( length(obj.Mean)==length(p.Mean) )
+                obj.Prior = p;
+            else
+                error(['Cannot link posterior to prior with different number ' ...
+                       'of parameters.'])
+            end
+        end
+        
         function xd = draw(obj,nDraws)
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 

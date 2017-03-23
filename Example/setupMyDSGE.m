@@ -158,14 +158,13 @@ model.StateEq = {...
     'YAeL_t-YAe_tL';
                  };
 
-
 %% Generate Mats
 model.genmats
 Mats = model.mats(model.Param.Values);
 % model.makeirf
 
 %% Describe Prior
-prior.analyze(model)
+prior.analyze
 % model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
 
 %% Data

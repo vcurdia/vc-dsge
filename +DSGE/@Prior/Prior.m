@@ -33,28 +33,39 @@ classdef Prior < handle
     end
     
     methods
-        function obj = Prior(model,p)
+        function obj = Prior(m,p)
             if nargin>0
-                obj.Model = model;
+                obj.Model = m;
             end
             if nargin>1 && ~isempty(p)
                 obj.TimeElapsed = TimeTracker;
-                [np,nc] = size(p,2);
-                model.Param.Names = p(:,1);
-                if nc==5
-                    model.Param.PrettyNames = p(:,nc);
-                end
-                obj.Dist = p(:,2);
-                obj.Mean = [p{:,3}]';
-                for j=1:np
-                    if isempty(p{j,4})
-                        p{j,4} = 0;
+                [np,nc] = size(p);
+                if nc>3
+                    obj.Dist = p(:,2);
+                    obj.Mean = [p{:,3}]';
+                    for j=1:np
+                        if isempty(p{j,4})
+                            p{j,4} = 0;
+                        end
                     end
+                    obj.SD = [p{:,4}]';
+                    p(:,[2,4]) = [];
+                else
+                    obj.Dist(1:np,1) = {'C'};
+                    obj.SD(1:np,1) = 0;
                 end
-                obj.SD = [p{:,4}]';
-                model.Param.Values = obj.Mean;
+                m.Param = p;
                 obj.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
+            end
+        end
+        
+        function set.Model(obj,m)
+            if isempty(obj.Dist) || ( m.Param.N==length(obj.Dist) )
+                obj.Model = m;
+            else
+                error(['Cannot link prior to model with different number of ' ...
+                       'parameters.'])
             end
         end
         
@@ -62,8 +73,8 @@ classdef Prior < handle
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 
             end
-            xd = nan(obj.NParam,nDraws);
-            for j=1:obj.NParam
+            xd = nan(obj.Model.Param.N,nDraws);
+            for j=1:obj.Model.Param.N
                 xd(j,:) = obj.RndCmd{j}(nDraws);
             end
         end

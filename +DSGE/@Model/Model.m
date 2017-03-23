@@ -54,13 +54,10 @@ classdef Model < handle
         end
         
         function set.NumSolveParam(obj,p)
-            if isstruct(p)
-                obj.NumSolveParam = p;
+            if iscell(p)
+                obj.NumSolveParam = DSGE.Param(p);
             else
-                obj.NumSolveParam = setnames('NumSolveParam',p);
-                if obj.NumSolveParam.N>0
-                    obj.NumSolveParam.Guess = [p{:,2}]';
-                end
+                obj.NumSolveParam = p;
             end
         end
         
@@ -74,48 +71,46 @@ classdef Model < handle
         end
     
         function set.CompoundParam(obj,p)
-            if isstruct(p)
+            if iscell(p)
+                obj.CompoundExpressions = p(:,2);
+                p(:,2) = {nan};
+                obj.CompoundParam = DSGE.Param(p);
+            else
                 obj.CompoundParam = p;
-            else
-                obj.CompoundParam = setnames('CompoundParam',p);
-                if obj.CompoundParam.N>0
-                    obj.CompoundParam.Expressions = p(:,2);
-                end
             end
         end
     
-        function set.ObsVar(obj,p)
-            if isstruct(p)
-                obj.ObsVar = p;
+        function set.ObsVar(obj,v)
+            if iscell(v)
+                obj.ObsVar = DSGE.Var(v);
             else
-                obj.ObsVar = setnames('ObsVar',p);
+                obj.ObsVar = v;
             end
         end
     
-        function set.StateVar(obj,p)
-            if isstruct(p)
-                obj.StateVar = p;
+        function set.StateVar(obj,v)
+            if iscell(v)
+                obj.StateVar = DSGE.Var(v);
             else
-                obj.StateVar = setnames('StateVar',p);
+                obj.StateVar = v;
             end
         end
     
-        function set.ShockVar(obj,p)
-            if isstruct(p)
-                obj.ShockVar = p;
+        function set.ShockVar(obj,v)
+            if iscell(v)
+                obj.ShockVar = DSGE.Var(v);
             else
-                obj.ShockVar = setnames('ShockVar',p);
+                obj.ShockVar = v;
             end
         end
     
-        function set.AuxVar(obj,p)
-            if isstruct(p)
-                obj.AuxVar = p;
+        function set.AuxVar(obj,v)
+            if iscell(v)
+                obj.AuxEq = v(:,2);
+                v(:,2) = [];
+                obj.AuxVar = DSGE.Var(v);
             else
-                obj.AuxVar = setnames('AuxVar',p);
-                if obj.AuxVar.N>0
-                    obj.AuxEq = p(:,2);
-                end
+                obj.AuxVar = v;
             end
         end
         
@@ -159,22 +154,6 @@ classdef Model < handle
     
 end %class
 
-function pp = setnames(pType,p)
-    if ~ismember(pType,{'Param','NumSolveParam','CompoundParam',...
-                        'ObsVar','StateVar','ShockVar','AuxVar'})
-        error('SetProperty called with invalid type.')
-    end
-    pp = struct;
-    [pp.N,nc] = size(p);
-    pp.Names = p(:,1);
-    if nc==(2+... 
-            ismember(pType,{'Param','NumSolveParam','CompoundParam','AuxVar'}))
-        pp.PrettyNames = p(:,nc);
-    else
-        pp.PrettyNames = pp.Names;
-    end
-end
-        
 function checkeq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.([eqType,'Var']).N;
@@ -182,12 +161,6 @@ function checkeq(obj,eqType)
         error(['Number of %sEq (%i) does not match number of ' ...
                'variables (%i).'],eqType,nEq,nVar)
     end
-end
-
-function s = initiatenames
-    s.Names = {};
-    s.PrettyNames = {};
-    s.N = 0;
 end
 
 
