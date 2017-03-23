@@ -150,6 +150,15 @@ classdef Model < handle
             end
         end
         
+        function new = copy(obj)
+            new = DSGE.Model;
+            % Copy all non-hidden properties.
+            pList = properties(obj);
+            for j = 1:length(pList)
+                new.(pList{j}) = obj.(pList{j});
+            end
+        end
+    
     end %methods
     
 end %class

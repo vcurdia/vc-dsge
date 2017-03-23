@@ -1,4 +1,4 @@
-classdef Data < handle
+classdef Data
 % DSGE.Data class
 % 
 % See also:
@@ -39,11 +39,11 @@ classdef Data < handle
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
                 obj.TimeIdx = Raw.textdata(2:end,1)';
-                obj.setticklabels;
+                obj = obj.setticklabels;
             end
         end
         
-        function set.Var(obj,Var)
+        function obj = set.Var(obj,Var)
             if ~isempty(obj.Var)
                 [tf,idx] = ismember(Var,obj.Var);
                 if ~all(tf)
@@ -55,7 +55,7 @@ classdef Data < handle
             obj.NVar = length(Var);
         end
         
-        function set.TimeIdx(obj,tid)
+        function obj = set.TimeIdx(obj,tid)
             if length(tid)==2
                 tid = timeidx(tid{:});
             end
@@ -72,7 +72,7 @@ classdef Data < handle
             end
         end
         
-        function set.SampleStart(obj,t)
+        function obj = set.SampleStart(obj,t)
             if ~ismember(t,obj.TimeIdx)
                 error('Requested SampleStart out of data scope.')
             end
@@ -80,7 +80,7 @@ classdef Data < handle
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
         end
         
-        function set.TickLabels(obj,tDates)
+        function obj = set.TickLabels(obj,tDates)
             tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
             obj.TickLabels = tDates;
             if isempty(obj.Tick) ...
@@ -92,7 +92,7 @@ classdef Data < handle
             obj.TickLabels = tDates;
         end
         
-        function set.Tick(obj,idx)
+        function obj = set.Tick(obj,idx)
             if iscell(idx)
                 idx = find(ismember(obj.TimeIdx,idx));
             end
@@ -108,7 +108,7 @@ classdef Data < handle
             obj.TickLabels = TickLabels;
         end
         
-        function settickannual(obj,q)
+        function obj = settickannual(obj,q)
             if nargin<2, q = 4; end
             obj.Tick = obj.findquarter(q):4:obj.T;
         end
@@ -122,23 +122,23 @@ classdef Data < handle
             end
         end
         
-        function setticklabels(obj,n,q)
+        function obj = setticklabels(obj,n,q)
             if nargin<2, n = 5; end
             if nargin<3, q = 4; end
-            obj.settickannual(q);
+            obj = obj.settickannual(q);
             tStep = ceil(obj.T/(n-1));
             while mod(tStep,4), tStep = tStep-1; end
             obj.TickLabels = obj.TimeIdx(obj.findquarter(q):tStep:obj.T);
         end
         
-        function new = copy(obj)
-            new = DSGE.Data;
-            % Copy all non-hidden properties.
-            pList = properties(obj);
-            for j = 1:length(pList)
-                new.(pList{j}) = obj.(pList{j});
-            end
-        end
+%         function new = copy(obj)
+%             new = DSGE.Data;
+%             % Copy all non-hidden properties.
+%             pList = properties(obj);
+%             for j = 1:length(pList)
+%                 new.(pList{j}) = obj.(pList{j});
+%             end
+%         end
     
     end %methods
     
