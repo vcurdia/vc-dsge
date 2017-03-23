@@ -29,10 +29,10 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
-        TimeElapsed
     end
     
     properties (SetAccess = protected)
+        TimeElapsed
         mats
     end
    
