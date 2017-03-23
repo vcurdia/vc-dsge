@@ -31,19 +31,19 @@ end
 
 %% Sym Params
 list = {'','NumSolve','Compound'};
-sList = struct;
+% sList = struct;
 for j=1:length(list)
     jstr = [list{j},'Param'];
     if obj.(jstr).N>0, vcsym(obj.(jstr).Names{:}), end
-    sList.(jstr) = sym(zeros(1,obj.(jstr).N));
-    for jp=1:obj.(jstr).N
-        sList.(jstr)(jp) = eval(obj.(jstr).Names{jp});
-    end
+%     sList.(jstr) = sym(zeros(1,obj.(jstr).N));
+%     for jp=1:obj.(jstr).N
+%         sList.(jstr)(jp) = eval(obj.(jstr).Names{jp});
+%     end
 end
-SymParam = sList.Param;
-SymNumsolveParam = sList.NumSolveParam;
-SymCompoundParam = sList.CompoundParam;
-SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
+% SymParam = sList.Param;
+% SymNumsolveParam = sList.NumSolveParam;
+% SymCompoundParam = sList.CompoundParam;
+% SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
 
 %% Constant
 vcsym('one')
@@ -265,19 +265,19 @@ if obj.ObsVar.N>0
         fclose(fid);
         error('Cannot have leads, lags, or shocks in Obs equations.')
     end
-    mNames = fieldnames(SymMats.ObsEq);
+    MatNames = fieldnames(SymMats.ObsEq);
     nCols = [1,obj.StateVar.N];
     fprintf(fid,'if op.StoreObsEq || op.StoreKF\n');
-    obj.ObsEqMats = struct;
-    for jM=1:length(mNames)
-        Mj = mNames{jM};
-        nMj = obj.ObsVar.N*nCols(jM);
-        fh = cell(nMj,1);
-        for j=1:nMj
-            fh{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),...
-                                    'Vars',SymParamAll);
-        end
-        obj.ObsEqMats.(MatNames{jM}) = @(x)buildmat(fh,x,obj.ObsVar.N,nCols(jM));
+%     obj.ObsEqMats = struct;
+    for jM=1:length(MatNames)
+%         Mj = MatNames{jM};
+%         nMj = obj.ObsVar.N*nCols(jM);
+%         fh = cell(nMj,1);
+%         for j=1:nMj
+%             fh{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),...
+%                                     'Vars',SymParamAll);
+%         end
+%         obj.ObsEqMats.(MatNames{jM}) = @(x)buildmat(fh,x,obj.ObsVar.N,nCols(jM));
         fprintf(fid,'    ObsEq.%s = [...\n',MatNames{jM});
         for jeq=1:obj.ObsVar.N
             fprintf(fid,'       ');
