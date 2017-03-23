@@ -11,14 +11,14 @@ classdef Prior < handle
 % Copyright (C) 2017 Vasco Curdia
     
     properties
-        ParamNames
+        Model
         Dist
         Mean
         SD
     end
    
     properties (SetAccess = protected)
-        NParam
+        EstimateIdx
         Mode
         Median
         Prc05
@@ -34,27 +34,26 @@ classdef Prior < handle
     
     methods
         function obj = Prior(model,p)
+            if nargin>0
+                obj.Model = model;
+            end
             if nargin>1 && ~isempty(p)
                 obj.TimeElapsed = TimeTracker;
-                [obj.NParam,nc] = size(p);
-                model.Param.N = obj.NParam;
-                obj.ParamNames = p(:,1);
-                model.Param.Names = obj.ParamNames;
+                [np,nc] = size(p,2);
+                model.Param.Names = p(:,1);
                 if nc==5
                     model.Param.PrettyNames = p(:,nc);
-                else
-                    model.Param.PrettyNames = model.Param.Names;
                 end
                 obj.Dist = p(:,2);
                 obj.Mean = [p{:,3}]';
-                for j=1:obj.NParam
+                for j=1:np
                     if isempty(p{j,4})
                         p{j,4} = 0;
                     end
                 end
                 obj.SD = [p{:,4}]';
                 model.Param.Values = obj.Mean;
-                model.Param.EstimateIdx = ~ismember(obj.Dist,{'C'});
+                obj.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
             end
         end

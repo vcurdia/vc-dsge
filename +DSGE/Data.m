@@ -39,7 +39,7 @@ classdef Data < handle
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
                 obj.TimeIdx = Raw.textdata(2:end,1)';
-                obj.setTickLabels;
+                obj.setticklabels;
             end
         end
         
@@ -108,12 +108,12 @@ classdef Data < handle
             obj.TickLabels = TickLabels;
         end
         
-        function setTickAnnual(obj,q)
+        function settickannual(obj,q)
             if nargin<2, q = 4; end
-            obj.Tick = obj.findQuarter(q):4:obj.T;
+            obj.Tick = obj.findquarter(q):4:obj.T;
         end
         
-        function t = findQuarter(obj,q)
+        function t = findquarter(obj,q)
             if nargin<2, q = 4; end
             for t=1:obj.T
                 if strcmp(obj.TimeIdx{t}(end),int2str(q))
@@ -122,16 +122,16 @@ classdef Data < handle
             end
         end
         
-        function setTickLabels(obj,n,q)
+        function setticklabels(obj,n,q)
             if nargin<2, n = 5; end
             if nargin<3, q = 4; end
-            obj.setTickAnnual(q);
+            obj.settickannual(q);
             tStep = ceil(obj.T/(n-1));
             while mod(tStep,4), tStep = tStep-1; end
-            obj.TickLabels = obj.TimeIdx(obj.findQuarter(q):tStep:obj.T);
+            obj.TickLabels = obj.TimeIdx(obj.findquarter(q):tStep:obj.T);
         end
         
-        function new = Copy(obj)
+        function new = copy(obj)
             new = DSGE.Data;
             % Copy all non-hidden properties.
             pList = properties(obj);

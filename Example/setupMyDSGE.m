@@ -169,13 +169,13 @@ prior.analyze(model)
 % model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
 
 %% Data
-Data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
-Data.TimeIdx = {'1987q3','2009q3'};
-Data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
-Data.Var = model.ObsVar.Names;
+data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
+data.TimeIdx = {'1987q3','2009q3'};
+data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
+data.Var = model.ObsVar.Names;
 
 %% Create posterior
-% m = m.GenPost;
+post = DSGE.Posterior(model,prior,data);
 
 
 %% Finish up

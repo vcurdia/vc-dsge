@@ -11,7 +11,9 @@ classdef Posterior < handle
 % Copyright (C) 2017 Vasco Curdia
     
     properties
-        ParamNames
+        Model
+        Prior
+        Data
         Mode
         Mean
         SD
@@ -22,7 +24,6 @@ classdef Posterior < handle
     end
    
     properties (SetAccess = protected)
-        NParam
         TimeElapsed
     end
     
@@ -30,8 +31,9 @@ classdef Posterior < handle
         function obj = Posterior(model,prior,data)
             if nargin>0
                 obj.TimeElapsed = TimeTracker;
-                obj.NParam = model.Param.N;
-                obj.ParamNames = model.Param.Names;
+                obj.Model = model;
+                obj.Prior = prior;
+                obj.Data = data;
             end
         end
         

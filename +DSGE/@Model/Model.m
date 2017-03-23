@@ -12,15 +12,16 @@ classdef Model < handle
     
     properties
         Name = '';
-        Param = initiatenames;
-        NumSolveParam = initiatenames;
+        Param = DSGE.Param;
+        NumSolveParam = DSGE.Param;
         NumSolveEq
-        CompoundParam = initiatenames;
-        AuxParam = initiatenames;
-        ObsVar = initiatenames;
-        StateVar = initiatenames;
-        ShockVar = initiatenames;
-        AuxVar = initiatenames;
+        CompoundParam = DSGE.Param;
+        CompoundExpressions
+        AuxParam = DSGE.Param;
+        ObsVar = DSGE.Var;
+        StateVar = DSGE.Var;
+        ShockVar = DSGE.Var;
+        AuxVar = DSGE.Var;
         ObsEq
         StateEq
         AuxEq
@@ -45,13 +46,10 @@ classdef Model < handle
         end
         
         function set.Param(obj,p)
-            if isstruct(p)
-                obj.Param = p;
+            if iscell(p)
+                obj.Param = DSGE.Param(p);
             else
-                obj.Param = setnames('Param',p);
-                if obj.Param.N>0
-                    obj.Param.Values = [p{:,2}]';
-                end
+                obj.Param = p;
             end
         end
         
