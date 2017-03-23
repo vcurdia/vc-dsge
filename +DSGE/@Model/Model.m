@@ -35,6 +35,7 @@ classdef Model < handle
     properties (SetAccess = protected)
         TimeElapsed
         mats
+        ObsEqMats
     end
    
     methods
@@ -150,6 +151,14 @@ classdef Model < handle
             end
         end
         
+        function Mats = evalmats(obj,matname,x)
+            Mats = struct;
+            matfields = fieldnames(obj.(matname));
+            for j=1:length(matfields)
+                Mats.(matfields{j}) = obj.(matname).(matfields{j})(x);
+            end
+        end
+            
         function new = copy(obj)
             new = DSGE.Model;
             % Copy all non-hidden properties.
@@ -160,6 +169,10 @@ classdef Model < handle
         end
     
     end %methods
+    
+    methods(Static)
+    
+    end %staticmethods
     
 end %class
 
