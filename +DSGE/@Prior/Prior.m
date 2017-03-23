@@ -79,6 +79,20 @@ classdef Prior < handle
             end
         end
         
+        function p = pdf(obj,x)
+            p = repmat(1,1,size(x,2));
+            for j=1:obj.Model.Param.N
+                p = p.*obj.PdfCmd{j}(x(j,:));
+            end
+        end
+        
+        function p = lpdf(obj,x)
+            p = repmat(0,1,size(x,2));
+            for j=1:obj.Model.Param.N
+                p = p + log(obj.PdfCmd{j}(x(j,:)));
+            end
+        end
+        
         function new = copy(obj)
             new = DSGE.Prior;
             % Copy all non-hidden properties.
