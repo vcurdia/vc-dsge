@@ -1,4 +1,4 @@
-% setupMyDSGE
+% setupDSGE
 %
 % This file gives an example of how to setup the DSGE
 %
@@ -173,6 +173,6 @@ post = DSGE.Posterior(model,prior,data);
 
 
 %% Finish up
+fprintf('\n'),TimeElapsed.stop('Setup')
 save(model.Name)
 cd(basePath)
-fprintf('\n'),TimeElapsed.stop('Setup')

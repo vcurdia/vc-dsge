@@ -16,6 +16,7 @@
 clear all
 setpath
 set(0,'defaultTextInterpreter','latex');
+TimeElapsed = TimeTracker;
 
 %% Settings
 specName = 'MyDSGE';
