@@ -31,10 +31,19 @@ end
 
 %% Sym Params
 list = {'','NumSolve','Compound'};
+% sList = struct;
 for j=1:length(list)
     jstr = [list{j},'Param'];
     if obj.(jstr).N>0, vcsym(obj.(jstr).Names{:}), end
+%     sList.(jstr) = sym(zeros(1,obj.(jstr).N));
+%     for jp=1:obj.(jstr).N
+%         sList.(jstr)(jp) = eval(obj.(jstr).Names{jp});
+%     end
 end
+% SymParam = sList.Param;
+% SymNumsolveParam = sList.NumSolveParam;
+% SymCompoundParam = sList.CompoundParam;
+% SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
 
 %% Constant
 vcsym('one')
@@ -173,7 +182,7 @@ if obj.NumSolveParam.N>0
     fprintf(fid,'end\n');
     fprintf(fid,'NumSolveGuess = [...\n');
     for j=1:obj.NumSolveParam.N
-        fprintf(fid,'    %.16f;\n',obj.NumSolveParam.Guess(j));
+        fprintf(fid,'    %.16f;\n',obj.NumSolveParam.Values(j));
     end
     fprintf(fid,'    ];\n');
 %     fprintf(fid,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
@@ -219,7 +228,7 @@ if obj.CompoundParam.N>0
     end
     for j=1:obj.CompoundParam.N
         fprintf(fid,'%s%s = %s;\n',txt,obj.CompoundParam.Names{j},...
-                obj.CompoundParam.Expressions{j});
+                obj.CompoundExpressions{j});
     end
     if obj.NumSolveParam.N>0
         fprintf(fid,'end \n');
@@ -227,7 +236,6 @@ if obj.CompoundParam.N>0
 end
 
 % Combine NumSolve, and Compound into AuxParam
-obj.AuxParam.N = obj.NumSolveParam.N + obj.CompoundParam.N;
 obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
 obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
@@ -260,7 +268,16 @@ if obj.ObsVar.N>0
     MatNames = fieldnames(SymMats.ObsEq);
     nCols = [1,obj.StateVar.N];
     fprintf(fid,'if op.StoreObsEq || op.StoreKF\n');
+%     obj.ObsEqMats = struct;
     for jM=1:length(MatNames)
+%         Mj = MatNames{jM};
+%         nMj = obj.ObsVar.N*nCols(jM);
+%         fh = cell(nMj,1);
+%         for j=1:nMj
+%             fh{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),...
+%                                     'Vars',SymParamAll);
+%         end
+%         obj.ObsEqMats.(MatNames{jM}) = @(x)buildmat(fh,x,obj.ObsVar.N,nCols(jM));
         fprintf(fid,'    ObsEq.%s = [...\n',MatNames{jM});
         for jeq=1:obj.ObsVar.N
             fprintf(fid,'       ');
@@ -459,6 +476,12 @@ fclose(fid);
 
 %% Save handle to function
 obj.mats = str2func(MatsFN);
+
+%% Test function
+Mats = obj.mats(obj.Param.Values);
+if Mats.Status==0
+    fprintf('Warning: REE solution not normal for Param.Values.\n')
+end
 
 %% Save timer
 obj.TimeElapsed.stop(ttName)
