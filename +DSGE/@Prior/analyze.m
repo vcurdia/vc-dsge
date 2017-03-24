@@ -21,7 +21,7 @@ ttName = 'Analyze';
 obj.TimeElapsed.start(ttName)
 
 %% Options
-op.NDraws = 100;
+op.NDraws = 1000;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 
