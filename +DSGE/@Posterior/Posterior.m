@@ -55,6 +55,15 @@ classdef Posterior < handle
             end
         end
         
+        function xx = expandparam(obj,x)
+            xx = repmat(obj.Model.Param.Values,1,size(x,2));
+            xx(obj.Prior.EstimateIdx,:) = x;
+        end
+        
+        function p = lpdfneg(obj,x,varargin)
+            p = -obj.lpdf(x,varargin{:});
+        end
+        
         function xd = draw(obj,nDraws)
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 
