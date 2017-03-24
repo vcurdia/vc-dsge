@@ -29,7 +29,7 @@ op = updateoptions(op,varargin);
 
 %% other settings
 ReportFileName = sprintf('%s_Report_Prior',obj.Model.Name);
-ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Model.Name);
+ReportTitle = sprintf('%s\\\\Prior Analysis',obj.Model.Name);
 
 %% useful variables
 np = obj.Model.Param.N;
