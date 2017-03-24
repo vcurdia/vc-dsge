@@ -39,10 +39,12 @@ classdef Model < handle
     end
    
     methods
-        function obj = Model(Name)
+        function obj = Model(name)
             if nargin>0
+                fprintf('\n*** Initiating model\n')
+                fprintf('%s\n',name)
+                obj.Name = name;
                 obj.TimeElapsed = TimeTracker;
-                obj.Name = Name;
             end
         end
         

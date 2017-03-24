@@ -30,10 +30,13 @@ classdef Posterior < handle
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0
+                fprintf('\n*** Initiating posterior\n')
                 obj.TimeElapsed = TimeTracker;
                 obj.Model = model;
                 obj.Prior = prior;
                 obj.Data = data;
+                fprintf('Log-posterior value using prior mean is %0.4f.\n',...
+                        obj.lpdf(prior.Mean));
             end
         end
         

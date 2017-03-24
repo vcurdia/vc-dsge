@@ -35,10 +35,11 @@ classdef Prior < handle
     methods
         function obj = Prior(m,p)
             if nargin>0
+                fprintf('\n*** Initiating prior\n')
+                obj.TimeElapsed = TimeTracker;
                 obj.Model = m;
             end
             if nargin>1 && ~isempty(p)
-                obj.TimeElapsed = TimeTracker;
                 [np,nc] = size(p);
                 if nc>3
                     obj.Dist = p(:,2);
