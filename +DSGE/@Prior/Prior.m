@@ -25,10 +25,9 @@ classdef Prior < handle
         Prc95
         Sample
         DistParam
-        LPdfCmd
-        PdfCmd
+        PDFCmd
         RndCmd
-        LPdfCorrection
+        LPDFCorrection
         TimeElapsed
     end
     

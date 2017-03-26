@@ -15,7 +15,6 @@ function analyze(obj,varargin)
 
 
 %% Preamble
-
 fprintf('\n*** Analyzing DSGE Prior\n')
 ttName = 'Analyze';
 obj.TimeElapsed.start(ttName)
@@ -89,7 +88,7 @@ end
 obj.Sample.NDraws = op.NDraws;
 obj.Sample.NBadDraws = sum(BadDraws);
 obj.Sample.FractionBadDraws = obj.Sample.NBadDraws/op.NDraws;
-obj.LPdfCorrection = -log(1-obj.Sample.FractionBadDraws);
+obj.LPDFCorrection = -log(1-obj.Sample.FractionBadDraws);
 xd(:,BadDraws) = [];
 xdAux(:,BadDraws) = [];
 obj.Sample.NDrawsUsed = size(xd,2);

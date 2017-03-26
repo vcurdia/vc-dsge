@@ -15,8 +15,10 @@ classdef Posterior < handle
         Prior
         Data
         Mode
+        ModeLPDF
         Mean
         SD
+        Var
         Median
         Prc05
         Prc95
@@ -35,8 +37,16 @@ classdef Posterior < handle
                 obj.Model = model;
                 obj.Prior = prior;
                 obj.Data = data;
-                fprintf('Log-posterior value using prior mean is %0.4f.\n',...
-                        obj.lpdf(prior.Mean));
+                obj.Mode = model.Param.Values;
+                obj.ModeLPDF = obj.lpdf(obj.Mode)
+                fprintf('Posterior log-pdf using Param.Values is %0.4f.\n',...
+                        obj.ModeLPDF);
+                obj.Mean = prior.Mean;
+                obj.SD = prior.SD;
+                obj.Var = diag(prior.SD.^2);
+                obj.Median = prior.Median;
+                obj.Prc05 = prior.Prc05;
+                obj.Prc95 = prior.Prc95;
             end
         end
         
