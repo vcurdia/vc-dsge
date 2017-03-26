@@ -1,8 +1,8 @@
-function findmode(obj,varargin)
+function maxlpdf(obj,varargin)
 
-% findmode
+% maxlpdf
 % 
-% Search for the posterior mode
+% Search for the posterior mode by maximizing the log-pdf function
 %
 % see also:
 % DSGE.Posterior
@@ -14,7 +14,7 @@ function findmode(obj,varargin)
 
 %% Preamble
 fprintf('\n*** Find posterior mode\n')
-ttName = 'FindMode';
+ttName = 'MaxLPDF';
 obj.TimeElapsed.start(ttName)
 
 
@@ -62,7 +62,7 @@ ReportTitle = sprintf('%s\\\\Posterior Mode',obj.Model.Name);
 %% Run minimizations
 MaxPostOut = cell(1,nMax);
 parfor jm=1:nMax
-    MaxPostOut{jm} = maxpost(jobOptions{jm}{:});
+    MaxPostOut{jm} = maxlpdf(jobOptions{jm}{:});
 end
 MaxPostOut = [MaxPostOut{:}];
 if ~op.KeepMatMaxPost
@@ -154,10 +154,10 @@ disp(' ')
 
 %% extract the best one
 [ModeLPDF, idxMax] = min([MaxPostOut(:).f]);
-obj.Mode = MaxPostOut(idxMax).x
+obj.Mode(pIdx) = MaxPostOut(idxMax).x
 obj.ModeLPDF = -MaxPostOut(idxMax).f
 obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
-obj.SD(obj.Prior.EstimateIdx) = diag(obj.Var).^(1/2);
+obj.SD(pIdx) = diag(obj.Var).^(1/2);
 
 %% display results on screen
 fprintf('\nResults from maximization of posterior:')
@@ -201,3 +201,7 @@ MakeTableMaxPost
 
 %% Finish up
 obj.TimeElapsed.stop(ttName)
+end
+
+function maxlpdf()
+end
