@@ -24,8 +24,7 @@ obj.Median = nan(np,1);
 obj.Prc05 = nan(np,1);
 obj.Prc95 = nan(np,1);
 obj.DistParam = cell(np,1);
-obj.LPdfCmd = cell(np,1);
-obj.PdfCmd = cell(np,1);
+obj.PDFCmd = cell(np,1);
 obj.RndCmd = cell(np,1);
 pOptions = optimoptions(@fsolve);
 pOptions.Display = 'off';
@@ -37,7 +36,7 @@ for j=1:np
         obj.Median(j) = obj.Mean(j);
         obj.Prc05(j) = obj.Mean(j);
         obj.Prc95(j) = obj.Mean(j);
-        obj.PdfCmd{j} = @(x)repmat(1,size(x));
+        obj.PDFCmd{j} = @(x)repmat(1,size(x));
         obj.RndCmd{j} = @(n)repmat(obj.Mean(j),1,n);
     
     elseif strcmp(obj.Dist{j},'N')
@@ -48,7 +47,7 @@ for j=1:np
         obj.Prc05(j) = norminv(0.05,pmean,psd);
         obj.Prc95(j) = norminv(0.95,pmean,psd);
         obj.DistParam{j} = [pmean,psd];
-        obj.PdfCmd{j} = @(x)normpdf(x,pmean,psd);
+        obj.PDFCmd{j} = @(x)normpdf(x,pmean,psd);
         obj.RndCmd{j} = @(n)normrnd(pmean,psd,1,n);
     
     elseif strcmp(obj.Dist{j},'TN')
@@ -67,7 +66,7 @@ for j=1:np
         obj.Prc05(j) = norminv(0.05*aZ+acdf,pmean,psd);
         obj.Prc95(j) = norminv(0.95*aZ+acdf,pmean,psd);
         obj.DistParam{j} = [pmean,psd];
-        obj.PdfCmd{j} = @(x)(x>=0).*normpdf((x-pmean)/psd,0,1)/psd/aZ;
+        obj.PDFCmd{j} = @(x)(x>=0).*normpdf((x-pmean)/psd,0,1)/psd/aZ;
         obj.RndCmd{j} = @(n)norminv(rand(1,n).*aZ+zcdf,pmean,psd);
     
     elseif strcmp(obj.Dist{j},'B')
@@ -80,7 +79,7 @@ for j=1:np
         obj.Prc05(j) = betainv(0.05,a,b);
         obj.Prc95(j) = betainv(0.95,a,b);
         obj.DistParam{j} = [a,b];
-        obj.PdfCmd{j} = @(x)betapdf(x,a,b);
+        obj.PDFCmd{j} = @(x)betapdf(x,a,b);
         obj.RndCmd{j} = @(n)betarnd(a,b,1,n);
         
     elseif strcmp(obj.Dist{j},'G')
@@ -97,7 +96,7 @@ for j=1:np
         obj.Prc05(j) = gaminv(0.05,a,b);
         obj.Prc95(j) = gaminv(0.95,a,b);
         obj.DistParam{j} = [a,b];
-        obj.PdfCmd{j} = @(x)gampdf(x,a,b);
+        obj.PDFCmd{j} = @(x)gampdf(x,a,b);
         obj.RndCmd{j} = @(n)gamrnd(a,b,1,n);
         
     elseif strcmp(obj.Dist{j},'IG1')
@@ -119,7 +118,7 @@ for j=1:np
         obj.Prc05(j) = gaminv(0.05,a,b)^(-1/2);
         obj.Prc95(j) = gaminv(0.95,a,b)^(-1/2);
         obj.DistParam{j} = [a,b];
-        obj.PdfCmd{j} = @(x)(x>0).*(gampdf(x.^(-2),a,b)*2./x.^3);
+        obj.PDFCmd{j} = @(x)(x>0).*(gampdf(x.^(-2),a,b)*2./x.^3);
         obj.RndCmd{j} = @(n)gamrnd(a,b,1,n).^(-1/2);
     
     elseif strcmp(obj.Dist{j},'IG2')
@@ -136,7 +135,7 @@ for j=1:np
         obj.Prc05(j) = gaminv(0.05,a,b)^(-1);
         obj.Prc95(j) = gaminv(0.95,a,b)^(-1);
         obj.DistParam{j} = [a,b];
-        obj.PdfCmd{j} = @(x)(x>0).*(gampdf(x.^(-1),a,b)./x.^2);
+        obj.PDFCmd{j} = @(x)(x>0).*(gampdf(x.^(-1),a,b)./x.^2);
         obj.RndCmd{j} = @(n)gamrnd(a,b).^(-1);
         
     end

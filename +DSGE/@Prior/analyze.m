@@ -95,7 +95,7 @@ obj.Sample.NDrawsUsed = size(xd,2);
 fprintf('Number of accepted draws: %.0f\n',obj.Sample.NDrawsUsed);
 fprintf('Percent of rejected draws: %.2f%%\n',...
         obj.Sample.FractionBadDraws*100);
-fprintf('log-prior correction: %.6f\n',obj.LPdfCorrection);
+fprintf('log-prior correction: %.6f\n',obj.LPDFCorrection);
 
 obj.Sample.Param = sumstats(xd,op.Percentiles);
 obj.Sample.AuxParam = sumstats(xdAux,op.Percentiles);

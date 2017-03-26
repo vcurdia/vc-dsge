@@ -80,9 +80,9 @@ classdef Prior < handle
         end
         
         function p = pdf(obj,x)
-            p = repmat(exp(obj.LPdfCorrection),1,size(x,2));
+            p = repmat(exp(obj.LPDFCorrection),1,size(x,2));
             for j=1:obj.Model.Param.N
-                p = p.*obj.PdfCmd{j}(x(j,:));
+                p = p.*obj.PDFCmd{j}(x(j,:));
             end
         end
         
