@@ -18,7 +18,6 @@ classdef Prior < handle
     end
    
     properties (SetAccess = protected)
-        EstimateIdx
         Mode
         Median
         Prc05
@@ -55,7 +54,6 @@ classdef Prior < handle
                     obj.SD(1:np,1) = 0;
                 end
                 m.Param = p;
-                obj.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
             end
         end

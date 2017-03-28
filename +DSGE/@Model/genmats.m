@@ -150,9 +150,10 @@ for j=1:obj.Param.N
     fprintf(fid,'%s = x(%.0f);\n',obj.Param.Names{j},j);
 end
 fprintf(fid,'if op.StoreParam\n');
-for j=1:obj.Param.N
-    fprintf(fid,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-end
+fprintf(fid,'    Mats.Param = x;\n');
+% for j=1:obj.Param.N
+%     fprintf(fid,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
+% end
 fprintf(fid,'end\n');
 
 if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
@@ -241,13 +242,11 @@ obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
                     obj.CompoundParam.PrettyNames];
 
 fprintf(fid,'if op.StoreParam\n');
-for j=1:obj.NumSolveParam.N
-    fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
-            obj.NumSolveParam.Names{j});
-end
-for j=1:obj.CompoundParam.N
-    fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
-            obj.CompoundParam.Names{j});
+fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
+for j=1:obj.AuxParam.N
+    fprintf(fid,'    Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
+%     fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
+%             obj.AuxParam.Names{j});
 end
 fprintf(fid,'end\n');
 

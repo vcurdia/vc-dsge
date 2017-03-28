@@ -80,9 +80,7 @@ xdAux = zeros(nAux,op.NDraws);
 parfor jd=1:op.NDraws
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~Matsj.Status==1;
-    for jp=1:nAux
-        xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
-    end
+    xdAux(:,jd) = Matsj.AuxParam;
 %     Matsd{jd} = Matsj;
 end
 obj.Sample.NDraws = op.NDraws;
@@ -147,7 +145,7 @@ for jBreak=1:nBreaks
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+7+1+5));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Prior Definition} ');
     fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
@@ -190,7 +188,7 @@ for jBreak=1:nBreaks
         fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
