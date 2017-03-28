@@ -26,12 +26,12 @@ np = obj.NEstimate;
 pIdx = obj.EstimateIdx;
 
 %% Options
-op.NMax = 1;
+op.NMax = 20;
 op.ShowRobustness = 1;
 op.DrawAll = 0;
 op.Min.verbose = 1;
 op.Min.H0 = obj.Var(pIdx,pIdx);
-op.Guess = obj.Mode(pIdx);
+op.Guess = [post.Mode(pIdx),prior.Mean(pIdx)];
 op.GuessMaxDraws = 1000;
 % op.GuessUsePriorDist = 0;
 op.GuessPrcUsePriorDist = 0.5;
