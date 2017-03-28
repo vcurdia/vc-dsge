@@ -1,9 +1,9 @@
-% setupMyDSGE
+% setupDSGE
 %
-% This file gives an example of how to use the vcDSGE package
+% This file gives an example of how to setup the DSGE
 %
 % See also:
-% DSGE
+% runDSGE
 %
 % ...........................................................................
 %
@@ -11,23 +11,18 @@
 % 
 % Copyright (C) 2016 Vasco Curdia
 
-%% -------------------------------------------------------------------
 
 %% Preamble
 clear all
 setpath
 set(0,'defaultTextInterpreter','latex');
-tic
-
-%% Initiate parallel pool
-% parpool(2)
-
-%% -------------------------------------------------------------------
+TimeElapsed = TimeTracker;
+TimeElapsed.start('Setup')
 
 %% Initiate DSGE
 model = DSGE.Model('MyDSGE');
 mkdir(model.Name)
-cd(model.Name)
+basePath = cd(model.Name);
 
 %% Setup the model
 
@@ -178,11 +173,6 @@ post = DSGE.Posterior(model,prior,data);
 
 
 %% Finish up
+fprintf('\n'),TimeElapsed.stop('Setup')
 save(model.Name)
-cd ..
-fprintf('\n'),vctoc
-
-% delete(gcp)
-% exit
-
-
+cd(basePath)

@@ -15,21 +15,20 @@ function analyze(obj,varargin)
 
 
 %% Preamble
-
 fprintf('\n*** Analyzing DSGE Prior\n')
 ttName = 'Analyze';
 obj.TimeElapsed.start(ttName)
 
 %% Options
-op.NDraws = 100;
+op.NDraws = 1000;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 
-op = updateoptions(op,varargin);
+op = updateoptions(op,varargin{:});
 
 %% other settings
 ReportFileName = sprintf('%s_Report_Prior',obj.Model.Name);
-ReportTitle = sprintf('Prior Analysis:\\\\%s',obj.Model.Name);
+ReportTitle = sprintf('%s\\\\Prior Analysis',obj.Model.Name);
 
 %% useful variables
 np = obj.Model.Param.N;
@@ -81,22 +80,20 @@ xdAux = zeros(nAux,op.NDraws);
 parfor jd=1:op.NDraws
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~Matsj.Status==1;
-    for jp=1:nAux
-        xdAux(jp,jd) = Matsj.AuxParam.(AuxNames{jp});
-    end
+    xdAux(:,jd) = Matsj.AuxParam;
 %     Matsd{jd} = Matsj;
 end
 obj.Sample.NDraws = op.NDraws;
 obj.Sample.NBadDraws = sum(BadDraws);
 obj.Sample.FractionBadDraws = obj.Sample.NBadDraws/op.NDraws;
-obj.LPdfCorrection = -log(1-obj.Sample.FractionBadDraws);
+obj.LPDFCorrection = -log(1-obj.Sample.FractionBadDraws);
 xd(:,BadDraws) = [];
 xdAux(:,BadDraws) = [];
 obj.Sample.NDrawsUsed = size(xd,2);
 fprintf('Number of accepted draws: %.0f\n',obj.Sample.NDrawsUsed);
 fprintf('Percent of rejected draws: %.2f%%\n',...
         obj.Sample.FractionBadDraws*100);
-fprintf('log-prior correction: %.6f\n',obj.LPdfCorrection);
+fprintf('log-prior correction: %.6f\n',obj.LPDFCorrection);
 
 obj.Sample.Param = sumstats(xd,op.Percentiles);
 obj.Sample.AuxParam = sumstats(xdAux,op.Percentiles);
@@ -148,7 +145,7 @@ for jBreak=1:nBreaks
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{lcccccccccccc} \n');
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+7+1+5));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Prior Definition} ');
     fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
@@ -191,7 +188,7 @@ for jBreak=1:nBreaks
         fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{lccccccccccccc} \n');
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');

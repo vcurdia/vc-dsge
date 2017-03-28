@@ -15,7 +15,7 @@ function p = lpdf(obj,x,varargin)
 %% Options
 op.fid = 1;
 op.verbose = 0;
-op = updateoptions(op,varargin);
+op = updateoptions(op,varargin{:});
 
 %% convert param vector
 if size(x,1)<obj.Model.Param.N

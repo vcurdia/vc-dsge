@@ -41,7 +41,7 @@ obj.TimeElapsed.start(ttName)
 mkdir(op.PlotDir)
 PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FileNameSuffix); 
 ReportFileName = sprintf('%s_Report_IRF%s',obj.Name,op.FileNameSuffix);
-ReportTitle = sprintf('IRF Report:\\\\%s, %s',obj.Name,...
+ReportTitle = sprintf('%s\\\\IRF Report %s',obj.Name,...
                       strrep(op.FileNameSuffix,'_',''));
 
 %% Prepare for IRF

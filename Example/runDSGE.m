@@ -1,0 +1,51 @@
+% runMyDSGE
+%
+% This file gives an example of how to use the vcDSGE package
+%
+% See also:
+% setupDSGE
+%
+% ...........................................................................
+%
+% Created: January 21, 2016 by Vasco Curdia
+% 
+% Copyright (C) 2016 Vasco Curdia
+
+
+%% Preamble
+clear all
+setpath
+set(0,'defaultTextInterpreter','latex');
+TimeElapsed = TimeTracker;
+
+%% Settings
+specName = 'MyDSGE';
+specPath = specName;
+
+%% Initiate parallel pool
+% parpool(2)
+
+%% Load DSGE
+basePath = cd(specPath);
+load(specName)
+DSGE.linkobj(model,prior,post)
+
+%% MaxPost
+opMaxPost.NMax = 4;
+opMaxPost.Guess = [post.Mode,prior.Mean];
+opMaxPost.Min.nit = 3; %1000
+opMaxPost.Min.Ritmax = 4;%30;
+opMaxPost.Min.Ritmin = 2;%10;
+post.maxlpdf(opMaxPost)
+
+
+
+%% Finish up
+% delete(gcp)
+save(specName)
+cd(basePath)
+fprintf('\n'),TimeElapsed.show
+
+% exit
+
+

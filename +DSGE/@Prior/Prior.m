@@ -18,17 +18,15 @@ classdef Prior < handle
     end
    
     properties (SetAccess = protected)
-        EstimateIdx
         Mode
         Median
         Prc05
         Prc95
         Sample
         DistParam
-        LPdfCmd
-        PdfCmd
+        PDFCmd
         RndCmd
-        LPdfCorrection
+        LPDFCorrection
         TimeElapsed
     end
     
@@ -56,7 +54,6 @@ classdef Prior < handle
                     obj.SD(1:np,1) = 0;
                 end
                 m.Param = p;
-                obj.EstimateIdx = ~ismember(obj.Dist,{'C'});
                 obj.analyzedist
             end
         end
@@ -81,9 +78,9 @@ classdef Prior < handle
         end
         
         function p = pdf(obj,x)
-            p = repmat(exp(obj.LPdfCorrection),1,size(x,2));
+            p = repmat(exp(obj.LPDFCorrection),1,size(x,2));
             for j=1:obj.Model.Param.N
-                p = p.*obj.PdfCmd{j}(x(j,:));
+                p = p.*obj.PDFCmd{j}(x(j,:));
             end
         end
         
