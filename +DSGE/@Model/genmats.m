@@ -139,7 +139,7 @@ fprintf(fid,'op.GensysAuthor = ''%s'';\n',obj.GensysAuthor);
 fprintf(fid,'op.gensys = {};\n');
 
 fprintf(fid,'\n%% Update options\n');
-fprintf(fid,'op = updateoptions(op,varargin);\n');
+fprintf(fid,'op = updateoptions(op,varargin{:});\n');
 
 fprintf(fid,'\n%% Initiate Status\n');
 fprintf(fid,'Mats.Status = 1;\n');
@@ -464,8 +464,8 @@ if obj.AuxVar.N>0
     fprintf(fid,'            AuxREE.G1 = [];\n');
     fprintf(fid,'            AuxREE.G2 = [];\n');
     fprintf(fid,'        end\n');
+    fprintf(fid,'        Mats.AuxREE = AuxREE;\n');
     fprintf(fid,'    end\n');
-    fprintf(fid,'    Mats.AuxREE = AuxREE;\n');
     fprintf(fid,'end\n');
 end
 

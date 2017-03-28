@@ -31,10 +31,11 @@ load(specName)
 DSGE.linkobj(model,prior,post)
 
 %% MaxPost
-opMaxPost.NMAx = 1;
-opMaxPost.MinParams.nit = 2; %1000
-opMaxPost.MinParams.Ritmax = 1;%30;
-opMaxPost.MinParams.Ritmin = 1;%10;
+opMaxPost.NMax = 4;
+opMaxPost.Guess = [post.Mode,prior.Mean];
+opMaxPost.Min.nit = 3; %1000
+opMaxPost.Min.Ritmax = 4;%30;
+opMaxPost.Min.Ritmin = 2;%10;
 post.maxlpdf(opMaxPost)
 
 

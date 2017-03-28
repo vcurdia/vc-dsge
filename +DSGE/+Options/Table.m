@@ -17,4 +17,4 @@ op.MoveLeft = 1;
 op.Lines = [];
 
 %% update options
-op = updateoptions(op,varargin);
+op = updateoptions(op,varargin{:});
