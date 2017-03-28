@@ -14,6 +14,8 @@ classdef Posterior < handle
         Model
         Prior
         Data
+        EstimateIdx
+        NEstimate
         Mode
         ModeLPDF
         Mean
@@ -37,8 +39,10 @@ classdef Posterior < handle
                 obj.Model = model;
                 obj.Prior = prior;
                 obj.Data = data;
+                obj.EstimateIdx = ~ismember(prior.Dist,{'C'});
+                obj.NEstimate = sum(obj.EstimateIdx);
                 obj.Mode = model.Param.Values;
-                obj.ModeLPDF = obj.lpdf(obj.Mode)
+                obj.ModeLPDF = obj.lpdf(obj.Mode);
                 fprintf('Posterior log-pdf using Param.Values is %0.4f.\n',...
                         obj.ModeLPDF);
                 obj.Mean = prior.Mean;
@@ -70,11 +74,7 @@ classdef Posterior < handle
         
         function xx = expandparam(obj,x)
             xx = repmat(obj.Model.Param.Values,1,size(x,2));
-            xx(obj.Prior.EstimateIdx,:) = x;
-        end
-        
-        function p = lpdfneg(obj,x,varargin)
-            p = -obj.lpdf(x,varargin{:});
+            xx(obj.EstimateIdx,:) = x;
         end
         
         function xd = draw(obj,nDraws)

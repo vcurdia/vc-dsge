@@ -30,6 +30,15 @@ basePath = cd(specPath);
 load(specName)
 DSGE.linkobj(model,prior,post)
 
+%% MaxPost
+opMaxPost.NMAx = 1;
+opMaxPost.MinParams.nit = 2; %1000
+opMaxPost.MinParams.Ritmax = 1;%30;
+opMaxPost.MinParams.Ritmin = 1;%10;
+post.maxlpdf(opMaxPost)
+
+
+
 %% Finish up
 % delete(gcp)
 save(specName)
