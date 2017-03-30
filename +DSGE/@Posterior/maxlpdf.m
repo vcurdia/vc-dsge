@@ -39,6 +39,8 @@ op.GuessMean = obj.Prior.Mean(pIdx);
 op.GuessSD = obj.Prior.SD(pIdx);
 op.GuessDF = 4;
 op.Table = DSGE.Options.Table;
+op.KeepLogs = 1;
+op.KeepMats = 1;
 
 op = updateoptions(op,varargin{:});
 
@@ -102,9 +104,18 @@ parfor jm=1:nMax
     opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
     MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
     fclose(fid);
+    if ~op.KeepLogs
+        delete(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm))
+    end
+    if ~op.KeepMats
+        delete(sprintf('%s_MaxPost_%03.0f.mat',obj.Model.Name,jm))
+    end
 end
 MaxPostOut = [MaxPostOut{:}];
 nMax = length(MaxPostOut);
+
+%% save minimization output
+save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
 
 %% Show history evolution of robustness
 if op.ShowRobustness
@@ -258,9 +269,6 @@ fprintf('\n')
 
 fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.ModeLPDF)
 
-%% save minimization output
-save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
-
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
@@ -355,6 +363,15 @@ fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
 
+for jm=1:nMax
+    fid = fopen(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm),'wt');
+    opj = op.Min;
+    opj.MatFn = sprintf('%s_MaxPost_%03.0f',obj.Model.Name,jm);
+    opj.LogFn = fid;
+    opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
+    MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
+    fclose(fid);
+end
 
 
 %% Finish up
