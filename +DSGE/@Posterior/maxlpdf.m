@@ -31,7 +31,7 @@ op.ShowRobustness = 1;
 op.DrawAll = 0;
 op.Min.verbose = 1;
 op.Min.H0 = obj.Var(pIdx,pIdx);
-op.Guess = [post.Mode(pIdx),prior.Mean(pIdx)];
+op.Guess = [obj.Mode(pIdx),obj.Prior.Mean(pIdx)];
 op.GuessMaxDraws = 1000;
 % op.GuessUsePriorDist = 0;
 op.GuessPrcUsePriorDist = 0.5;
@@ -62,7 +62,7 @@ for jm=1:nMax
     else
         for jg=1:op.GuessMaxDraws
             if jm<nx0+nDrawPrior
-                x0g = obj.Prior.Draw(1);
+                x0g = obj.Prior.draw(1);
                 x0(:,jm) = x0g(pIdx);
             else
                 for jp=1:np
@@ -93,6 +93,7 @@ end
 
 %% Run minimizations
 MaxPostOut = cell(1,nMax);
+x0j = op.GuessMean;
 parfor jm=1:nMax
     fid = fopen(sprintf('MaxPost_%03.0f.log',jm),'wt');
     opj = op.Min;
@@ -187,6 +188,10 @@ obj.ModeLPDF = -MaxPostOut(idxMax).f;
 obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
 obj.SD = diag(obj.Var).^(1/2);
 
+Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
+xAux = Mats.AuxParam;
+
+
 %% display results on screen
 pNames = obj.Model.Param.Names;
 pNameLength = [cellfun('length',pNames)];
@@ -221,6 +226,36 @@ for jp=1:obj.Model.Param.N
     end
     disp(str2show)
 end
+fprintf('\n')
+
+auxN = obj.Model.AuxParam.N;
+auxNames = obj.Model.AuxParam.Names;
+auxNameLength = [cellfun('length',auxNames)];
+auxNameLengthMax = max(auxNameLength);
+DispList = {'','',auxNames;
+            'Prior','   Mean',obj.Prior.Sample.AuxParam.Mean;
+            '','     5%',obj.Prior.Sample.AuxParam.Prc05;
+            '',' Median',obj.Prior.Sample.AuxParam.Median;
+            '','    95%',obj.Prior.Sample.AuxParam.Prc95;
+            'Posterior','   Mode',xAux;
+           };
+nc = size(DispList,1);
+for jr=1:2
+    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
+    for jc=2:nc
+        str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
+    end
+    disp(str2show)
+end
+for jp=1:auxN
+    str2show = sprintf(['%',int2str(auxNameLengthMax),'s'],DispList{1,3}{jp});
+    for jc=2:nc
+        str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
+    end
+    disp(str2show)
+end
+fprintf('\n')
+
 fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.ModeLPDF)
 
 %% save minimization output
@@ -230,7 +265,6 @@ save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 
-% value of the posterior density
 fprintf(fid,'\\begin{equation*} \n');
 fprintf(fid,'\\begin{tabular}{rl} \n');
 fprintf(fid,'posterior log density at mode: & %.4f\n',obj.ModeLPDF);
@@ -283,41 +317,8 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-%% show auxiliary parameters
 fprintf(fid,'\\section{Auxiliary Parameters}\n');
-np = obj.Model.AuxParam.N;
-pNames = obj.Model.AuxParam.Names;
-pNameLength = [cellfun('length',pNames)];
-pNameLengthMax = max(pNameLength);
-Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
-xAux = Mats.AuxParam;
-
-DispList = {'','',pNames;
-            'Prior','   Mean',obj.Prior.Sample.AuxParam.Mean;
-            '','     5%',obj.Prior.Sample.AuxParam.Prc05;
-            '',' Median',obj.Prior.Sample.AuxParam.Median;
-            '','    95%',obj.Prior.Sample.AuxParam.Prc95;
-            'Posterior','   Mode',xAux;
-           };
-nc = size(DispList,1);
-for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
-    for jc=2:nc
-        str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
-    end
-    disp(str2show)
-end
-for jp=1:np
-    str2show = sprintf(['%',int2str(pNameLengthMax),'s'],DispList{1,3}{jp});
-    for jc=2:nc
-        str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
-    end
-    disp(str2show)
-end
-fprintf('\n')
-
-str = [' & %.',int2str(op.Table.Precision),'f'];
-tableBreaks = settablebreaks(np,op.Table.MaxRows);
+tableBreaks = settablebreaks(auxN,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
