@@ -95,9 +95,9 @@ end
 MaxPostOut = cell(1,nMax);
 x0j = op.GuessMean;
 parfor jm=1:nMax
-    fid = fopen(sprintf('MaxPost_%03.0f.log',jm),'wt');
+    fid = fopen(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm),'wt');
     opj = op.Min;
-    opj.MatFn = sprintf('MaxPost_%03.0f',jm);
+    opj.MatFn = sprintf('%s_MaxPost_%03.0f',obj.Model.Name,jm);
     opj.LogFn = fid;
     opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
     MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
