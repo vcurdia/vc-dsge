@@ -1,4 +1,5 @@
 function mcmcchain(obj,fn,nDraws,varargin)
+function MCMCFcn(PostName,SaveName,Post,nDraws,jChain,options)
 
 % mcmcchain
 % 
@@ -32,7 +33,11 @@ op = updateoptions(op,varargin{:});
 
 %% preparations
 fid = fopen([fn,'.log'],'wt');
+fpost = 
 
+%% preliminary calculations
+np = length(Post.Mode);
+if ~exist('isAugment','var'), isAugment = 0; end
 
 
 %% save output

@@ -26,11 +26,8 @@ classdef Posterior < handle
         Prc95
         Sample
         MCMCUpdate
-        MCMCJumpSize = 2.4;
         MCMCNChains = 4;
         MCMCNDraws = 100000;
-        MCMCBurnIn = 0.25;
-        MCMCNThinning = 1;
     end
    
     properties (SetAccess = protected)
