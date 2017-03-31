@@ -1,5 +1,4 @@
-function mcmcchain(obj,fn,nDraws,varargin)
-function MCMCFcn(PostName,SaveName,Post,nDraws,jChain,options)
+function nRejections = mcmcchain(obj,varargin)
 
 % mcmcchain
 % 
@@ -15,6 +14,7 @@ function MCMCFcn(PostName,SaveName,Post,nDraws,jChain,options)
 
 %% Options
 op.verbose = 1;
+op.NDraws = 50000;
 op.NIRS = 1000;
 op.NBlocks = 10;
 op.ExplosionScale = [.4,.5,.6,.7];
@@ -25,23 +25,20 @@ op.InitDrawItMax = 1000;
 op.InitDrawTol = 20;
 op.InitDrawVarFactor = 1;
 op.InitDrawDF = 6;
-op.IsAugment = 0;
-op.SaveList = {'xDraws','postDraws','nRejections','nDraws',...
-               'jumpScaleFactor','jumpScale','jumpVar'};
+op.NRejections = 0;
+op.fn = 'MCMC_Chain';
 
 op = updateoptions(op,varargin{:});
 
 %% preparations
-fid = fopen([fn,'.log'],'wt');
-fpost = 
+fid = fopen([op.fn,'.log'],'wt');
+np = obj.Model.Param.N;
+nRejections = op.NRejections;
 
-%% preliminary calculations
-np = length(Post.Mode);
-if ~exist('isAugment','var'), isAugment = 0; end
 
 
 %% save output
-save([fn,SaveList{:})
+save(op.fn,'xDraws','postDraws');
 
 %% close printed output file
 if fid~=1,fclose(fid);end

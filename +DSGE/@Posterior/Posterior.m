@@ -24,10 +24,7 @@ classdef Posterior < handle
         Median
         Prc05
         Prc95
-        Sample
-        MCMCUpdate
-        MCMCNChains = 4;
-        MCMCNDraws = 100000;
+        MCMCSample
     end
    
     properties (SetAccess = protected)
