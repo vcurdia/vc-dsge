@@ -31,11 +31,11 @@ load(specName)
 DSGE.linkobj(model,prior,post)
 
 %% MaxPost
-opMaxPost.NMax = 4;
-opMaxPost.Min.nit = 2;
-opMaxPost.Min.Ritmax = 2;
-opMaxPost.Min.Ritmin = 1;
-post.maxlpdf(opMaxPost)
+options.MaxPost.NMax = 4;
+options.MaxPost.Min.nit = 2;
+options.MaxPost.Min.Ritmax = 2;
+options.MaxPost.Min.Ritmin = 1;
+post.maxlpdf(options.MaxPost)
 save(specName)
 save([specName,'_MaxPost'])
 

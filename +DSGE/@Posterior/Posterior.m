@@ -17,7 +17,7 @@ classdef Posterior < handle
         EstimateIdx
         NEstimate
         Mode
-        ModeLPDF
+        LPDFMode
         Mean
         SD
         Var
@@ -42,9 +42,9 @@ classdef Posterior < handle
                 obj.EstimateIdx = ~ismember(prior.Dist,{'C'});
                 obj.NEstimate = sum(obj.EstimateIdx);
                 obj.Mode = model.Param.Values;
-                obj.ModeLPDF = obj.lpdf(obj.Mode);
+                obj.LPDFMode = obj.lpdf(obj.Mode);
                 fprintf('Posterior log-pdf using Param.Values is %0.4f.\n',...
-                        obj.ModeLPDF);
+                        obj.LPDFMode);
                 obj.Mean = prior.Mean;
                 obj.SD = prior.SD;
                 obj.Var = diag(prior.SD.^2);

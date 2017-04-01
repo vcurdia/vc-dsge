@@ -28,6 +28,7 @@ op = updateoptions(op,varargin{:});
 % ReportTitle = sprintf('%s\\\\Posterior Mode',obj.Model.Name);
 
 sid = op.SampleID;
+pIdx = obj.EstimateIdx;
 
 fprintf('\n*** Make MCMC sample %.0f\n',sid)
 ttName = sprintf('MCMCSample%.0f',sid);
@@ -36,7 +37,7 @@ obj.TimeElapsed.start(ttName)
 obj.MCMCSample(sid).NChains = op.NChains;
 obj.MCMCSample(sid).NDraws = op.Chain.NDraws;
 if ~op.Chain.Augment
-    op.Chain.JumpVar = op.JumpScale^2/obj.NEstimate*obj.Var;
+    op.Chain.JumpVar = op.JumpScale^2/obj.NEstimate*obj.Var(pIdx,pIdx);
     obj.MCMCSample(sid).JumpScale = op.JumpScale;
     obj.MCMCSample(sid).JumpVar = op.Chain.JumpVar;
     obj.MCMCSample(sid).NRejections = zeros(1,op.NChains);

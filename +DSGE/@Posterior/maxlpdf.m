@@ -193,9 +193,9 @@ end
 disp(' ')
 
 %% extract the best one
-[ModeLPDF, idxMax] = min([MaxPostOut(:).f]);
+[LPDFMode, idxMax] = min([MaxPostOut(:).f]);
 obj.Mode(pIdx) = MaxPostOut(idxMax).x;
-obj.ModeLPDF = -MaxPostOut(idxMax).f;
+obj.LPDFMode = -MaxPostOut(idxMax).f;
 obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
 obj.SD = diag(obj.Var).^(1/2);
 
@@ -267,7 +267,7 @@ for jp=1:auxN
 end
 fprintf('\n')
 
-fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.ModeLPDF)
+fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.LPDFMode)
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
@@ -275,7 +275,7 @@ fid = createtex(ReportFileName,ReportTitle);
 
 fprintf(fid,'\\begin{equation*} \n');
 fprintf(fid,'\\begin{tabular}{rl} \n');
-fprintf(fid,'posterior log density at mode: & %.4f\n',obj.ModeLPDF);
+fprintf(fid,'posterior log density at mode: & %.4f\n',obj.LPDFMode);
 fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
 
