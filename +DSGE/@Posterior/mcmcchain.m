@@ -12,6 +12,12 @@ function nRejections = mcmcchain(obj,varargin)
 % Created: March 28, 2017
 % Copyright (C) 2017 Vasco Curdia
 
+%% map object related variables
+np = obj.NEstimate;
+xMode = obj.Mode(obj.EstimateIdx);
+Var = obj.Var(obj.EstimateIdx,obj.EstimateIdx)
+lpdfMode = obj.LPDFMode;
+
 %% Options
 op.verbose = 1;
 op.NDraws = 50000;
@@ -26,20 +32,16 @@ op.InitDrawTol = 20;
 op.InitDrawVarFactor = 1;
 op.InitDrawDF = 6;
 op.NRejections = 0;
+op.JumpVar = 2.4^2/np*Var;
 op.fn = 'MCMC_Chain';
 op.x0 = [];
+op.SaveList = {'xDraws','lpdfDraws'};
 
 op = updateoptions(op,varargin{:});
 
-%% preparations
+%% chain related variables
 fid = fopen([op.fn,'.log'],'wt');
-np = obj.NEstimate;
-xMode = obj.Mode(obj.EstimateIdx);
-Var = obj.Var(obj.EstimateIdx,obj.EstimateIdx)
-lpdfMode = obj.LPDFMode;
-
 lpdf = @(x)obj.lpdf(x,struct('verbose',op.verbose,'fid',fid));
-
 nRejections = op.NRejections;
 
 %% generate initial draw
@@ -121,19 +123,46 @@ end
 %% Prepare variables
 if ~op.Augment
     nDraws = op.NDraws;
-    xDraws=[];
-    lpdfDraws=[];
+    xDraws = [];
+    lpdfDraws = [];
 else
     fprintf(fid,'Loading existing chain...\n');
     load(op.fn)
     nDraws = op.NDraws - length(lpdfDraws);
     x0 = xDraws(:,end);
 end
-njj = ceil(nDraws/op.NBlocks);
+nDrawsBlock = ceil(nDraws/op.NBlocks);
 
+%% MCMC
+lpdf0 = lpdf(x0);
+for jB=1:op.NBlocks
+    fprintf(fid,'Generating set %2.0f out of %.0f...\n',jB,op.NBlocks);
+    nB = min(nDrawsBlock,nDraws-(jB-1)*nDrawsBlock);
+    xB = zeros(np,nB);
+    lpdfB = zeros(1,nB);
+    for j=1:nB
+        xc = mvnrnd(x0,op.JumpVar,1)';
+        lpdfc = lpdf(xc);
+        if unifrnd(0,1)<exp(lpdfc-lpdf0)
+            x0 = xc;
+            lpdf0 = lpdfc;
+        else
+            nRejections = nRejections+1;
+        end
+        xB(:,j) = x0;
+        lpdfB(j) = lpdf0;
+    end
+    xDraws = [xDraws,xB];
+    lpdfDraws = [lpdfDraws,lpdfB];
+    save(SaveName,op.SaveList{:})
+end
+
+%% show number of rejections
+fprintf(fid,'%.0f rejections out of %.0f draws (%.2f%%).\n',...
+        nRejections,nDraws,nRejections/nDraws*100);
 
 %% save output
-save(op.fn,'xDraws','lpdfDraws');
+save(op.fn,op.SaveList{:});
 
 %% close printed output file
 if fid~=1,fclose(fid);end
