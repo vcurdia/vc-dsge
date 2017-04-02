@@ -13,7 +13,7 @@ function maxlpdf(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Preamble
-fprintf('\n*** Search for posterior mode\n')
+fprintf('\n*** Maximizing posterior log-pdf\n')
 ttName = 'MaxLPDF';
 obj.TimeElapsed.start(ttName)
 
@@ -114,6 +114,17 @@ end
 MaxPostOut = [MaxPostOut{:}];
 nMax = length(MaxPostOut);
 
+%% extract the best one
+[LPDFMode, idxMax] = min([MaxPostOut(:).f]);
+obj.Mode(pIdx) = MaxPostOut(idxMax).x;
+obj.LPDFMode = -MaxPostOut(idxMax).f;
+obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
+obj.SD = diag(obj.Var).^(1/2);
+
+Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
+xAux = Mats.AuxParam;
+
+
 %% save minimization output
 save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
 
@@ -192,18 +203,7 @@ for jm=1:nMax
 end
 disp(' ')
 
-%% extract the best one
-[LPDFMode, idxMax] = min([MaxPostOut(:).f]);
-obj.Mode(pIdx) = MaxPostOut(idxMax).x;
-obj.LPDFMode = -MaxPostOut(idxMax).f;
-obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
-obj.SD = diag(obj.Var).^(1/2);
-
-Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
-xAux = Mats.AuxParam;
-
-
-%% display results on screen
+%% show results on screen
 pNames = obj.Model.Param.Names;
 pNameLength = [cellfun('length',pNames)];
 pNameLengthMax = max(pNameLength);
