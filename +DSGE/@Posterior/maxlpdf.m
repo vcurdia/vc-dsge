@@ -104,12 +104,6 @@ parfor jm=1:nMax
     opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
     MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
     fclose(fid);
-    if ~op.KeepLogs
-        delete(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm))
-    end
-    if ~op.KeepMats
-        delete(sprintf('%s_MaxPost_%03.0f.mat',obj.Model.Name,jm))
-    end
 end
 MaxPostOut = [MaxPostOut{:}];
 nMax = length(MaxPostOut);
@@ -364,13 +358,12 @@ fclose(fid);
 pdflatex(ReportFileName)
 
 for jm=1:nMax
-    fid = fopen(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm),'wt');
-    opj = op.Min;
-    opj.MatFn = sprintf('%s_MaxPost_%03.0f',obj.Model.Name,jm);
-    opj.LogFn = fid;
-    opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
-    MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
-    fclose(fid);
+    if ~op.KeepLogs
+        delete(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm))
+    end
+    if ~op.KeepMats
+        delete(sprintf('%s_MaxPost_%03.0f.mat',obj.Model.Name,jm))
+    end
 end
 
 
