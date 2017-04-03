@@ -57,7 +57,7 @@ x0 = op.x0;
 if nx0>0 && npx0==obj.Model.Param.N, 
     x0 = x0(obj.EstimateIdx,:); 
 end
-nRejections = cell(op.NChains);
+nRejections = obj.MCMCSample(sid).NRejections;
 parfor jChain=1:op.NChains
     opj = op.Chain;
     opj.NRejections = obj.MCMCSample(sid).NRejections(jChain);
@@ -65,15 +65,15 @@ parfor jChain=1:op.NChains
     if nx0>=jChain
         opj.x0 = x0(:,jChain);
     end
-    nRejections{jChain} = obj.mcmcchain(opj);
+    nRejections(jChain) = obj.mcmcchain(opj);
 end
 
     
 %% show rejection rates
 for jChain=1:op.NChains
-    obj.MCMCSample(sid).NRejections(jChain) = nRejections{jChain};
+    obj.MCMCSample(sid).NRejections(jChain) = nRejections(jChain);
     fprintf('Chain %.0f: JumpScale = %4.2f, Rejection rate = %5.1f%%\n',...
-            jChain,op.JumpScale,nRejections{jChain}/op.Chain.NDraws*100)
+            jChain,op.JumpScale,nRejections(jChain)/op.Chain.NDraws*100)
 end
 fprintf('\n')
 

@@ -41,7 +41,7 @@ classdef Model < handle
     methods
         function obj = Model(name)
             if nargin>0
-                fprintf('\n*** Initiating model\n')
+                fprintf('\n*** Preparing model\n')
                 fprintf('%s\n',name)
                 obj.Name = name;
                 obj.TimeElapsed = TimeTracker;
