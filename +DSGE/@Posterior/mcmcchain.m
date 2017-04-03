@@ -15,7 +15,7 @@ function nRejections = mcmcchain(obj,varargin)
 %% map object related variables
 np = obj.NEstimate;
 xMode = obj.Mode(obj.EstimateIdx);
-Var = obj.Var(obj.EstimateIdx,obj.EstimateIdx)
+Var = obj.Var(obj.EstimateIdx,obj.EstimateIdx);
 lpdfMode = obj.LPDFMode;
 
 %% Options
@@ -49,7 +49,7 @@ x0 = op.x0;
 if ~op.Augment && isempty(x0)
     fprintf(fid,'Generating initial draw...\n');
     if op.InitDrawTStudent
-        InitDrawVarChol = chol(InitDrawVarFactor^2*Var)';
+        InitDrawVarChol = chol(op.InitDrawVarFactor^2*Var)';
         InitDrawCorr = eye(np);
         for jd=1:op.InitDrawItMax
             x0 = xMode + InitDrawVarChol*mvtrnd(InitDrawCorr,op.InitDrawDF)';
@@ -154,7 +154,7 @@ for jB=1:op.NBlocks
     end
     xDraws = [xDraws,xB];
     lpdfDraws = [lpdfDraws,lpdfB];
-    save(SaveName,op.SaveList{:})
+    save(op.fn,op.SaveList{:})
 end
 
 %% show number of rejections

@@ -30,7 +30,7 @@ op = updateoptions(op,varargin{:});
 sid = op.SampleID;
 pIdx = obj.EstimateIdx;
 
-fprintf('\n*** Make MCMC sample %.0f\n',sid)
+fprintf('\n*** Making MCMC Sample %.0f\n',sid)
 ttName = sprintf('MCMCSample%.0f',sid);
 obj.TimeElapsed.start(ttName)
 
@@ -47,13 +47,16 @@ end
 obj.MCMCSample(sid).FileNames = cell(op.NChains,1);
 for jChain=1:op.NChains
     obj.MCMCSample(sid).FileNames{jChain} = sprintf(...
-        '%s_MCMCSample_%.0f_Chain_%.0f',obj.Model.Name,sid,jChain);
+        '%s_MCMC_Sample_%.0f_Chain_%.0f',obj.Model.Name,sid,jChain);
 end
 
 
 %% Run MCMCFcn
-[npx0,nx0] = size(op.x0);
-if nx0>0 && npx0==obj.Model.Param.N, x0 = op.x0(obj.EstimateIdx,:);
+x0 = op.x0;
+[npx0,nx0] = size(x0);
+if nx0>0 && npx0==obj.Model.Param.N, 
+    x0 = x0(obj.EstimateIdx,:); 
+end
 nRejections = cell(op.NChains);
 parfor jChain=1:op.NChains
     opj = op.Chain;
@@ -69,9 +72,8 @@ end
 %% show rejection rates
 for jChain=1:op.NChains
     obj.MCMCSample(sid).NRejections(jChain) = nRejections{jChain};
-    fprintf('Chain %.0f: JumpScaleFactor = %4.2f, Rejection rate = %5.1f%%\n',...
-            jChain,op.Chain.JumpScaleFactor,...
-            nRejections{jChain}/op.Chain.NDraws*100)
+    fprintf('Chain %.0f: JumpScale = %4.2f, Rejection rate = %5.1f%%\n',...
+            jChain,op.JumpScale,nRejections{jChain}/op.Chain.NDraws*100)
 end
 fprintf('\n')
 
