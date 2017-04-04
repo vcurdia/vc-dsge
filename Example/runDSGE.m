@@ -45,7 +45,7 @@ for sid=1
     options.MCMC.SampleID = sid;
     fn = sprintf('%s_MCMC_Sample_%.0f',specName,sid);
     options.MCMC.JumpScale = 2.4; %reset to default
-    options.MCMC.JumpScale = post.calibratemcmcjump(options.MCMC);
+    options.MCMC.JumpScale = post.calibratejump(options.MCMC);
     save([fn,'_CalibrateJump'])
     post.mcmc(options.MCMC)
     save(fn)

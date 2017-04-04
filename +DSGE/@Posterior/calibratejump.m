@@ -13,7 +13,7 @@ function jumpScale = calibratejump(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.SampleID = length(obj.MCMCSample)+1;
+op.SampleID = length(obj.Sample)+1;
 op.NChains = 4;
 op.JumpScale = 2.4;
 op.NDrawsCalibrateJump = 1000;

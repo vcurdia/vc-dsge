@@ -14,7 +14,7 @@ function mcmc(obj,varargin)
 
 %% Options
 op.KeepLogs = 1;
-op.SampleID = length(obj.MCMCSample)+1;
+op.SampleID = length(obj.Sample)+1;
 op.x0 = [];
 op.NChains = 4;
 op.JumpScale = 2.4;
