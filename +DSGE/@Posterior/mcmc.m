@@ -24,8 +24,6 @@ op.Chain.NDraws = 50000;
 op = updateoptions(op,varargin{:});
 
 %% Preparations
-% ReportFileName = sprintf('%s_Report_Posterior_Mode',obj.Model.Name);
-% ReportTitle = sprintf('%s\\\\Posterior Mode',obj.Model.Name);
 
 sid = op.SampleID;
 pIdx = obj.EstimateIdx;
@@ -44,27 +42,32 @@ if ~op.Chain.Augment
 else
     op.Chain.JumpVar = obj.MCMCSample(sid).JumpVar;
 end
-obj.MCMCSample(sid).FileNames = cell(op.NChains,1);
+obj.MCMCSample(sid).FileNameDraws = cell(op.NChains,1);
 for jChain=1:op.NChains
-    obj.MCMCSample(sid).FileNames{jChain} = sprintf(...
+    obj.MCMCSample(sid).FileNameDraws{jChain} = sprintf(...
         '%s_MCMC_Sample_%.0f_Chain_%.0f',obj.Model.Name,sid,jChain);
 end
+obj.MCMCSample(sid).NDrawsRedux = [];
+obj.MCMCSample(sid).FileNameRedux = [];
 
 
-%% Run MCMCFcn
-x0 = op.x0;
-[npx0,nx0] = size(x0);
-if nx0>0 && npx0==obj.Model.Param.N, 
-    x0 = x0(obj.EstimateIdx,:); 
+%% create MCMC chains
+[npx0,nx0] = size(op.x0);
+x0 = cell(1,4);
+if nx0>0
+    if npx0==obj.Model.Param.N
+        op.x0 = op.x0(obj.EstimateIdx,:); 
+    end
+    for j=1:nx0
+        x0{j} = op.x0(:,j);
+    end
 end
 nRejections = obj.MCMCSample(sid).NRejections;
 parfor jChain=1:op.NChains
     opj = op.Chain;
-    opj.NRejections = obj.MCMCSample(sid).NRejections(jChain);
-    opj.fn = obj.MCMCSample(sid).FileNames{jChain};
-    if nx0>=jChain
-        opj.x0 = x0(:,jChain);
-    end
+    opj.NRejections = nRejections(jChain);
+    opj.fn = obj.MCMCSample(sid).FileNameDraws{jChain}
+    opj.x0 = x0{jChain};
     nRejections(jChain) = obj.mcmcchain(opj);
 end
 
@@ -81,7 +84,8 @@ fprintf('\n')
 %% Clean up
 if ~op.KeepLogs
     for jChain=1:op.NChains
-        delete(sprintf('%s.log',obj.MCMCSample(sid).FileNames{jChain},jChain));
+        delete(sprintf('%s.log',obj.MCMCSample(sid).FileNameDraws{jChain},...
+                       jChain));
     end
 end
 

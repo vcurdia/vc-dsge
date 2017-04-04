@@ -33,7 +33,7 @@ sid = op.SampleID;
 pIdx = obj.EstimateIdx;
 
 fprintf('\n*** Calibrating Jump Distribution for MCMC Sample %.0f\n',sid)
-ttName = sprintf('CalibrateMCMCJumpSample%.0f',sid);
+ttName = sprintf('MCMCSample%.0fCalibrateJump',sid);
 obj.TimeElapsed.start(ttName)
 
 jumpScale = op.JumpScale;

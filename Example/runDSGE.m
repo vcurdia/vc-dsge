@@ -31,16 +31,16 @@ load(specName)
 DSGE.linkobj(model,prior,post)
 
 %% MaxPost
-options.MaxPost.NMax = 4;
-options.MaxPost.Min.nit = 100;
-options.MaxPost.Min.Ritmax = 10;
-options.MaxPost.Min.Ritmin = 5;
-post.maxlpdf(options.MaxPost)
-save([specName,'_MaxPost'])
+% options.MaxPost.NMax = 4;
+% options.MaxPost.Min.nit = 100;
+% options.MaxPost.Min.Ritmax = 10;
+% options.MaxPost.Min.Ritmin = 5;
+% post.maxlpdf(options.MaxPost)
+% save([specName,'_MaxPost'])
 
 %% MCMC
 options.MCMC.Chain.NDraws = 1000;
-options.MCMC.NDrawsCalibrateJump = 100;
+options.MCMC.NDrawsCalibrateJump = 200;
 for sid=1
     options.MCMC.SampleID = sid;
     fn = sprintf('%s_MCMC_Sample_%.0f',specName,sid);
