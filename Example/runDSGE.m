@@ -43,7 +43,7 @@ options.MCMC.NDraws = 1000;
 options.MCMC.NDrawsCalibrate = 200;
 for s=1
     post.MCMCStage = s;
-    fn = sprintf('%s_MCMC_Sample_%.0f',specName,s);
+    fn = sprintf('%s_MCMC_%.0f',specName,s);
     options.MCMC.JumpScale = 2.4; %reset to default
     options.MCMC.JumpScale = post.calibratemcmc(options.MCMC);
     save([fn,'_CalibrateJump'])
