@@ -39,16 +39,17 @@ DSGE.linkobj(model,prior,post)
 % save([specName,'_MaxPost'])
 
 %% MCMC
-options.MCMC.Chain.NDraws = 1000;
-options.MCMC.NDrawsCalibrateJump = 200;
-for sid=1
-    options.MCMC.SampleID = sid;
-    fn = sprintf('%s_MCMC_Sample_%.0f',specName,sid);
+options.MCMC.NDraws = 1000;
+options.MCMC.NDrawsCalibrate = 200;
+for s=1
+    post.MCMCStage = s;
+    fn = sprintf('%s_MCMC_Sample_%.0f',specName,s);
     options.MCMC.JumpScale = 2.4; %reset to default
-    options.MCMC.JumpScale = post.calibratejump(options.MCMC);
+    options.MCMC.JumpScale = post.calibratemcmc(options.MCMC);
     save([fn,'_CalibrateJump'])
     post.mcmc(options.MCMC)
     save(fn)
+    post.mcmcredux
 %     post.analyzemcmc
 %     save([fn,'_Analysis'])
 end

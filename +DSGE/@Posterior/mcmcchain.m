@@ -20,6 +20,7 @@ lpdfMode = obj.LPDFMode;
 
 %% Options
 op.verbose = 1;
+op.Augment = 0;
 op.NDraws = 50000;
 op.NIRS = 1000;
 op.NBlocks = 10;

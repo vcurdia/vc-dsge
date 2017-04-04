@@ -1,6 +1,6 @@
-function jumpScale = calibratejump(obj,varargin)
+function jumpScale = calibratemcmc(obj,varargin)
 
-% calibratejump
+% calibratemcmc
 % 
 % Calibrate MCMC jump distribution
 %
@@ -13,11 +13,10 @@ function jumpScale = calibratejump(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.SampleID = length(obj.Sample)+1;
 op.NChains = 4;
 op.JumpScale = 2.4;
-op.NDrawsCalibrateJump = 1000;
-op.KeepFilesCalibrateJump = 0; 
+op.NDrawsCalibrate = 1000;
+op.KeepFilesCalibrate = 0; 
 op.ScaleIncrements = [0.2,0.05,0.01];
 op.NConfirm = 1;
 op.RejectionRateMax = 0.85;
@@ -29,24 +28,24 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-sid = op.SampleID;
-pIdx = obj.EstimateIdx;
-
-fprintf('\n*** Calibrating Jump Distribution for MCMC Sample %.0f\n',sid)
-ttName = sprintf('CalibrateJumpMCMCSample%.0f',sid);
+if isempty(obj.MCMCStage), obj.MCMCStage = 1; end
+fprintf('\n*** Calibrating Jump Distribution for MCMC Sample %.0f\n',...
+        obj.MCMCStage)
+ttName = sprintf('CalibrateMCMC%.0f',obj.MCMCStage);
 obj.TimeElapsed.start(ttName)
 
+pIdx = obj.EstimateIdx;
 jumpScale = op.JumpScale;
 
-op.Chain.Augment = 0;
-op.Chain.NDraws = op.NDrawsCalibrateJump;
-op.Chain.x0 = [];
-op.Chain.NRejections = 0;
+opChain.Augment = 0;
+opChain.NDraws = op.NDrawsCalibrate;
+opChain.x0 = [];
+opChain.NRejections = 0;
 
 fn = cell(op.NChains,1);
 for jChain=1:op.NChains
-    fn{jChain} = sprintf('%s_MCMC_Sample_%.0f_Chain_%.0f_CalibrateJump',...
-                         obj.Model.Name,sid,jChain);
+    fn{jChain} = sprintf('%s_MCMC_%.0f_Chain_%.0f_CalibrateJump',...
+                         obj.Model.Name,obj.MCMCStage,jChain);
 end
 
 %% Calibrate jump scale
@@ -58,10 +57,10 @@ nBlocks = 0;
 RejectionRates = zeros(1,op.NChains);
 while jConfirm<=op.NConfirm 
     nBlocks = nBlocks+1;
-    op.Chain.JumpVar = jumpScale^2/obj.NEstimate*obj.Var(pIdx,pIdx);
+    opChain.JumpVar = jumpScale^2/obj.NEstimate*obj.Var(pIdx,pIdx);
     RejectionRates(nBlocks,:) = zeros(1,op.NChains);
     parfor jChain=1:op.NChains
-        opj = op.Chain;
+        opj = opChain;
         opj.fn = fn{jChain};
         nRejections = obj.mcmcchain(opj);
         RejectionRates(nBlocks,jChain) = nRejections/opj.NDraws;
@@ -146,7 +145,7 @@ end
 
 
 %% Clean up
-if ~op.KeepFilesCalibrateJump
+if ~op.KeepFilesCalibrate
     for jChain=1:op.NChains
         delete([fn{jChain},'.log']);
         delete([fn{jChain},'.mat']);

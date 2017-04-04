@@ -25,7 +25,9 @@ classdef Posterior < handle
         Median
         Prc05
         Prc95
-        Sample
+        LogMgLikelihood
+        MCMCStage
+        MCMCSample
     end
    
     properties (SetAccess = protected)

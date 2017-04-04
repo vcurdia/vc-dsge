@@ -1,8 +1,8 @@
-function analyze(obj,varargin)
+function analyzeparam(obj,varargin)
 
-% analyze
+% analyzeparam
 % 
-% Analyze posterior MCMC sample 
+% Analyze parameter posterior MCMC sample
 %
 % see also:
 % DSGE.Posterior
@@ -13,7 +13,6 @@ function analyze(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.SampleID = length(obj.Sample);
 op.BurnIn = 0.5;
 op.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
@@ -23,19 +22,18 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-sid = op.SampleID;
-sample = obj.Sample(sid);
+fprintf('\n*** Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
+ttName = sprintf('AnalyzeParamMCMC%.0f',obj.MCMCStage);
+obj.TimeElapsed.start(ttName)
+
+sample = obj.MCMCSample;
 np = obj.Model.Param.N;
 pNames = obj.Model.Param.Names;
 nAux = obj.Model.AuxParam.N;
 auxNames = obj.Model.AuxParam.Names;
 
-fprintf('\n*** Analyzing MCMC Sample %.0f\n',sid)
-ttName = sprintf('AnalyzeSample%.0f',sid);
-obj.TimeElapsed.start(ttName)
-
 %% load the mcmc draws
-idxDraws = (op.BurnIn*sample.NDraws+1):op.NThinning:sample.NDraws;
+idxDraws = (op.BurnIn*sample.NDraws+1):op.Thinning:sample.NDraws;
 for jChain=1:sample.NChains
     load(sample.FileNameDraws{jChain})
     xd(:,:,jChain) = xDraws(:,idxDraws);
@@ -46,7 +44,7 @@ xd = obj.expandparam(reshape(xd,obj.NEstimate,nDrawsUsed));
 lpdfd = reshape(lpdfd,1,nDrawsUsed);
 fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
 fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
-fprintf('Thinning used: %.0f\n', op.NThinning)
+fprintf('Thinning used: %.0f\n', op.Thinning)
 fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
 
 %% Generate AuxParam
@@ -59,13 +57,13 @@ end
 
 
 %% Analyze sample
-obj.Sample(sid).Param = sumstats(xd,op.Percentiles);
-obj.Sample(sid).AuxParam = sumstats(xdAux,op.Percentiles);
-obj.Mean = obj.Sample(sid).Param.Mean;
-obj.Median = obj.Sample(sid).Param.Median;
-obj.SD = obj.Sample(sid).Param.SD;
-obj.Prc05 = obj.Sample(sid).Param.Prc05;
-obj.Prc95 = obj.Sample(sid).Param.Prc95;
+obj.MCMCSample.Param = sumstats(xd,op.Percentiles);
+obj.MCMCSample.AuxParam = sumstats(xdAux,op.Percentiles);
+obj.Mean = obj.MCMCSample.Param.Mean;
+obj.Median = obj.MCMCSample.Param.Median;
+obj.SD = obj.MCMCSample.Param.SD;
+obj.Prc05 = obj.MCMCSample.Param.Prc05;
+obj.Prc95 = obj.MCMCSample.Param.Prc95;
 Var = xd-repmat(obj.Mean,1,nDrawsUsed);
 obj.Var = Var*Var'/(nDrawsUsed-1);
 CorrMat = zeros(np);
@@ -154,8 +152,8 @@ end
 obj.LogMgLikelihood = LogMgLikelihood(tau==0.5);
 % obj.LogMgLikelihood = mean(LogMgLikelihood);
 for jt = 1:ntau
-    obj.Sample(sid).LogMgLikelihoodtau(jt).Tau = tau(jt);
-    obj.Sample(sid).LogMgLikelihoodtau(jt).Value = LogMgLikelihood(jt);
+    obj.MCMCSample.LogMgLikelihoodtau(jt).Tau = tau(jt);
+    obj.MCMCSample.LogMgLikelihoodtau(jt).Value = LogMgLikelihood(jt);
 end
 
 
