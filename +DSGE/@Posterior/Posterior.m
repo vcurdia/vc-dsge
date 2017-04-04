@@ -77,12 +77,19 @@ classdef Posterior < handle
             xx(obj.EstimateIdx,:) = x;
         end
         
-        function xd = draw(obj,nDraws)
+        function xd = draw(obj,nDraws,sid)
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 
             end
-            xd = nan(obj.NParam,nDraws);
-            error('Posterior draw method is not ready yet.')
+            if nargin<3 || isempty(sid)
+                sid = length(obj.MCMCSample);
+            end
+            if isempty(obj.MCMCSample(sid).NDrawsRedux)
+                obj.mcmcredux
+            end
+            load(obj.MCMCSample(sid).FileNameRedux,'xDraws')
+            xd = obj.expandparam(...
+                xDraws(:,randi(obj.MCMCSample(sid).NDrawsRedux,1,nDraws)));
         end
         
         function new = copy(obj)

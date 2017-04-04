@@ -43,7 +43,7 @@ end
 clear xDraws lpdfDraws
 nDrawsUsed = size(xd,2)*sample.NChains;
 xDraws = reshape(xd,obj.NEstimate,nDrawsUsed);
-lpdfDraws = reshape(lpdfd,nDrawsUsed,1);
+lpdfDraws = reshape(lpdfd,1,nDrawsUsed);
 fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
 fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
 fprintf('Thinning used: %.0f\n', nThinningRedux)
