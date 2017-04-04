@@ -13,7 +13,7 @@ function mcmcredux(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.SampleID = length(obj.MCMCSample);
+op.SampleID = length(obj.Sample);
 op.BurnIn = 0.5;
 op.NDrawsRedux = 10000;
 
@@ -22,10 +22,10 @@ op = updateoptions(op,varargin{:});
 %% Preparations
 
 sid = op.SampleID;
-sample = obj.MCMCSample(sid);
+sample = obj.Sample(sid);
 
 fprintf('\n*** Generating MCMC Draws Redux for Sample %.0f\n',sid)
-ttName = sprintf('MCMCSample%.0fRedux',sid);
+ttName = sprintf('ReduxSample%.0f',sid);
 obj.TimeElapsed.start(ttName)
 
 nDrawsAvailable = floor(sample.NDraws*(1-op.BurnIn))*sample.NChains;
@@ -40,7 +40,6 @@ for jChain=1:sample.NChains
     xd(:,:,jChain) = xDraws(:,idxDraws);
     lpdfd(:,:,jChain) = lpdfDraws(:,idxDraws);
 end
-clear xDraws lpdfDraws
 nDrawsUsed = size(xd,2)*sample.NChains;
 xDraws = reshape(xd,obj.NEstimate,nDrawsUsed);
 lpdfDraws = reshape(lpdfd,1,nDrawsUsed);
@@ -48,13 +47,13 @@ fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
 fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
 fprintf('Thinning used: %.0f\n', nThinningRedux)
 fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
-obj.MCMCSample(sid).NDrawsRedux = nDrawsUsed;
+obj.Sample(sid).NDrawsRedux = nDrawsUsed;
 
 %% Save MCMC draws Redux
-obj.MCMCSample(sid).FileNameRedux = sprintf(...
+obj.Sample(sid).FileNameRedux = sprintf(...
         '%s_MCMC_Sample_%.0f_Redux',obj.Model.Name,sid);
-save(obj.MCMCSample(sid).FileNameRedux,'xDraws','lpdfDraws')
-fprintf('Saved MCMC draws redux to: %s.mat\n',obj.MCMCSample(sid).FileNameRedux)
+save(obj.Sample(sid).FileNameRedux,'xDraws','lpdfDraws')
+fprintf('Saved MCMC draws redux to: %s.mat\n',obj.Sample(sid).FileNameRedux)
 
 
 

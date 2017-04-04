@@ -1,6 +1,6 @@
-function jumpScale = calibratemcmcjump(obj,varargin)
+function jumpScale = calibratejump(obj,varargin)
 
-% calibratemcmcjump
+% calibratejump
 % 
 % Calibrate MCMC jump distribution
 %
@@ -33,7 +33,7 @@ sid = op.SampleID;
 pIdx = obj.EstimateIdx;
 
 fprintf('\n*** Calibrating Jump Distribution for MCMC Sample %.0f\n',sid)
-ttName = sprintf('MCMCSample%.0fCalibrateJump',sid);
+ttName = sprintf('CalibrateJumpMCMCSample%.0f',sid);
 obj.TimeElapsed.start(ttName)
 
 jumpScale = op.JumpScale;
@@ -45,7 +45,7 @@ op.Chain.NRejections = 0;
 
 fn = cell(op.NChains,1);
 for jChain=1:op.NChains
-    fn{jChain} = sprintf('%s_MCMC_Sample_%.0f_Chain_%.0f_CalibJump',...
+    fn{jChain} = sprintf('%s_MCMC_Sample_%.0f_Chain_%.0f_CalibrateJump',...
                          obj.Model.Name,sid,jChain);
 end
 

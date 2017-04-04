@@ -21,10 +21,11 @@ classdef Posterior < handle
         Mean
         SD
         Var
+        Corr
         Median
         Prc05
         Prc95
-        MCMCSample
+        Sample
     end
    
     properties (SetAccess = protected)
@@ -82,14 +83,14 @@ classdef Posterior < handle
                 nDraws = 1; 
             end
             if nargin<3 || isempty(sid)
-                sid = length(obj.MCMCSample);
+                sid = length(obj.Sample);
             end
-            if isempty(obj.MCMCSample(sid).NDrawsRedux)
+            if isempty(obj.Sample(sid).NDrawsRedux)
                 obj.mcmcredux
             end
-            load(obj.MCMCSample(sid).FileNameRedux,'xDraws')
+            load(obj.Sample(sid).FileNameRedux,'xDraws')
             xd = obj.expandparam(...
-                xDraws(:,randi(obj.MCMCSample(sid).NDrawsRedux,1,nDraws)));
+                xDraws(:,randi(obj.Sample(sid).NDrawsRedux,1,nDraws)));
         end
         
         function new = copy(obj)
