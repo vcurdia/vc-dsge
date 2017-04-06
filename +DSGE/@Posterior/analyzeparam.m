@@ -20,7 +20,7 @@ op.Table = DSGE.Options.Table;
 op.NBin = 50;
 op.Fig = DSGE.Options.Figure;
 op.FigShape = [3,3];
-op.LineColor = colorscheme;
+op.Color = colorscheme;
 op.PlotDir = 'Plots/PriorPost/';
 
 op = updateoptions(op,varargin{:});
@@ -71,9 +71,12 @@ end
 obj.MCMCSample.Param = sumstats(xd,op.Percentiles);
 obj.MCMCSample.AuxParam = sumstats(xdAux,op.Percentiles);
 Var = xd-repmat(obj.Mean,1,nDrawsUsed);
+Var = Var*Var'/(nDrawsUsed-1);
 CorrMat = zeros(np);
 for jr=1:np
+    if Var(jr,jr)==0, continue, end
     for jc=1:np
+        if Var(jc,jc)==0, continue, end
         CorrMat(jr,jc) = Var(jr,jc)/sqrt(Var(jr,jr)*Var(jc,jc));
     end
 end
@@ -82,7 +85,7 @@ obj.Median = obj.MCMCSample.Param.Median;
 obj.SD = obj.MCMCSample.Param.SD;
 obj.Prc05 = obj.MCMCSample.Param.Prc05;
 obj.Prc95 = obj.MCMCSample.Param.Prc95;
-obj.Var = Var*Var'/(nDrawsUsed-1);
+obj.Var = Var;
 obj.Corr = CorrMat;
 
 
@@ -271,11 +274,12 @@ for jr=1:np
     disp(str2show)
 end
 disp(' ')
-
+keyboard
 
 %% Make Prior Post Plots
 fprintf('Making Prior-Posterior Plots...')
-fn = sprintf('%s_Plots_MCMC_%.0f_PriorPost',obj.Model.Name,obj.MCMCStage);
+fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
+             op.PlotDir,obj.Model.Name,obj.MCMCStage);
 nPlots = prod(op.FigShape);
 nFig = ceil(np/nPlots);
 for jF=1:nFig
@@ -283,7 +287,7 @@ for jF=1:nFig
     for jf=1:nPlots 
         jp = (jF-1)*nPlots+jf;
         if jp>np, break, end
-        subplot(op.FigShape(1),op.FigShape(2),jf)
+        hf = subplot(op.FigShape(1),op.FigShape(2),jf);
         xPost = xd(jp,:);
 %         [xFreq,xOut] = hist(xPost,nBin);
         hf = histogram(xPost,op.NBin);
@@ -292,37 +296,40 @@ for jF=1:nFig
 %         xOutMax = max(xOut);
         xStep = hf.BinWidth;
         xOut = hf.BinEdges;
+        xOut = xOut(2:end)-xStep/2;
         xCrit = [obj.Prior.Sample.Param.Prc01(jp),...
                  obj.Prior.Sample.Param.Prc99(jp)];
         xPlot = [sort(xOut(1)-xStep:-xStep:xCrit(1)),...
-                 Out,...
+                 xOut,...
                  xOut(end)+xStep:xStep:xCrit(2)];
         nPlot = zeros(size(xPlot));
         nIdx = ismember(xPlot,xOut);
         nPlot(nIdx) = hf.Values;
+        xPriorPdf = nan(1,length(xPlot));
         for jx=1:length(xPlot)
 %             xPriorPdf(jx) = eval(sprintf(Params(jp).priorpdfcmd,xPlot(jx)));
             xPriorPdf(jx) = obj.Prior.PDFCmd(xPlot(jx));
         end
 %         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
         nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
-        HERE HERE
-        bar(xPlot,nPlot)
+        hb = bar(xPlot,nPlot,op.Color(1,:));
         hold on
-        plot(xPlot,xPriorPdf,'r','LineWidth',2)
+        hp = plot(xPlot,xPriorPdf,op.Color(2,:),'LineWidth',2);
         hold off
-        title(Params(jp).prettyname)
+        title(obj.Model.Param.PrettyNames{jp})
         xBounds = xPlot([1,end]);
         xBounds = xBounds+(-1).^(1:-1:0)*0.01*(xBounds(2)-xBounds(1));
         xlim(xBounds)
         xTickLabels = xBounds(1):(xBounds(2)-xBounds(1))/8:xBounds(2);
         yBounds = max(max(nPlot),max(xPriorPdf));
         yBounds = [0,yBounds+0.01*yBounds];
+        ax = gca;
         ylim(yBounds)
-        set(gca,'YTick',[],'XTick',xTickLabels([2,5,8]),'FontSize',8)
-        clear xPost xFreq xOut xStep xOutMin xOutMax xPlot nIdx xPriorPdf xBounds xTickLabels yBounds
+        ax.YTick = [];
+        ax.XTick = xTickLabels([2,5,8]);
+        ax.FontSize = 8;
     end
-    vcPrintPDF(sprintf('%s%sFig%.0f',PlotDir.PriorPost,FileName.PlotsPriorPost,jF))
+    vcPrintPDF(sprintf('%s_%.0f',fn,jF))
 end
 
 
