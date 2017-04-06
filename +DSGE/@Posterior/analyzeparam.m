@@ -17,6 +17,10 @@ op.BurnIn = 0.5;
 op.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
+op.NBin = 50;
+op.FigShape = {3,3};
+op.ShowFig = 0;
+op.PlotDir = 'Plots/PriorPost/';
 
 op = updateoptions(op,varargin{:});
 
@@ -25,6 +29,11 @@ op = updateoptions(op,varargin{:});
 fprintf('\n*** Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeParamMCMC%.0f',obj.MCMCStage);
 obj.TimeElapsed.start(ttName)
+
+ReportFileName = sprintf('%s_Report_MCMC_%.0f_Param',obj.Model.Name,...
+                         obj.MCMCStage);
+ReportTitle = sprintf('%s\\\\MCMC Stage %.0f\\\\Parameter Analysis',...
+                      obj.Model.Name,obj.MCMCStage);
 
 sample = obj.MCMCSample;
 np = obj.Model.Param.N;
@@ -48,6 +57,7 @@ fprintf('Thinning used: %.0f\n', op.Thinning)
 fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
 
 %% Generate AuxParam
+fprintf('Generating AuxParam draws...\n')
 xdAux = zeros(nAux,nDrawsUsed);
 fh = @(x)obj.Model.mats(x);
 parfor jd=1:nDrawsUsed
@@ -59,46 +69,47 @@ end
 %% Analyze sample
 obj.MCMCSample.Param = sumstats(xd,op.Percentiles);
 obj.MCMCSample.AuxParam = sumstats(xdAux,op.Percentiles);
+Var = xd-repmat(obj.Mean,1,nDrawsUsed);
+CorrMat = zeros(np);
+for jr=1:np
+    for jc=1:np
+        CorrMat(jr,jc) = Var(jr,jc)/sqrt(Var(jr,jr)*Var(jc,jc));
+    end
+end
 obj.Mean = obj.MCMCSample.Param.Mean;
 obj.Median = obj.MCMCSample.Param.Median;
 obj.SD = obj.MCMCSample.Param.SD;
 obj.Prc05 = obj.MCMCSample.Param.Prc05;
 obj.Prc95 = obj.MCMCSample.Param.Prc95;
-Var = xd-repmat(obj.Mean,1,nDrawsUsed);
 obj.Var = Var*Var'/(nDrawsUsed-1);
-CorrMat = zeros(np);
-for jr=1:np
-    for jc=1:np
-        CorrMat(jr,jc) = obj.Var(jr,jc)/sqrt(obj.Var(jr,jr)*obj.Var(jc,jc));
-    end
-end
 obj.Corr = CorrMat;
+
 
 %% check for new mode in mcmc sample
 [lpdfNewMode,idxMax] = max(lpdfd);
-fprintf('\nChecking MCMC draws for new mode\n')
+fprintf('Checking MCMC draws for new mode\n')
 fprintf('Previous mode lpdf: %.6f\n',obj.LPDFMode)
 fprintf('Highest posterior density in MCMC draws: %.6f\n',lpdfNewMode)
 if lpdfNewMode>obj.LPDFMode
     fprintf('Found MCMC draw with higher posterior density.\n')
-    fprintf('Posterior mode updated!\n')
+    fprintf('Posterior mode updated.\n')
     namelength = [cellfun('length',pNames)];
     namelengthmax = max(namelength);
     fprintf(['%',int2str(namelengthmax),'s %-7s %-7s\n'],'','Old','New')
     for jp=1:np
         fprintf(['%',int2str(namelengthmax),'s %7.4f %7.4f\n'],...
-            pNames{jp},obj.Mode(jp),xd(jp,idxMax))
+                pNames{jp},obj.Mode(jp),xd(jp,idxMax))
     end
     obj.LPDFMode = lpdfNewMode;
     obj.Mode = xd(:,idxMax);
 else
     fprintf('Did not find MCMC draw with higher posterior density.\n')
-    fprintf('Previous posterior mode kept!\n')
+    fprintf('Previous posterior mode kept.\n')
 end
-fprintf('\n')
+
 
 %% Marginal likelihood
-fprintf('Computing marginal likelihood\n')
+fprintf('Computing marginal likelihood...\n')
 tau = 0.1:0.1:0.9;
 ntau = length(tau);
 pIdx = obj.EstimateIdx;
@@ -164,7 +175,8 @@ pNames = obj.Model.Param.Names;
 pNameLength = [cellfun('length',pNames)];
 pNameLengthMax = max(pNameLength);
 DispList = {'','',pNames;
-            'Prior','Dist',obj.Prior.Dist;
+            'Prior',' Dist',obj.Prior.Dist;
+%             '','   Mode',obj.Prior.Mode;
             '','   Mean',obj.Prior.Mean;
             '','     SD',obj.Prior.SD;
             '','     5%',obj.Prior.Prc05;
@@ -206,16 +218,15 @@ DispList = {'','',auxNames;
             '','     5%',obj.Prior.Sample.AuxParam.Prc05;
             '',' Median',obj.Prior.Sample.AuxParam.Median;
             '','    95%',obj.Prior.Sample.AuxParam.Prc95;
-            'Posterior','   Mode',xAux;
-            '','   Mean',obj.Sample.AuxParam.Mean;
-            '','     SD',obj.Sample.AuxParam.SD;
-            '','     5%',obj.Sample.AuxParam.Prc05;
-            '',' Median',obj.Sample.AuxParam.Median;
-            '','    95%',obj.Sample.AuxParam.Prc95;
+            'Posterior','   Mean',obj.MCMCSample.AuxParam.Mean;
+            '','     SD',obj.MCMCSample.AuxParam.SD;
+            '','     5%',obj.MCMCSample.AuxParam.Prc05;
+            '',' Median',obj.MCMCSample.AuxParam.Median;
+            '','    95%',obj.MCMCSample.AuxParam.Prc95;
            };
 nc = size(DispList,1);
 for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
+    str2show = sprintf(['%-',int2str(auxNameLengthMax),'s'],DispList{1,jr});
     for jc=2:nc
         str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
     end
@@ -259,6 +270,116 @@ for jr=1:np
     disp(str2show)
 end
 disp(' ')
+
+
+%% create report
+fprintf('Making report: %s\n',ReportFileName);
+fid = createtex(ReportFileName,ReportTitle);
+
+fprintf(fid,'\\begin{equation*} \n');
+fprintf(fid,'\\begin{tabular}{rl} \n');
+fprintf(fid,'number of chains: & %.0f\\\\\n',sample.NChains);
+fprintf(fid,'size of each chain: & %.0f\\\\\n',sample.NDraws);
+fprintf(fid,'burn in used: & %.0f (%.0f\\%%)\\\\\n',...
+        op.BurnIn*sample.NDraws,op.BurnIn*100);
+fprintf(fid,'thinning used: & %.0f\\\\\n',op.Thinning);
+fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',nDrawsUsed);
+fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.LogMgLikelihood);
+fprintf(fid,'\\end{tabular}\n');
+fprintf(fid,'\\end{equation*}\n');
+
+fprintf(fid,'\\newpage \n');
+fprintf(fid,'\\section{Tables}\n');
+fprintf(fid,'\\subsection{Parameters}\n');
+np = obj.Model.Param.N;
+str = [' & %.',int2str(op.Table.Precision),'f'];
+tableBreaks = settablebreaks(np,op.Table.MaxRows);
+idxPar = 0;
+nBreaks = length(tableBreaks);
+for jBreak=1:nBreaks
+    idxPar = (idxPar(end)+1):tableBreaks(jBreak);
+    if jBreak>1
+        fprintf(fid,'\\subsection{Parameters (Cont)}\n');
+    end
+    fprintf(fid,'\\begin{equation*}\n');
+    if op.Table.MoveLeft
+        fprintf(fid,'\\hspace{-0.5in}\n');
+    end
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4+1+6));
+    fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+    fprintf(fid,'& \\multicolumn{4}{c}{Prior} ');
+    fprintf(fid,'& & \\multicolumn{6}{c}{Posterior} \\\\[0.5ex]\n');
+    fprintf(fid,'& Dist & 5\\%% & Median & 95\\%% ');
+    fprintf(fid,'& & Mode & Mean & SD & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+    for jr=idxPar
+        fprintf(fid,'%s',obj.Model.Param.PrettyNames{jr});
+        fprintf(fid,' & %s', obj.Prior.Dist{jr});
+        fprintf(fid,str,obj.Prior.Prc05(jr));
+        fprintf(fid,str,obj.Prior.Median(jr));
+        fprintf(fid,str,obj.Prior.Prc95(jr));
+        fprintf(fid,' &');
+        fprintf(fid,str,obj.Mode(jr));
+        fprintf(fid,str,obj.Mean(jr));
+        fprintf(fid,str,obj.SD(jr));
+        fprintf(fid,str,obj.Prc05(jr));
+        fprintf(fid,str,obj.Median(jr));
+        fprintf(fid,str,obj.Prc95(jr));
+        fprintf(fid,' \\\\\n');
+        if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
+            fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+        end        
+    end
+    fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+    fprintf(fid,'\\end{tabular}\n');
+    fprintf(fid,'\\end{equation*}\n');
+    fprintf(fid,'\\clearpage\n');
+end
+
+fprintf(fid,'\\subsection{Table: Auxiliary Parameters}\n');
+tableBreaks = settablebreaks(auxN,op.Table.MaxRows);
+idxPar = 0;
+nBreaks = length(tableBreaks);
+for jBreak=1:nBreaks
+    idxPar = (idxPar(end)+1):tableBreaks(jBreak);
+    if jBreak>1
+        fprintf(fid,'\\subsection{Auxiliary Parameters (Cont)}\n');
+    end
+    fprintf(fid,'\\begin{equation*}\n');
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+3+1+5));
+    fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+    fprintf(fid,'& \\multicolumn{3}{c}{Prior} ');
+    fprintf(fid,'& & \\multicolumn{5}{c}{Posterior} \\\\[0.5ex]\n');
+    fprintf(fid,'& 5\\%% & Median & 95\\%% ');
+    fprintf(fid,'& & Mean & SD & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+    for jr=idxPar
+        fprintf(fid,'%s',obj.Model.AuxParam.PrettyNames{jr});
+        fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc05(jr));
+        fprintf(fid,str,obj.Prior.Sample.AuxParam.Median(jr));
+        fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc95(jr));
+        fprintf(fid,' &');
+        fprintf(fid,str,obj.MCMCSample.AuxParam.Mean(jr));
+        fprintf(fid,str,obj.MCMCSample.AuxParam.SD(jr));
+        fprintf(fid,str,obj.MCMCSample.AuxParam.Prc05(jr));
+        fprintf(fid,str,obj.MCMCSample.AuxParam.Median(jr));
+        fprintf(fid,str,obj.MCMCSample.AuxParam.Prc95(jr));
+        fprintf(fid,' \\\\\n');
+        if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
+            fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+        end        
+    end
+    fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+    fprintf(fid,'\\end{tabular}\n');
+    fprintf(fid,'\\end{equation*}\n');
+    fprintf(fid,'\\clearpage\n');
+end
+
+fprintf(fid,'\\end{document}\n');
+fclose(fid);
+pdflatex(ReportFileName)
+
+
 
 %% Finish up
 obj.TimeElapsed.stop(ttName)
