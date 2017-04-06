@@ -50,8 +50,9 @@ for s=1
     post.mcmc(options.MCMC)
     save(fn)
     post.mcmcredux
-%     post.analyzemcmc
-%     save([fn,'_Analysis'])
+    post.analyzeparam
+    save([fn,'_Analysis'])
+    save(specName)
 end
 
 

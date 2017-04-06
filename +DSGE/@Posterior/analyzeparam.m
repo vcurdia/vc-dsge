@@ -18,8 +18,9 @@ op.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 op.NBin = 50;
-op.FigShape = {3,3};
-op.ShowFig = 0;
+op.Fig = DSGE.Options.Figure;
+op.FigShape = [3,3];
+op.LineColor = colorscheme;
 op.PlotDir = 'Plots/PriorPost/';
 
 op = updateoptions(op,varargin{:});
@@ -270,6 +271,59 @@ for jr=1:np
     disp(str2show)
 end
 disp(' ')
+
+
+%% Make Prior Post Plots
+fprintf('Making Prior-Posterior Plots...')
+fn = sprintf('%s_Plots_MCMC_%.0f_PriorPost',obj.Model.Name,obj.MCMCStage);
+nPlots = prod(op.FigShape);
+nFig = ceil(np/nPlots);
+for jF=1:nFig
+    figure('Visible',op.Fig.Visible)
+    for jf=1:nPlots 
+        jp = (jF-1)*nPlots+jf;
+        if jp>np, break, end
+        subplot(op.FigShape(1),op.FigShape(2),jf)
+        xPost = xd(jp,:);
+%         [xFreq,xOut] = hist(xPost,nBin);
+        hf = histogram(xPost,op.NBin);
+%         xStep = xOut(2)-xOut(1);
+%         xOutMin = min(xOut);
+%         xOutMax = max(xOut);
+        xStep = hf.BinWidth;
+        xOut = hf.BinEdges;
+        xCrit = [obj.Prior.Sample.Param.Prc01(jp),...
+                 obj.Prior.Sample.Param.Prc99(jp)];
+        xPlot = [sort(xOut(1)-xStep:-xStep:xCrit(1)),...
+                 Out,...
+                 xOut(end)+xStep:xStep:xCrit(2)];
+        nPlot = zeros(size(xPlot));
+        nIdx = ismember(xPlot,xOut);
+        nPlot(nIdx) = hf.Values;
+        for jx=1:length(xPlot)
+%             xPriorPdf(jx) = eval(sprintf(Params(jp).priorpdfcmd,xPlot(jx)));
+            xPriorPdf(jx) = obj.Prior.PDFCmd(xPlot(jx));
+        end
+%         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
+        nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
+        HERE HERE
+        bar(xPlot,nPlot)
+        hold on
+        plot(xPlot,xPriorPdf,'r','LineWidth',2)
+        hold off
+        title(Params(jp).prettyname)
+        xBounds = xPlot([1,end]);
+        xBounds = xBounds+(-1).^(1:-1:0)*0.01*(xBounds(2)-xBounds(1));
+        xlim(xBounds)
+        xTickLabels = xBounds(1):(xBounds(2)-xBounds(1))/8:xBounds(2);
+        yBounds = max(max(nPlot),max(xPriorPdf));
+        yBounds = [0,yBounds+0.01*yBounds];
+        ylim(yBounds)
+        set(gca,'YTick',[],'XTick',xTickLabels([2,5,8]),'FontSize',8)
+        clear xPost xFreq xOut xStep xOutMin xOutMax xPlot nIdx xPriorPdf xBounds xTickLabels yBounds
+    end
+    vcPrintPDF(sprintf('%s%sFig%.0f',PlotDir.PriorPost,FileName.PlotsPriorPost,jF))
+end
 
 
 %% create report
