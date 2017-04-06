@@ -1,8 +1,8 @@
-function op = Table(varargin)
+function op = Figure(varargin)
 
-% DSGE.Options.Table
+% DSGE.Options.Figure
 %
-% Set Table options
+% Set Figure options
 %
 % ...........................................................................
 % 
@@ -11,10 +11,7 @@ function op = Table(varargin)
 % Copyright 2017 by Vasco Curdia
 
 %% Default Options
-op.Precision = 3;
-op.MaxRows = 35;
-op.MoveLeft = 1; 
-op.Lines = [];
+op.Visible = 'off';
 
 %% update options
 op = updateoptions(op,varargin{:});
