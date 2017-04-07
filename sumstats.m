@@ -1,4 +1,4 @@
-function dStats = genstats(data,Percentiles)
+function dStats = sumstats(data,Percentiles)
 
 % genstats
 %
@@ -19,8 +19,8 @@ end
 dStats = struct;
 dStats.Mean = mean(data,2);
 dStats.SD = std(data,0,2);
-dStats.Min = min(data,2);
-dStats.Max = max(data,2);
+dStats.Min = min(data,[],2);
+dStats.Max = max(data,[],2);
 dStats.Median = prctile(data,50,2);
 for jPrc=1:length(Percentiles)
     dStats.(sprintf('Prc%02.0f',100*Percentiles(jPrc))) = ...
