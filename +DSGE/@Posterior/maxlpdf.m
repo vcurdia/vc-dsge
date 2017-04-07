@@ -274,7 +274,6 @@ fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
 
 fprintf(fid,'\\newpage \n');
-fprintf(fid,'\\section{Parameters}\n');
 np = obj.Model.Param.N;
 str = [' & %.',int2str(op.Table.Precision),'f'];
 tableBreaks = settablebreaks(np,op.Table.MaxRows);
@@ -282,8 +281,11 @@ idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     if op.Table.MoveLeft
@@ -319,14 +321,16 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-fprintf(fid,'\\section{Auxiliary Parameters}\n');
 tableBreaks = settablebreaks(auxN,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Auxiliary Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Auxiliary Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4+1+1));

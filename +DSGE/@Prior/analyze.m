@@ -20,7 +20,7 @@ ttName = 'Analyze';
 obj.TimeElapsed.start(ttName)
 
 %% Options
-op.NDraws = 1000;
+op.NDraws = 10000;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 
@@ -131,15 +131,17 @@ fprintf('\n');
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
-fprintf(fid,'\\section{Parameters}\n');
+% fprintf(fid,'\\section{Parameters}\n');
 str = [' & %.',int2str(op.Table.Precision),'f'];
 tableBreaks = settablebreaks(np,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\section{Parameters}\n');
+    else
+        fprintf(fid,'\\section{Parameters (%.0f/%.0f)}\n',jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     if op.Table.MoveLeft
@@ -177,15 +179,18 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-fprintf(fid,'\\section{Auxiliary Parameters}\n');
+% fprintf(fid,'\\section{Auxiliary Parameters}\n');
 str = [' & %.',int2str(op.Table.Precision),'f'];
 tableBreaks = settablebreaks(nAux,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\section{Auxiliary Parameters}\n');
+    else
+        fprintf(fid,'\\section{Auxiliary Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4));

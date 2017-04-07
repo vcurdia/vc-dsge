@@ -115,7 +115,7 @@ for jP = 1:nPanels
         Figj.TitleList = Pj.Names;
     end
     if isfield(Pj,'FigShape');
-        Figj.FigShape = Pj.FigShape;
+        Figj.Shape = Pj.FigShape;
     end
     nVar = length(Pj.Names);
     PlotData = nan(nDrawsUsed,nSteps,nVar,nShocks2Show);
@@ -152,7 +152,7 @@ for jS=1:nShocks2Show
         fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
-        fprintf(fid,'\\includegraphics[scale=1]{%s%s_%s_%s.pdf}\n',...
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
                 op.PlotDir,PlotFileName,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
