@@ -17,11 +17,12 @@ op.BurnIn = 0.5;
 op.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
-op.NDrawsPrior = 1000;
+op.NDrawsPrior = 10000;
 op.NBin = 50;
 op.Fig = DSGE.Options.Figure;
-op.FigShape = [3,3];
-op.Color = colorscheme;
+op.Fig.Shape = [3,3];
+op.Fig.Color = colorscheme;
+op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_PriorPost/';
 
 op = updateoptions(op,varargin{:});
@@ -281,7 +282,7 @@ disp(' ')
 fprintf('Making Prior-Posterior Plots...\n')
 fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Model.Name,obj.MCMCStage);
-nPlots = prod(op.FigShape);
+nPlots = prod(op.Fig.Shape);
 xdPrior = obj.Prior.draw(op.NDrawsPrior);
 fh = @(x)obj.Model.mats(x,'SolveREE',0);
 xdAuxPrior = zeros(nAux,op.NDrawsPrior);
@@ -294,7 +295,9 @@ end
 % xdAuxPrior(:,BadDraws) = [];
 NDrawsUsed = size(xdPrior,2);
 pList = {'Param','AuxParam'};
+pListPretty = {'Parameters','Auxiliary Parameters'};
 dList = {'Prior','Post'};
+nFig = ones(1,2);
 for jP=1:2
     Pj = pList{jP};
     if strcmp(Pj,'Param')
@@ -305,14 +308,14 @@ for jP=1:2
         xj.Prior = xdAuxPrior;
     end
     np = obj.Model.(Pj).N;
-    nFig = ceil(np/nPlots);
-    for jF=1:nFig
+    nFig(jP) = ceil(np/nPlots);
+    for jF=1:nFig(jP)
         figure('Visible',op.Fig.Visible)
         clear hf
         for jf=1:nPlots 
             jp = (jF-1)*nPlots+jf;
             if jp>np, break, end
-            hf(jf) = subplot(op.FigShape(1),op.FigShape(2),jf);
+            hf(jf) = subplot(op.Fig.Shape(1),op.Fig.Shape(2),jf);
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
@@ -322,19 +325,22 @@ for jP=1:2
                 [yData,xData] = histcounts(xjdata,op.NBin);
                 xStep = xData(2)-xData(1);
                 plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
-                     'Color',op.Color(jD,:),'LineWidth',2)
+                     'Color',op.Fig.Color(jD,:),'LineWidth',2)
                 hold on
             end
             hold off
             axis tight
             ax = gca;
+%             ymax = max([ax.Children(1).YData,ax.Children(2).YData]);
+%             ax.Children(1).YData = ax.Children(1).YData/ymax;
+%             ax.Children(2).YData = ax.Children(2).YData/ymax;
             ax.YTick = [];
-            ax.YTickLabel = [];
-%             ax.FontSize = 8;
+%             ax.YTickLabel = [];
+            ax.FontSize = op.Fig.FontSize;
             if jf==nPlots || jp==np
                 hl = legend(dList,'Orientation','horizontal');
                 legPos = hl.Position;
-                xIdx = (max(1,op.FigShape(1)-1))*op.FigShape(2);
+                xIdx = (max(1,op.Fig.Shape(1)-1))*op.Fig.Shape(2);
                 xR = hf(xIdx).Position;
                 xL = hf(min(jf,xIdx+1)).Position;
                 legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
@@ -362,10 +368,10 @@ for jP=1:2
 %             end
 % %         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
 %             nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
-%             hb = bar(xPlot,nPlot,'FaceColor',op.Color(1,:),...
-%                      'EdgeColor',op.Color(1,:));
+%             hb = bar(xPlot,nPlot,'FaceColor',op.Fig.Color(1,:),...
+%                      'EdgeColor',op.Fig.Color(1,:));
 %             hold on
-%             hp = plot(xPlot,xPriorPdf,'Color',op.Color(2,:),'LineWidth',2);
+%             hp = plot(xPlot,xPriorPdf,'Color',op.Fig.Color(2,:),'LineWidth',2);
 %             hold off
             title(obj.Model.(Pj).PrettyNames{jp})
 %             xBounds = xPlot([1,end]);
@@ -397,7 +403,7 @@ fprintf(fid,'\\end{equation*}\n');
 
 fprintf(fid,'\\newpage \n');
 fprintf(fid,'\\section{Tables}\n');
-fprintf(fid,'\\subsection{Parameters}\n');
+% fprintf(fid,'\\subsection{Parameters}\n');
 np = obj.Model.Param.N;
 str = [' & %.',int2str(op.Table.Precision),'f'];
 tableBreaks = settablebreaks(np,op.Table.MaxRows);
@@ -405,8 +411,11 @@ idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\subsection{Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Parameters (%.0f/%.0f)}\n',jBreak, ...
+                nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     if op.Table.MoveLeft
@@ -443,14 +452,16 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-fprintf(fid,'\\subsection{Table: Auxiliary Parameters}\n');
 tableBreaks = settablebreaks(auxN,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\subsection{Auxiliary Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Auxiliary Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Auxiliary Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+3+1+5));
@@ -480,6 +491,24 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\end{tabular}\n');
     fprintf(fid,'\\end{equation*}\n');
     fprintf(fid,'\\clearpage\n');
+end
+
+fprintf(fid,'\\section{Fig: Prior-Post PDF}\n');
+for jP=1:2
+    for jF=1:nFig(jP)
+        if nFig(jP)==1
+            fprintf(fid,'\\subsection{%s}\n',pListPretty{jP});
+        else
+            fprintf(fid,'\\subsection{%s (%.0f/%.0f)}\n',pListPretty{jP},...
+                jF,nFig(jP));
+        end
+        fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
+        fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
+                fn,pList{jP},jF);
+        fprintf(fid,'\\end{figure}\n');
+        fprintf(fid,'\\clearpage \n');
+    end
 end
 
 fprintf(fid,'\\end{document}\n');
