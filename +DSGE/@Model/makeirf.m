@@ -38,7 +38,7 @@ fprintf('\n*** Making IRF\n')
 ttName = ['IRF',op.FileNameSuffix];
 obj.TimeElapsed.start(ttName)
 
-mkdir(op.PlotDir)
+if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FileNameSuffix); 
 ReportFileName = sprintf('%s_Report_IRF%s',obj.Name,op.FileNameSuffix);
 ReportTitle = sprintf('%s\\\\IRF Report %s',obj.Name,...

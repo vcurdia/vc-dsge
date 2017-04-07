@@ -17,11 +17,12 @@ op.BurnIn = 0.5;
 op.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
+op.NDrawsPrior = 1000;
 op.NBin = 50;
 op.Fig = DSGE.Options.Figure;
 op.FigShape = [3,3];
 op.Color = colorscheme;
-op.PlotDir = 'Plots/PriorPost/';
+op.PlotDir = 'Plots_PriorPost/';
 
 op = updateoptions(op,varargin{:});
 
@@ -31,6 +32,7 @@ fprintf('\n*** Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeParamMCMC%.0f',obj.MCMCStage);
 obj.TimeElapsed.start(ttName)
 
+if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 ReportFileName = sprintf('%s_Report_MCMC_%.0f_Param',obj.Model.Name,...
                          obj.MCMCStage);
 ReportTitle = sprintf('%s\\\\MCMC Stage %.0f\\\\Parameter Analysis',...
@@ -60,7 +62,7 @@ fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
 %% Generate AuxParam
 fprintf('Generating AuxParam draws...\n')
 xdAux = zeros(nAux,nDrawsUsed);
-fh = @(x)obj.Model.mats(x);
+fh = @(x)obj.Model.mats(x,'SolveREE',0);
 parfor jd=1:nDrawsUsed
     Matsj = fh(xd(:,jd));
     xdAux(:,jd) = Matsj.AuxParam;
@@ -274,64 +276,108 @@ for jr=1:np
     disp(str2show)
 end
 disp(' ')
-keyboard
 
 %% Make Prior Post Plots
-fprintf('Making Prior-Posterior Plots...')
+fprintf('Making Prior-Posterior Plots...\n')
 fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Model.Name,obj.MCMCStage);
 nPlots = prod(op.FigShape);
-nFig = ceil(np/nPlots);
-for jF=1:nFig
-    figure('Visible',op.Fig.Visible)
-    for jf=1:nPlots 
-        jp = (jF-1)*nPlots+jf;
-        if jp>np, break, end
-        hf = subplot(op.FigShape(1),op.FigShape(2),jf);
-        xPost = xd(jp,:);
-%         [xFreq,xOut] = hist(xPost,nBin);
-        hf = histogram(xPost,op.NBin);
-%         xStep = xOut(2)-xOut(1);
-%         xOutMin = min(xOut);
-%         xOutMax = max(xOut);
-        xStep = hf.BinWidth;
-        xOut = hf.BinEdges;
-        xOut = xOut(2:end)-xStep/2;
-        xCrit = [obj.Prior.Sample.Param.Prc01(jp),...
-                 obj.Prior.Sample.Param.Prc99(jp)];
-        xPlot = [sort(xOut(1)-xStep:-xStep:xCrit(1)),...
-                 xOut,...
-                 xOut(end)+xStep:xStep:xCrit(2)];
-        nPlot = zeros(size(xPlot));
-        nIdx = ismember(xPlot,xOut);
-        nPlot(nIdx) = hf.Values;
-        xPriorPdf = nan(1,length(xPlot));
-        for jx=1:length(xPlot)
-%             xPriorPdf(jx) = eval(sprintf(Params(jp).priorpdfcmd,xPlot(jx)));
-            xPriorPdf(jx) = obj.Prior.PDFCmd(xPlot(jx));
-        end
-%         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
-        nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
-        hb = bar(xPlot,nPlot,op.Color(1,:));
-        hold on
-        hp = plot(xPlot,xPriorPdf,op.Color(2,:),'LineWidth',2);
-        hold off
-        title(obj.Model.Param.PrettyNames{jp})
-        xBounds = xPlot([1,end]);
-        xBounds = xBounds+(-1).^(1:-1:0)*0.01*(xBounds(2)-xBounds(1));
-        xlim(xBounds)
-        xTickLabels = xBounds(1):(xBounds(2)-xBounds(1))/8:xBounds(2);
-        yBounds = max(max(nPlot),max(xPriorPdf));
-        yBounds = [0,yBounds+0.01*yBounds];
-        ax = gca;
-        ylim(yBounds)
-        ax.YTick = [];
-        ax.XTick = xTickLabels([2,5,8]);
-        ax.FontSize = 8;
-    end
-    vcPrintPDF(sprintf('%s_%.0f',fn,jF))
+xdPrior = obj.Prior.draw(op.NDrawsPrior);
+fh = @(x)obj.Model.mats(x,'SolveREE',0);
+xdAuxPrior = zeros(nAux,op.NDrawsPrior);
+parfor jd=1:op.NDrawsPrior
+    Matsj = fh(xdPrior(:,jd));
+%     BadDraws(jd) = ~Matsj.Status==1;
+    xdAuxPrior(:,jd) = Matsj.AuxParam;
 end
-
+% xdPrior(:,BadDraws) = [];
+% xdAuxPrior(:,BadDraws) = [];
+NDrawsUsed = size(xdPrior,2);
+pList = {'Param','AuxParam'};
+dList = {'Prior','Post'};
+for jP=1:2
+    Pj = pList{jP};
+    if strcmp(Pj,'Param')
+        xj.Post = xd;
+        xj.Prior = xdPrior;
+    else
+        xj.Post = xdAux;
+        xj.Prior = xdAuxPrior;
+    end
+    np = obj.Model.(Pj).N;
+    nFig = ceil(np/nPlots);
+    for jF=1:nFig
+        figure('Visible',op.Fig.Visible)
+        clear hf
+        for jf=1:nPlots 
+            jp = (jF-1)*nPlots+jf;
+            if jp>np, break, end
+            hf(jf) = subplot(op.FigShape(1),op.FigShape(2),jf);
+            for jD=1:2
+                Dj = dList{jD};
+                xjdata = xj.(Dj)(jp,:);
+                xcrit = prctile(xjdata,[1,99]);
+                xjdata(xjdata<xcrit(1)) = [];
+                xjdata(xjdata>xcrit(2)) = [];
+                [yData,xData] = histcounts(xjdata,op.NBin);
+                xStep = xData(2)-xData(1);
+                plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
+                     'Color',op.Color(jD,:),'LineWidth',2)
+                hold on
+            end
+            hold off
+            axis tight
+            ax = gca;
+            ax.YTick = [];
+            ax.YTickLabel = [];
+%             ax.FontSize = 8;
+            if jf==nPlots || jp==np
+                hl = legend(dList,'Orientation','horizontal');
+                legPos = hl.Position;
+                xIdx = (max(1,op.FigShape(1)-1))*op.FigShape(2);
+                xR = hf(xIdx).Position;
+                xL = hf(min(jf,xIdx+1)).Position;
+                legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
+                legPos(2) = 0;
+                hl.Position = legPos;
+            end
+%             xPost = xd(jp,:);
+%             [xFreq,xOut] = histcounts(xPost,nBin);
+%             xStep = xOut(2)-xOut(1);
+% %         xOutMin = min(xOut);
+% %         xOutMax = max(xOut);
+%             xOut = xOut(2:end)-xStep/2;
+%             xCrit = [obj.Prior.Sample.Param.Prc01(jp),...
+%                      obj.Prior.Sample.Param.Prc99(jp)];
+%             xPlot = [sort(xOut(1)-xStep:-xStep:xCrit(1)),...
+%                      xOut,...
+%                      xOut(end)+xStep:xStep:xCrit(2)];
+%             nPlot = zeros(size(xPlot));
+%             nIdx = ismember(xPlot,xOut);
+%             nPlot(nIdx) = hf.Values;
+%             xPriorPdf = nan(1,length(xPlot));
+%             for jx=1:length(xPlot)
+% %             xPriorPdf(jx) = eval(sprintf(Params(jp).priorpdfcmd,xPlot(jx)));
+%                 xPriorPdf(jx) = obj.Prior.PDFCmd{jp}(xPlot(jx));
+%             end
+% %         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
+%             nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
+%             hb = bar(xPlot,nPlot,'FaceColor',op.Color(1,:),...
+%                      'EdgeColor',op.Color(1,:));
+%             hold on
+%             hp = plot(xPlot,xPriorPdf,'Color',op.Color(2,:),'LineWidth',2);
+%             hold off
+            title(obj.Model.(Pj).PrettyNames{jp})
+%             xBounds = xPlot([1,end]);
+%             xBounds = xBounds+(-1).^(1:-1:0)*0.01*(xBounds(2)-xBounds(1));
+%             xlim(xBounds)
+%             xTickLabels = xBounds(1):(xBounds(2)-xBounds(1))/8:xBounds(2);
+%             yBounds = max(max(nPlot),max(xPriorPdf));
+%             yBounds = [0,yBounds+0.01*yBounds];
+        end
+        printpdf(sprintf('%s_%s_%.0f',fn,Pj,jF))
+    end
+end
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
