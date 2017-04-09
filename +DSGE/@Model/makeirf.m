@@ -22,7 +22,7 @@ op.FigPanels = obj.setvarfigpanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.PlotDir = 'Plots_IRF/';
-op.Fig = DSGE.Options.Figure;
+op.Fig.Visible = 'off';
 
 %% Update options
 op = updateoptions(op,varargin{:});
