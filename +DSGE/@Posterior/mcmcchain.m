@@ -32,18 +32,15 @@ op.InitDrawItMax = 1000;
 op.InitDrawTol = 20;
 op.InitDrawVarFactor = 1;
 op.InitDrawDF = 6;
-op.NRejections = 0;
 op.JumpVar = 2.4^2/np*Var;
 op.fn = 'MCMC_Chain';
 op.x0 = [];
-op.SaveList = {'xDraws','lpdfDraws'};
 
 op = updateoptions(op,varargin{:});
 
 %% chain related variables
 fid = fopen([op.fn,'.log'],'wt');
 lpdf = @(x)obj.lpdf(x,struct('verbose',op.verbose,'fid',fid));
-nRejections = op.NRejections;
 
 %% generate initial draw
 x0 = op.x0;
@@ -123,15 +120,17 @@ end
 
 %% Prepare variables
 if ~op.Augment
-    nDraws = op.NDraws;
-    xDraws = [];
-    lpdfDraws = [];
+    draws.N = 0;
+    draws.Param = [];
+    draws.LPDF = [];
+    draws.NRejections = 0;
 else
     fprintf(fid,'Loading existing chain...\n');
     load(op.fn)
-    nDraws = op.NDraws - length(lpdfDraws);
-    x0 = xDraws(:,end);
+    nDraws = op.NDraws - draws.N;
+    x0 = draws.Param(:,end);
 end
+nRejections = draws.NRejections;
 nDrawsBlock = ceil(nDraws/op.NBlocks);
 
 %% MCMC
@@ -153,14 +152,16 @@ for jB=1:op.NBlocks
         xB(:,j) = x0;
         lpdfB(j) = lpdf0;
     end
-    xDraws = [xDraws,xB];
-    lpdfDraws = [lpdfDraws,lpdfB];
-    save(op.fn,op.SaveList{:})
+    draws.N = draws.N+NB;
+    draws.Param = [draws.Param,xB];
+    draws.LPDF = [draws.LPDF,lpdfB];
+    draws.NRejections = nRejections;
+    save(op.fn,'draws')
 end
 
 %% show number of rejections
 fprintf(fid,'%.0f rejections out of %.0f draws (%.2f%%).\n',...
-        nRejections,nDraws,nRejections/nDraws*100);
+        nRejections,draws.N,nRejections/draws.N*100);
 
 %% save output
 save(op.fn,op.SaveList{:});

@@ -43,7 +43,6 @@ for jChain=1:op.NChains
     obj.MCMCSample.FileNameDraws{jChain} = sprintf(...
         '%s_MCMC_%.0f_Chain_%.0f',obj.Model.Name,obj.MCMCStage,jChain);
 end
-obj.MCMCSample.NDrawsRedux = [];
 obj.MCMCSample.FileNameRedux = [];
 
 
@@ -64,7 +63,6 @@ opChain.JumpVar = obj.MCMCSample.JumpVar;
 nRejections = obj.MCMCSample.NRejections;
 parfor jChain=1:op.NChains
     opj = opChain;
-    opj.NRejections = nRejections(jChain);
     opj.fn = obj.MCMCSample.FileNameDraws{jChain}
     opj.x0 = x0{jChain};
     nRejections(jChain) = obj.mcmcchain(opj);

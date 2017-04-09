@@ -40,7 +40,6 @@ jumpScale = op.JumpScale;
 opChain.Augment = 0;
 opChain.NDraws = op.NDrawsCalibrate;
 opChain.x0 = [];
-opChain.NRejections = 0;
 
 fn = cell(op.NChains,1);
 for jChain=1:op.NChains

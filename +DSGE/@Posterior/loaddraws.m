@@ -26,23 +26,22 @@ draws.N = 0;
 
 idxDraws = (op.BurnIn*sample.NDraws+1):op.Thinning:obj.sample.NDraws;
 for jChain=1:sample.NChains
-    load(sample.FileNameDraws{jChain})
-    xd(:,:,jChain) = xDraws(:,idxDraws);
-    lpdfd(:,:,jChain) = lpdfDraws(:,idxDraws);
+    dc = load(sample.FileNameDraws{jChain});
+    draws.Param(:,:,jChain) = dc.Param(:,idxDraws);
+    draws.LPDF(:,:,jChain) = dc.LPDF(:,idxDraws);
 end
-draws.N = size(xd,2)*sample.NChains;
-draws.Param = obj.expandparam(reshape(xd,obj.NEstimate,draws.N));
-draws.LPDF = reshape(lpdfd,1,draws.N);
+draws.N = size(draws.LPDF,2)*sample.NChains;
+draws.Param = obj.expandparam(reshape(draws.Param,obj.NEstimate,draws.N));
+draws.LPDF = reshape(draws.LPDF,1,draws.N);
 
 if op.AuxParam
     fprintf('Generating AuxParam draws\n')
-    xdAux = zeros(obj.Model.AuxParam.N,draws.N);
+    draws.AuxParam = zeros(obj.Model.AuxParam.N,draws.N);
     fh = @(x)obj.Model.mats(x,'SolveREE',0);
     parfor jd=1:draws.N
-        Matsj = fh(xd(:,jd));
-        xdAux(:,jd) = Matsj.AuxParam;
+        Matsj = fh(draws.Param(:,jd));
+        draws.AuxParam(:,jd) = Matsj.AuxParam;
     end
-    draws.AuxParam = xdAux;
 end
 
 fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)

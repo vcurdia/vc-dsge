@@ -41,7 +41,6 @@ op.Draws.Thinning = max(1,...
 
 draws = obj.loaddraws(op.Draws);
 draws.Param = draws.Param(obj.EstimateIdx,:);
-obj.MCMCSample.NDrawsRedux = draws.N;
 
 %% Save MCMC draws Redux
 fn = sprintf('%s_MCMC_%.0f_Redux',obj.Model.Name,obj.MCMCStage);
