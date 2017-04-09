@@ -263,30 +263,25 @@ fprintf('Making Prior-Posterior Plots...\n')
 fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Model.Name,obj.MCMCStage);
 nPlots = prod(op.Fig.Shape);
-xdPrior = obj.Prior.draw(op.NDrawsPrior);
+drawsPrior.Param = obj.Prior.draw(op.NDrawsPrior);
 fh = @(x)obj.Model.mats(x,'SolveREE',0);
-xdAuxPrior = zeros(nAux,op.NDrawsPrior);
+drawsPrior.AuxParam = zeros(nAux,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
     Matsj = fh(xdPrior(:,jd));
 %     BadDraws(jd) = ~Matsj.Status==1;
-    xdAuxPrior(:,jd) = Matsj.AuxParam;
+    drawsPrior.AuxParam(:,jd) = Matsj.AuxParam;
 end
 % xdPrior(:,BadDraws) = [];
 % xdAuxPrior(:,BadDraws) = [];
-NDrawsUsed = size(xdPrior,2);
+drawsPrior.N = (drawsPrior.Param,2);
 pList = {'Param','AuxParam'};
 pListPretty = {'Parameters','Auxiliary Parameters'};
 dList = {'Prior','Post'};
 nFig = ones(1,2);
 for jP=1:2
     Pj = pList{jP};
-    if strcmp(Pj,'Param')
-        xj.Post = xd;
-        xj.Prior = xdPrior;
-    else
-        xj.Post = xdAux;
-        xj.Prior = xdAuxPrior;
-    end
+    xj.Post = draws.(Pj);
+    xj.Prior = drawsPrior.(Pj);
     np = obj.Model.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
