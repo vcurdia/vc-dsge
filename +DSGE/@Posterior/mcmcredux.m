@@ -2,7 +2,12 @@ function mcmcredux(obj,varargin)
 
 % mcmcredux
 % 
-% Combine MCMC sample chains and extract part of it
+% Combine MCMC sample chains and save part of it. saved file contains a 
+% structure named "draws" with fields:
+%   draw.N (number of draws)
+%   draw.Param (compact matrix with draws for Param)
+%   draw.LPDF (row matrix with draws for posterior log-pdf)
+%   draw.AuxParam (if op.Draws.AuxParam=1, matrix with draws for AuxParam)
 %
 % see also:
 % DSGE.Posterior
@@ -13,8 +18,9 @@ function mcmcredux(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.BurnIn = 0.5;
-op.NDrawsRedux = 10000;
+op.Draws.BurnIn = 0.5;
+op.Draws.AuxParam = 0;
+op.NDraws = 10000;
 
 op = updateoptions(op,varargin{:});
 
@@ -27,32 +33,21 @@ obj.TimeElapsed.start(ttName)
 sample = obj.MCMCSample;
 
 nDrawsAvailable = floor(sample.NDraws*(1-op.BurnIn))*sample.NChains;
-nDrawsRedux = min(op.NDrawsRedux,nDrawsAvailable);
+nDraws = min(op.NDraws,nDrawsAvailable);
 
 %% load the mcmc draws
-ThinningRedux = max(1,...
-    floor(sample.NDraws*sample.NChains*(1-op.BurnIn)/nDrawsRedux));
-idxDraws = (op.BurnIn*sample.NDraws+1):ThinningRedux:sample.NDraws;
-for jChain=1:sample.NChains
-    load(sample.FileNameDraws{jChain})
-    xd(:,:,jChain) = xDraws(:,idxDraws);
-    lpdfd(:,:,jChain) = lpdfDraws(:,idxDraws);
-end
-nDrawsUsed = size(xd,2)*sample.NChains;
-xDraws = reshape(xd,obj.NEstimate,nDrawsUsed);
-lpdfDraws = reshape(lpdfd,1,nDrawsUsed);
-fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
-fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
-fprintf('Thinning used: %.0f\n', ThinningRedux)
-fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
-obj.MCMCSample.NDrawsRedux = nDrawsUsed;
+op.Draws.Thinning = max(1,...
+    floor(sample.NDraws*sample.NChains*(1-op.BurnIn)/nDraws));
+
+draws = obj.loaddraws(op.Draws);
+draws.Param = draws.Param(obj.EstimateIdx,:);
+obj.MCMCSample.NDrawsRedux = draws.N;
 
 %% Save MCMC draws Redux
 fn = sprintf('%s_MCMC_%.0f_Redux',obj.Model.Name,obj.MCMCStage);
 obj.MCMCSample.FileNameRedux = fn;
-save(fn,'xDraws','lpdfDraws')
+save(fn,'draws')
 fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
-
 
 
 %% Finish up

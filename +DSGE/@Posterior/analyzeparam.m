@@ -13,13 +13,13 @@ function analyzeparam(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.BurnIn = 0.5;
-op.Thinning = 1;
+op.Draws.BurnIn = 0.5;
+op.Draws.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 op.NDrawsPrior = 10000;
 op.NBin = 50;
-op.Fig = DSGE.Options.Figure;
+op.Fig.Visible = 'off';
 op.Fig.Shape = [3,3];
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
@@ -46,35 +46,14 @@ nAux = obj.Model.AuxParam.N;
 auxNames = obj.Model.AuxParam.Names;
 
 %% load the mcmc draws
-idxDraws = (op.BurnIn*sample.NDraws+1):op.Thinning:sample.NDraws;
-for jChain=1:sample.NChains
-    load(sample.FileNameDraws{jChain})
-    xd(:,:,jChain) = xDraws(:,idxDraws);
-    lpdfd(:,:,jChain) = lpdfDraws(:,idxDraws);
-end
-nDrawsUsed = size(xd,2)*sample.NChains;
-xd = obj.expandparam(reshape(xd,obj.NEstimate,nDrawsUsed));
-lpdfd = reshape(lpdfd,1,nDrawsUsed);
-fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
-fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
-fprintf('Thinning used: %.0f\n', op.Thinning)
-fprintf('Total number of draws used: %.0f\n', nDrawsUsed)
-
-%% Generate AuxParam
-fprintf('Generating AuxParam draws...\n')
-xdAux = zeros(nAux,nDrawsUsed);
-fh = @(x)obj.Model.mats(x,'SolveREE',0);
-parfor jd=1:nDrawsUsed
-    Matsj = fh(xd(:,jd));
-    xdAux(:,jd) = Matsj.AuxParam;
-end
-
+op.Draws.AuxParam = 1;
+draws = obj.loaddraws(op.Draws);
 
 %% Analyze sample
-obj.MCMCSample.Param = sumstats(xd,op.Percentiles);
-obj.MCMCSample.AuxParam = sumstats(xdAux,op.Percentiles);
-Var = xd-repmat(obj.Mean,1,nDrawsUsed);
-Var = Var*Var'/(nDrawsUsed-1);
+obj.MCMCSample.Param = sumstats(draws.Param,op.Percentiles);
+obj.MCMCSample.AuxParam = sumstats(draws.AuxParam,op.Percentiles);
+Var = xd-repmat(obj.Mean,1,draws.N);
+Var = Var*Var'/(draws.N-1);
 CorrMat = zeros(np);
 for jr=1:np
     if Var(jr,jr)==0, continue, end
@@ -93,7 +72,7 @@ obj.Corr = CorrMat;
 
 
 %% check for new mode in mcmc sample
-[lpdfNewMode,idxMax] = max(lpdfd);
+[lpdfNewMode,idxMax] = max(draws.LPDF);
 fprintf('Checking MCMC draws for new mode\n')
 fprintf('Previous mode lpdf: %.6f\n',obj.LPDFMode)
 fprintf('Highest posterior density in MCMC draws: %.6f\n',lpdfNewMode)
@@ -108,7 +87,7 @@ if lpdfNewMode>obj.LPDFMode
                 pNames{jp},obj.Mode(jp),xd(jp,idxMax))
     end
     obj.LPDFMode = lpdfNewMode;
-    obj.Mode = xd(:,idxMax);
+    obj.Mode = draws.Param(:,idxMax);
 else
     fprintf('Did not find MCMC draw with higher posterior density.\n')
     fprintf('Previous posterior mode kept.\n')
@@ -122,8 +101,8 @@ ntau = length(tau);
 pIdx = obj.EstimateIdx;
 npd = obj.NEstimate;
 % InvVar = inv(Post.Var);
-xdd = xd(pIdx,:)-repmat(obj.Mean(pIdx),1,nDrawsUsed);
-xddvar = xdd*xdd'/nDrawsUsed;
+xdd = draws.Param(pIdx,:)-repmat(obj.Mean(pIdx),1,draws.N);
+xddvar = xdd*xdd'/draws.N;
 [xddvaru,xddvars,xddvarv] = svd(xddvar);
 xddvarmd = min(size(xddvars));
 bigev = find(diag(xddvars(1:xddvarmd,1:xddvarmd))>1e-6);
@@ -140,22 +119,22 @@ for j=1:npd
 end
 InvVar = xddvaru*xddvars*xddvaru';
 lpdfMax = obj.LPDFMode;
-lpdfMean = mean(lpdfd);
+lpdfMean = mean(draws.LPDF);
 % [postMax,postMean]
 % Constant terms
 % lfConst = -log(tau)-np/2*log(2*pi)-1/2*log(det(Post.Var));
 lfConst = -log(tau)-npd/2*log(2*pi)-1/2*xddvarlndet;
 chi2Crit = chi2inv(tau,npd);
 % Calculate the ratio of f(x)/post(x)
-pw = zeros(ntau,nDrawsUsed);
+pw = zeros(ntau,draws.N);
 nB = 10;
 for jB=1:nB
 %     fprintf('Computing %.0f of %.0f...\n',jB,nB)
-    for jd=1:nDrawsUsed/nB
-        idx = nDrawsUsed/nB*(jB-1)+jd;
+    for jd=1:draws.N/nB
+        idx = draws.N/nB*(jB-1)+jd;
         pratio = xdd(:,idx)'*InvVar*xdd(:,idx);
         pw(:,idx) = (pratio<=chi2Crit).*...
-            exp(lfConst-1/2*pratio-lpdfd(idx)+lpdfMean);
+            exp(lfConst-1/2*pratio-draws.LPDF(idx)+lpdfMean);
     end
 end
 % harmonic mean
@@ -240,7 +219,8 @@ for jr=1:2
     disp(str2show)
 end
 for jp=1:auxN
-    str2show = sprintf(['%',int2str(auxNameLengthMax),'s'],DispList{1,3}{jp});
+    str2show = sprintf(['%',int2str(auxNameLengthMax),'s'],...
+                       DispList{1,3}{jp});
     for jc=2:nc
         str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
     end
@@ -396,7 +376,7 @@ fprintf(fid,'size of each chain: & %.0f\\\\\n',sample.NDraws);
 fprintf(fid,'burn in used: & %.0f (%.0f\\%%)\\\\\n',...
         op.BurnIn*sample.NDraws,op.BurnIn*100);
 fprintf(fid,'thinning used: & %.0f\\\\\n',op.Thinning);
-fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',nDrawsUsed);
+fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',draws.N);
 fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.LogMgLikelihood);
 fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
