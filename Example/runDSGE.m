@@ -49,12 +49,11 @@ for s=1
     save([fn,'_CalibrateJump'])
     post.mcmc(options.MCMC)
     save(fn)
-    post.mcmcredux
     post.analyzeparam
+    post.mcmcredux
     save([fn,'_Analysis'])
     save(specName)
 end
-
 
 
 %% Finish up
