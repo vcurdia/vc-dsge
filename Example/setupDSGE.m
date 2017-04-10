@@ -14,8 +14,7 @@
 
 %% Preamble
 clear all
-setpath
-set(0,'defaultTextInterpreter','latex');
+% startup
 TimeElapsed = TimeTracker;
 TimeElapsed.start('Setup')
 
