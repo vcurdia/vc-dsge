@@ -52,7 +52,7 @@ draws = obj.loaddraws(op.Draws);
 %% Analyze sample
 obj.MCMCSample.Param = sumstats(draws.Param,op.Percentiles);
 obj.MCMCSample.AuxParam = sumstats(draws.AuxParam,op.Percentiles);
-Var = xd-repmat(obj.Mean,1,draws.N);
+Var = draws.Param-repmat(obj.Mean,1,draws.N);
 Var = Var*Var'/(draws.N-1);
 CorrMat = zeros(np);
 for jr=1:np
@@ -370,8 +370,8 @@ fprintf(fid,'\\begin{tabular}{rl} \n');
 fprintf(fid,'number of chains: & %.0f\\\\\n',sample.NChains);
 fprintf(fid,'size of each chain: & %.0f\\\\\n',sample.NDraws);
 fprintf(fid,'burn in used: & %.0f (%.0f\\%%)\\\\\n',...
-        op.BurnIn*sample.NDraws,op.BurnIn*100);
-fprintf(fid,'thinning used: & %.0f\\\\\n',op.Thinning);
+        op.Draws.BurnIn*sample.NDraws,op.Draws.BurnIn*100);
+fprintf(fid,'thinning used: & %.0f\\\\\n',op.Draws.Thinning);
 fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',draws.N);
 fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.LogMgLikelihood);
 fprintf(fid,'\\end{tabular}\n');
@@ -469,7 +469,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-fprintf(fid,'\\section{Fig: Prior-Post PDF}\n');
+fprintf(fid,'\\section{Prior-Post PDF}\n');
 for jP=1:2
     for jF=1:nFig(jP)
         if nFig(jP)==1
