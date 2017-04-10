@@ -76,8 +76,8 @@ classdef Posterior < handle
         end
         
         function xx = expandparam(obj,x)
-            xx = repmat(obj.Model.Param.Values,1,size(x,2));
-            xx(obj.EstimateIdx,:) = x;
+            xx = repmat(obj.Model.Param.Values,1,size(x,2),size(x,3));
+            xx(obj.EstimateIdx,:,:) = x;
         end
         
         function xd = draw(obj,nDraws,sid)
