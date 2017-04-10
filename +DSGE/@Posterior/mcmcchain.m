@@ -124,6 +124,7 @@ if ~op.Augment
     draws.Param = [];
     draws.LPDF = [];
     draws.NRejections = 0;
+    nDraws = op.NDraws;
 else
     fprintf(fid,'Loading existing chain...\n');
     load(op.fn)
@@ -152,19 +153,19 @@ for jB=1:op.NBlocks
         xB(:,j) = x0;
         lpdfB(j) = lpdf0;
     end
-    draws.N = draws.N+NB;
+    draws.N = draws.N+nB;
     draws.Param = [draws.Param,xB];
     draws.LPDF = [draws.LPDF,lpdfB];
     draws.NRejections = nRejections;
-    save(op.fn,'draws')
+    save(op.fn,'-struct','draws')
 end
 
 %% show number of rejections
 fprintf(fid,'%.0f rejections out of %.0f draws (%.2f%%).\n',...
         nRejections,draws.N,nRejections/draws.N*100);
 
-%% save output
-save(op.fn,op.SaveList{:});
+% %% save output (not needed because we save at end of each block)
+% save(op.fn,'draws');
 
 %% close printed output file
 if fid~=1,fclose(fid);end

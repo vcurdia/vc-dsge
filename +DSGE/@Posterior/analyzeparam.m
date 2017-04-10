@@ -141,10 +141,10 @@ end
 % LogMgLikelihood = postMean-log(mean(pw,2));
 LogMgLikelihood = zeros(ntau,1);
 for jtau=1:ntau
-  pwj = pw(jtau,:);
-  pwj = pwj(~isinf(pwj));
-  pwj = pwj(~isnan(pwj));
-  LogMgLikelihood(jtau) = lpdfMean-log(mean(pwj,2));
+    pwj = pw(jtau,:);
+    pwj = pwj(~isinf(pwj));
+    pwj = pwj(~isnan(pwj));
+    LogMgLikelihood(jtau) = lpdfMean-log(mean(pwj,2));
 end
 obj.LogMgLikelihood = LogMgLikelihood(tau==0.5);
 % obj.LogMgLikelihood = mean(LogMgLikelihood);
@@ -265,15 +265,16 @@ fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
 nPlots = prod(op.Fig.Shape);
 drawsPrior.Param = obj.Prior.draw(op.NDrawsPrior);
 fh = @(x)obj.Model.mats(x,'SolveREE',0);
-drawsPrior.AuxParam = zeros(nAux,op.NDrawsPrior);
+dAux = zeros(nAux,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
-    Matsj = fh(xdPrior(:,jd));
+    Matsj = fh(drawsPrior.Param(:,jd));
 %     BadDraws(jd) = ~Matsj.Status==1;
-    drawsPrior.AuxParam(:,jd) = Matsj.AuxParam;
+    dAux(:,jd) = Matsj.AuxParam;
 end
+drawsPrior.AuxParam = dAux;
 % xdPrior(:,BadDraws) = [];
 % xdAuxPrior(:,BadDraws) = [];
-drawsPrior.N = (drawsPrior.Param,2);
+drawsPrior.N = size(drawsPrior.Param,2);
 pList = {'Param','AuxParam'};
 pListPretty = {'Parameters','Auxiliary Parameters'};
 dList = {'Prior','Post'};

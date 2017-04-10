@@ -45,7 +45,7 @@ draws.Param = draws.Param(obj.EstimateIdx,:);
 %% Save MCMC draws Redux
 fn = sprintf('%s_MCMC_%.0f_Redux',obj.Model.Name,obj.MCMCStage);
 obj.MCMCSample.FileNameRedux = fn;
-save(fn,'draws')
+save(fn,'-struct','draws')
 fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
 
 
