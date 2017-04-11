@@ -18,7 +18,7 @@ function mcmcredux(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.Draws.BurnIn = 0.5;
+op.Draws.BurnIn = 0.25;
 op.Draws.AuxParam = 0;
 op.Draws.CombineChains = 1;
 op.Draws.ExpandParam = 0;

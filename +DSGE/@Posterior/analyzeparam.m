@@ -13,7 +13,7 @@ function analyzeparam(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.Draws.BurnIn = 0.5;
+op.Draws.BurnIn = 0.25;
 op.Draws.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
@@ -21,7 +21,7 @@ op.NDrawsPrior = 10000;
 op.NBin = 50;
 op.Fig.Visible = 'off';
 op.Fig.Shape = [3,3];
-op.Fig.Color = colorscheme;
+op.Fig.Plot.LineColor = colorscheme;
 op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_PriorPost/';
 
@@ -301,7 +301,7 @@ for jP=1:2
                 [yData,xData] = histcounts(xjdata,op.NBin);
                 xStep = xData(2)-xData(1);
                 plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
-                     'Color',op.Fig.Color(jD,:),'LineWidth',2)
+                     'Color',op.Fig.Plot.LineColor(jD,:),'LineWidth',2)
                 hold on
             end
             hold off
@@ -344,10 +344,10 @@ for jP=1:2
 %             end
 % %         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
 %             nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
-%             hb = bar(xPlot,nPlot,'FaceColor',op.Fig.Color(1,:),...
-%                      'EdgeColor',op.Fig.Color(1,:));
+%             hb = bar(xPlot,nPlot,'FaceColor',op.Fig.Plot.LineColor(1,:),...
+%                      'EdgeColor',op.Fig.Plot.LineColor(1,:));
 %             hold on
-%             hp = plot(xPlot,xPriorPdf,'Color',op.Fig.Color(2,:),'LineWidth',2);
+%             hp = plot(xPlot,xPriorPdf,'Color',op.Fig.Plot.LineColor(2,:),'LineWidth',2);
 %             hold off
             title(obj.Model.(Pj).PrettyNames{jp})
 %             xBounds = xPlot([1,end]);

@@ -13,7 +13,7 @@ function draws = loaddraws(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.BurnIn = 0.5;
+op.BurnIn = 0.25;
 op.Thinning = 1;
 op.AuxParam = 0;
 op.CombineChains = 1;
