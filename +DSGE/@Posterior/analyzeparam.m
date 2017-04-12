@@ -19,6 +19,7 @@ op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 op.NDrawsPrior = 20000;
 op.NBin = 50;
+op.Fig.Visible = 'off';
 op.Fig.Shape = [3,3];
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
@@ -285,7 +286,7 @@ for jP=1:2
     np = obj.Model.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
-        figure('Visible','off')
+        figure('Visible',op.Fig.Visible)
         clear hf
         for jf=1:nPlots 
             jp = (jF-1)*nPlots+jf;

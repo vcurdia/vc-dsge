@@ -18,6 +18,7 @@ op.Draws.Thinning = 1;
 op.Draws.AuxParam = 1;
 op.Table = DSGE.Options.Table;
 op.NBin = 50;
+op.Fig.Visible = 'off';
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_Convergence/';
@@ -75,7 +76,7 @@ for jL=1:length(pdList)
         pSpread = pMax-pMin;
         pMax = pMax+.01*pSpread;
         pMin = pMin-.01*pSpread;
-        figure('Visible','off')
+        figure('Visible',op.Fig.Visible)
         clear h
         for jChain=1:sample.NChains
             h(jChain,1) = subplot(sample.NChains,nc,(jChain-1)*nc+1);
