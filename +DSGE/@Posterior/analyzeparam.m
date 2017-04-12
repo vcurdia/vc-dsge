@@ -149,8 +149,8 @@ end
 obj.LogMgLikelihood = LogMgLikelihood(tau==0.5);
 % obj.LogMgLikelihood = mean(LogMgLikelihood);
 for jt = 1:ntau
-    obj.MCMCSample.LogMgLikelihoodtau(jt).Tau = tau(jt);
-    obj.MCMCSample.LogMgLikelihoodtau(jt).Value = LogMgLikelihood(jt);
+    obj.MCMCSample.LogMgLikelihood(jt).Tau = tau(jt);
+    obj.MCMCSample.LogMgLikelihood(jt).Value = LogMgLikelihood(jt);
 end
 
 
@@ -268,12 +268,9 @@ fh = @(x)obj.Model.mats(x,'SolveREE',0);
 dAux = zeros(nAux,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
     Matsj = fh(drawsPrior.Param(:,jd));
-%     BadDraws(jd) = ~Matsj.Status==1;
     dAux(:,jd) = Matsj.AuxParam;
 end
 drawsPrior.AuxParam = dAux;
-% xdPrior(:,BadDraws) = [];
-% xdAuxPrior(:,BadDraws) = [];
 drawsPrior.N = size(drawsPrior.Param,2);
 pList = {'Param','AuxParam'};
 pListPretty = {'Parameters','Auxiliary Parameters'};
@@ -295,13 +292,6 @@ for jP=1:2
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
-%                 xcrit = prctile(xjdata,[1,99]);
-%                 xjdata(xjdata<xcrit(1)) = [];
-%                 xjdata(xjdata>xcrit(2)) = [];
-%                 [yData,xData] = histcounts(xjdata,nBin);
-%                 xStep = xData(2)-xData(1);
-%                 plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
-%                      'Color',op.Fig.Plot.Color(jD,:),'LineWidth',2)
                 histogram(xjdata,op.NBin,...
                           'Normalization','probability',...
                           'FaceColor',op.Fig.Color(jD,:),...
@@ -311,11 +301,7 @@ for jP=1:2
             hold off
             axis tight
             ax = gca;
-%             ymax = max([ax.Children(1).YData,ax.Children(2).YData]);
-%             ax.Children(1).YData = ax.Children(1).YData/ymax;
-%             ax.Children(2).YData = ax.Children(2).YData/ymax;
             ax.YTick = [];
-%             ax.YTickLabel = [];
             ax.FontSize = op.Fig.FontSize;
             if jf==nPlots || jp==np
                 hl = legend(dList,'Orientation','horizontal');
@@ -327,41 +313,8 @@ for jP=1:2
                 legPos(2) = 0;
                 hl.Position = legPos;
             end
-%             xPost = xd(jp,:);
-%             [xFreq,xOut] = histcounts(xPost,nBin);
-%             xStep = xOut(2)-xOut(1);
-% %         xOutMin = min(xOut);
-% %         xOutMax = max(xOut);
-%             xOut = xOut(2:end)-xStep/2;
-%             xCrit = [obj.Prior.Sample.Param.Prc01(jp),...
-%                      obj.Prior.Sample.Param.Prc99(jp)];
-%             xPlot = [sort(xOut(1)-xStep:-xStep:xCrit(1)),...
-%                      xOut,...
-%                      xOut(end)+xStep:xStep:xCrit(2)];
-%             nPlot = zeros(size(xPlot));
-%             nIdx = ismember(xPlot,xOut);
-%             nPlot(nIdx) = hf.Values;
-%             xPriorPdf = nan(1,length(xPlot));
-%             for jx=1:length(xPlot)
-% %             xPriorPdf(jx) = eval(sprintf(Params(jp).priorpdfcmd,xPlot(jx)));
-%                 xPriorPdf(jx) = obj.Prior.PDFCmd{jp}(xPlot(jx));
-%             end
-% %         nPlot = nPlot*(max(xPriorPdf)-min(xPriorPdf))/(max(nPlot)-min(nPlot));
-%             nPlot = nPlot/sum(nPlot*xStep); % normalize hist to have unit area
-%             hb = bar(xPlot,nPlot,'FaceColor',op.Fig.Plot.LineColor(1,:),...
-%                      'EdgeColor',op.Fig.Plot.LineColor(1,:));
-%             hold on
-%             hp = plot(xPlot,xPriorPdf,'Color',op.Fig.Plot.LineColor(2,:),'LineWidth',2);
-%             hold off
             title(obj.Model.(Pj).PrettyNames{jp})
-%             xBounds = xPlot([1,end]);
-%             xBounds = xBounds+(-1).^(1:-1:0)*0.01*(xBounds(2)-xBounds(1));
-%             xlim(xBounds)
-%             xTickLabels = xBounds(1):(xBounds(2)-xBounds(1))/8:xBounds(2);
-%             yBounds = max(max(nPlot),max(xPriorPdf));
-%             yBounds = [0,yBounds+0.01*yBounds];
         end
-%         printpdf(sprintf('%s_%s_%.0f',fn,Pj,jF))
         print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
     end
 end
