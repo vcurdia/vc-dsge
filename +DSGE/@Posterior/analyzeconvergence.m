@@ -16,6 +16,8 @@ function analyzeconvergence(obj,varargin)
 op.Draws.BurnIn = 0.25;
 op.Draws.Thinning = 1;
 op.Draws.AuxParam = 1;
+op.NMeansSPM = 4;
+op.DrawsFraction = 0.04;
 op.Table = DSGE.Options.Table;
 op.NBin = 50;
 op.TraceStep = [];
@@ -62,10 +64,13 @@ nList = length(pList);
 for jL=1:nList
     Lj = pList{jL};
     p.(Lj).N = length(p.(Lj).Names);
+    p.(Lj).NameLength = [cellfun('length',p.(Lj).Names)];
+    p.(Lj).NameLengthMax = max(p.(Lj).NameLength);
 end
 
 
 %% Plot draws
+fprintf('Making plots of MCMC draws\n')
 pdFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
              op.PlotDirDraws,obj.Model.Name,obj.MCMCStage);
 pdList = pList;
@@ -114,6 +119,7 @@ draws.AuxParam = draws.AuxParam(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
 nDrawsUsed = size(draws.LPDF,2);
 
 %% Plot trace
+fprintf('Making trace plots\n')
 ptFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
              op.PlotDirTrace,obj.Model.Name,obj.MCMCStage);
 ptList = {'Param','AuxParam'};
@@ -171,7 +177,113 @@ for jL=1:length(ptList)
 end
 close all
 
+%% Convergence Tests
+fprintf('Generating convergence tests\n')
+cList = {'Param','AuxParam'};
 
+%% Check convergence with R statistic from Gelman et al
+fprintf('\nR statistic from Gelman et al:')
+fprintf('\n==============================\n\n')
+for jL=1:length(cList)
+    Lj = cList{jL};
+    xd = draws.(Lj);
+    Mj = mean(xd,2);
+    M = mean(Mj,3);
+    s2j = sum((xd-repmat(Mj,[1,nDrawsUsed,1])).^2,2)/(nDrawsUsed-1);
+    W = mean(s2j,3);
+    B = nDrawsUsed/(sample.NChains-1)*...
+        sum((Mj-repmat(M,[1,1,sample.NChains])).^2,3);
+    varplus = (nDrawsUsed-1)/nDrawsUsed*W+1/nDrawsUsed*B;
+    conv.R.(Lj) = squeeze(sqrt(varplus./W));
+    conv.MNEff.(Lj) = squeeze(sample.NChains*nDrawsUsed*varplus./B);
+    for jp=1:p.(Lj).N
+        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s %7.4f\n'],...
+                p.(Lj).Names(jp),conv.R.(Lj)(jp))
+    end
+    fprintf('\n')
+end
+
+%% Effective number of independent draws a la Gelman et al.
+fprintf('\nEffective number of independent draws a la Gelman et al.:')
+fprintf('\n=========================================================\n\n')
+for jL=1:length(cList)
+    Lj = cList{jL};
+    for jp=1:p.(Lj).N
+        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s %10.0f\n'],...
+                 p.(Lj).Names(jp),conv.MNEff.(Lj)(jp))
+    end
+    fprintf('\n')
+end
+
+
+%% Geweke's separated partial means test
+npm = floor(nDrawsUsed/2/op.NMeansSPM);
+Lp = round(op.DrawsFraction*npm);
+fprintf('\nSPM test results for each chain:')
+fprintf('\n================================')
+fprintf('\ncritical value (95%%) for chi-square(%.0f) is %f\n\n',...
+        op.NMeansSPM-1,chi2inv(0.95,op.NMeansSPM-1))
+for jL=1:length(cList)
+    Lj = cList{jL};
+    xd = draws.(Lj);
+    parfor jChain=1:sample.NChains
+        for jp=1:op.NMeansSPM
+            xj = xd(:,(2*jp-1)*npm+1:2*jp*npm,jChain);
+            mean_jp(:,jp) = mean(xj,2);
+            xj = xj-repmat(mean_jp(:,jp),1,npm);
+            s0 = mean(xj.^2,2);
+            for jL=1:Lp-1
+                cL = sum(xj(:,1+jL:npm).*xj(:,1:npm-jL),2)/npm;
+                s0 = s0 + 2*(Lp-jL)/Lp*cL;
+            end
+            S0(:,jp) = s0; 
+        end
+        for j=1:p.(Lj).N
+            hp = mean_jp(j,2:end)'-mean_jp(j,1:end-1)';
+            Vp = diag(S0(j,2:end))+diag(S0(j,1:end-1));
+            Vp = Vp - [zeros(op.NMeansSPM-1,1),...
+                       [diag(S0(j,2:end-1));zeros(1,op.NMeansSPM-2)]];
+            Vp = Vp - [zeros(1,op.NMeansSPM-1);...
+                       [diag(S0(j,2:end-1)),zeros(op.NMeansSPM-2,1)]];
+            Vp = Vp/npm;
+            conv.SPM.(Lj)(j,jChain) = hp'*inv(Vp)*hp;
+        end
+    end
+    for jp=1:p.(Lj).N
+        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s', ...
+                 repmat(' %10.4f',1,sample.NChains),'\n'],...
+                p.(Lj).Names{jp},conv.SPM.(Lj)(jp,:))
+    end
+    fprintf('\n')
+end
+
+%% Calculate the within chain number of effective sample size
+L = round(op.DrawsFraction*nDrawsUsed);
+fprintf('\nn_eff for each chain:')
+fprintf('\n=====================\n\n')
+for jL=1:length(cList)
+    Lj = cList{jL};
+    xd = draws.(Lj);
+    parfor jChain=1:sample.NChains
+        xj = xd(:,:,jChain);
+        xj = xj-repmat(mean(xj,2),1,nDrawsUsed);
+        c0 = mean(xj.^2,2);
+        S0 = c0;
+        for jL=1:L-1
+            cL = sum(xj(:,1+jL:nDrawsUsed).*xj(:,1:nDrawsUsed-jL),2)/nDrawsUsed;
+            S0 = S0 + 2*(L-jL)/L*cL;
+        end
+        conv.NEff.(Lj)(:,jChain) = nDrawsUsed*c0./S0;
+    end
+    for jp=1:p.(Lj).N
+        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s',...
+                 repmat(' %10.0f',1,sample.NChains),'\n'],...
+                p.(Lj).Names{jp},conv.NEff.(Lj)(jp,:))
+    end
+    fprintf('\n')
+end
+
+obj.MCMCSample.Convergence = conv;
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
