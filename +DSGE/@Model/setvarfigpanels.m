@@ -45,13 +45,13 @@ for j=1:nList
     if ~isempty(op.FigShape{j}), continue, end
     nVarj = obj.(op.PanelList{j}).N;
     if nVarj==1
-        op.FigShape{j} = [1,1];
+        op.FigShape{j} = {1,1};
     elseif nVarj<=4*2
-        op.FigShape{j} = [2,2];
+        op.FigShape{j} = {2,2};
     elseif nVarj<=9*3
-        op.FigShape{j} = [3,3];
+        op.FigShape{j} = {3,3};
     else
-        op.FigShape{j} = [4,4];
+        op.FigShape{j} = {4,4};
     end
 end
 
@@ -60,7 +60,7 @@ FigPanels = struct;
 jP = 0;
 for jL=1:nList
     Lj = op.PanelList{jL};
-    nMaxVar = prod(op.FigShape{jL});
+    nMaxVar = prod([op.FigShape{jL}{:}]);
     nPj = ceil(obj.(Lj).N/nMaxVar);
     for j=1:nPj
         jP = jP+1;
