@@ -67,13 +67,21 @@ for jL=1:nList
     p.(Lj).NameLength = [cellfun('length',p.(Lj).Names)];
     p.(Lj).NameLengthMax = max(p.(Lj).NameLength);
 end
+nameLengthMax = p.Param.NameLengthMax;
+if op.Draws.AuxParam
+    nameLengthMax = max(nameLengthMax,p.AuxParam.NameLengthMax);
+end
 
 
 %% Plot draws
 fprintf('Making plots of MCMC draws\n')
 pdFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
              op.PlotDirDraws,obj.Model.Name,obj.MCMCStage);
-pdList = pList;
+if op.Draws.AuxParam
+    pdList = {'LPDF','Param','AuxParam'};
+else
+    pdList = {'LPDF','Param'};
+end    
 for jL=1:length(pdList)
     Lj = pdList{jL};
     nc = 2 - strcmp(Lj,'LPDF');
@@ -115,14 +123,22 @@ close all
 %% eliminate BurnIn
 draws.Param = draws.Param(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
 draws.LPDF = draws.LPDF(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
-draws.AuxParam = draws.AuxParam(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
+if op.Draws.AuxParam
+    draws.AuxParam = draws.AuxParam(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
+end
 nDrawsUsed = size(draws.LPDF,2);
+fprintf('\nBurn in for rest of convergence analysis: %.0f%%\n',...
+        100*op.Draws.BurnIn)
 
 %% Plot trace
-fprintf('Making trace plots\n')
+fprintf('\nMaking trace plots\n')
 ptFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
              op.PlotDirTrace,obj.Model.Name,obj.MCMCStage);
-ptList = {'Param','AuxParam'};
+if op.Draws.AuxParam
+    ptList = {'Param','AuxParam'};
+else
+    ptList = {'Param'};
+end    
 if isempty(op.TraceStep)
     op.TraceStep = floor(max(nDrawsUsed/100,1));
 end
@@ -178,10 +194,13 @@ end
 close all
 
 %% Convergence Tests
-fprintf('Generating convergence tests\n')
-cList = {'Param','AuxParam'};
+if op.Draws.AuxParam
+    cList = {'Param','AuxParam'};
+else
+    cList = {'Param'};
+end
 
-%% Check convergence with R statistic from Gelman et al
+%% R and MNEff from Gelman et al
 fprintf('\nR statistic from Gelman et al:')
 fprintf('\n==============================\n\n')
 for jL=1:length(cList)
@@ -197,20 +216,18 @@ for jL=1:length(cList)
     conv.R.(Lj) = squeeze(sqrt(varplus./W));
     conv.MNEff.(Lj) = squeeze(sample.NChains*nDrawsUsed*varplus./B);
     for jp=1:p.(Lj).N
-        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s %7.4f\n'],...
-                p.(Lj).Names(jp),conv.R.(Lj)(jp))
+        fprintf(['%',int2str(nameLengthMax),'s %8.4f\n'],...
+                p.(Lj).Names{jp},conv.R.(Lj)(jp))
     end
     fprintf('\n')
 end
-
-%% Effective number of independent draws a la Gelman et al.
 fprintf('\nEffective number of independent draws a la Gelman et al.:')
 fprintf('\n=========================================================\n\n')
 for jL=1:length(cList)
     Lj = cList{jL};
     for jp=1:p.(Lj).N
-        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s %10.0f\n'],...
-                 p.(Lj).Names(jp),conv.MNEff.(Lj)(jp))
+        fprintf(['%',int2str(nameLengthMax),'s %10.0f\n'],...
+                 p.(Lj).Names{jp},conv.MNEff.(Lj)(jp))
     end
     fprintf('\n')
 end
@@ -219,6 +236,8 @@ end
 %% Geweke's separated partial means test
 npm = floor(nDrawsUsed/2/op.NMeansSPM);
 Lp = round(op.DrawsFraction*npm);
+SPMc95 = chi2inv(0.95,op.NMeansSPM-1);
+SPMc99 = chi2inv(0.99,op.NMeansSPM-1);
 fprintf('\nSPM test results for each chain:')
 fprintf('\n================================')
 fprintf('\ncritical value (95%%) for chi-square(%.0f) is %f\n\n',...
@@ -226,7 +245,10 @@ fprintf('\ncritical value (95%%) for chi-square(%.0f) is %f\n\n',...
 for jL=1:length(cList)
     Lj = cList{jL};
     xd = draws.(Lj);
+    SPMj = cell(1,sample.NChains);
     parfor jChain=1:sample.NChains
+        mean_jp = zeros(p.(Lj).N,op.NMeansSPM);
+        S0 = zeros(p.(Lj).N,op.NMeansSPM);
         for jp=1:op.NMeansSPM
             xj = xd(:,(2*jp-1)*npm+1:2*jp*npm,jChain);
             mean_jp(:,jp) = mean(xj,2);
@@ -238,6 +260,7 @@ for jL=1:length(cList)
             end
             S0(:,jp) = s0; 
         end
+        SPMjj = zeros(p.(Lj).N,1);
         for j=1:p.(Lj).N
             hp = mean_jp(j,2:end)'-mean_jp(j,1:end-1)';
             Vp = diag(S0(j,2:end))+diag(S0(j,1:end-1));
@@ -246,11 +269,13 @@ for jL=1:length(cList)
             Vp = Vp - [zeros(1,op.NMeansSPM-1);...
                        [diag(S0(j,2:end-1)),zeros(op.NMeansSPM-2,1)]];
             Vp = Vp/npm;
-            conv.SPM.(Lj)(j,jChain) = hp'*inv(Vp)*hp;
+            SPMjj(j) = hp'*inv(Vp)*hp;
         end
+        SPMj{jChain} = SPMjj;
     end
+    conv.SPM.(Lj) = [SPMj{:}];
     for jp=1:p.(Lj).N
-        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s', ...
+        fprintf(['%',int2str(nameLengthMax),'s', ...
                  repmat(' %10.4f',1,sample.NChains),'\n'],...
                 p.(Lj).Names{jp},conv.SPM.(Lj)(jp,:))
     end
@@ -264,6 +289,7 @@ fprintf('\n=====================\n\n')
 for jL=1:length(cList)
     Lj = cList{jL};
     xd = draws.(Lj);
+    neffj = cell(sample.NChains);
     parfor jChain=1:sample.NChains
         xj = xd(:,:,jChain);
         xj = xj-repmat(mean(xj,2),1,nDrawsUsed);
@@ -273,10 +299,11 @@ for jL=1:length(cList)
             cL = sum(xj(:,1+jL:nDrawsUsed).*xj(:,1:nDrawsUsed-jL),2)/nDrawsUsed;
             S0 = S0 + 2*(L-jL)/L*cL;
         end
-        conv.NEff.(Lj)(:,jChain) = nDrawsUsed*c0./S0;
+        neffj{jChain} = nDrawsUsed*c0./S0;
     end
+    conv.NEff.(Lj) = [neffj{:}];
     for jp=1:p.(Lj).N
-        fprintf(['%',int2str(p.(Lj).NameLengthMax),'s',...
+        fprintf(['%',int2str(nameLengthMax),'s',...
                  repmat(' %10.0f',1,sample.NChains),'\n'],...
                 p.(Lj).Names{jp},conv.NEff.(Lj)(jp,:))
     end
@@ -302,7 +329,105 @@ fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
 fprintf(fid,'\\newpage\n');
 
-fprintf(fid,'\\section{Plot Draws}\n');
+fprintf(fid,'\\section{R, Effective Draws}\n');
+for jL=1:length(cList)
+    Lj = cList{jL};
+    np = p.(Lj).N;
+    tableBreaks = settablebreaks(np,op.Table.MaxRows);
+    idxPar = 0;
+    nBreaks = length(tableBreaks);
+    for jBreak=1:nBreaks
+        idxPar = (idxPar(end)+1):tableBreaks(jBreak);
+        if nBreaks==1
+            fprintf(fid,'\\subsection{%s}\n',p.(Lj).Title);
+        else
+            fprintf(fid,'\\subsection{%s (%.0f/%.0f)}\n',p.(Lj).Title,...
+                    jBreak,nBreaks);
+        end
+        fprintf(fid,'\\begin{equation*}\n');
+        if op.Table.MoveLeft
+            fprintf(fid,'\\hspace{-0.5in}\n');
+        end
+        fprintf(fid,'\\begin{tabular}{lrr%s} \n',repmat('r',1,sample.NChains));
+        fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+        fprintf(fid,['& & \\multicolumn{%.0f}{c}{Number of Effective ' ...
+                     'Draws}\\\\[0.5ex]\\cline{3-%.0f}\\\\[-1.5ex]\n'],...
+                1+sample.NChains,3+sample.NChains);
+        fprintf(fid,'& \\multicolumn{1}{c}{$R$} & Sample');
+        for jChain=1:sample.NChains
+            fprintf(fid,' & Chain $%.0f$\n',jChain);
+        end
+        fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+        for jr=idxPar
+            fprintf(fid,'%s',p.(Lj).PrettyNames{jr});
+            fprintf(fid,' & $%.4f$',conv.R.(Lj)(jr));
+            fprintf(fid,' & $%.0f$',conv.MNEff.(Lj)(jr));
+            for jChain=1:sample.NChains
+                fprintf(fid,' & $%.0f$',conv.NEff.(Lj)(jr,jChain));
+            end
+            fprintf(fid,' \\\\\n');
+            if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
+                fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+            end        
+        end
+        fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+        fprintf(fid,'\\end{tabular}\n');
+        fprintf(fid,'\\end{equation*}\n');
+        fprintf(fid,'\\clearpage\n');
+    end
+end
+
+fprintf(fid,'\\section{SPM}\n');
+for jL=1:length(cList)
+    Lj = cList{jL};
+    np = p.(Lj).N;
+    tableBreaks = settablebreaks(np,op.Table.MaxRows);
+    idxPar = 0;
+    nBreaks = length(tableBreaks);
+    for jBreak=1:nBreaks
+        idxPar = (idxPar(end)+1):tableBreaks(jBreak);
+        if nBreaks==1
+            fprintf(fid,'\\subsection{%s}\n',p.(Lj).Title);
+        else
+            fprintf(fid,'\\subsection{%s (%.0f/%.0f)}\n',p.(Lj).Title,...
+                    jBreak,nBreaks);
+        end
+        fprintf(fid,'\\begin{equation*}\n');
+        if op.Table.MoveLeft
+            fprintf(fid,'\\hspace{-0.5in}\n');
+        end
+        fprintf(fid,'\\begin{tabular}{l%s}\n',repmat('rl',1,sample.NChains));
+        fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+        for jChain=1:sample.NChains
+            fprintf(fid,' & \\multicolumn{2}{c}{$SPM_%.0f(%.0f)$}',...
+                    op.NMeansSPM,jChain);
+        end
+        fprintf(fid,'\n\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+        for jr=idxPar
+            fprintf(fid,'%s',p.(Lj).PrettyNames{jr});
+            for jChain=1:sample.NChains
+                fprintf(fid,' & $%.2f$',conv.SPM.(Lj)(jr,jChain));
+                fprintf(fid,' & %s%s',...
+                        repmat('*',conv.SPM.(Lj)(jr,jChain)>=SPMc99),...
+                        repmat('*',conv.SPM.(Lj)(jr,jChain)>=SPMc95));
+            end
+            fprintf(fid,' \\\\\n');
+            if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
+                fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+            end        
+        end
+        fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+        fprintf(fid,'\\end{tabular}\n');
+        fprintf(fid,'\\end{equation*}\n');
+        fprintf(fid,'The null hypothesis of the SPM test is that the mean \n');
+        fprintf(fid,'in two separate subsamples is the same. * indicates \n');
+        fprintf(fid,'p-value less than 5\\%%. ** indicates p-value less \n');
+        fprintf(fid,'than 1\\%%.\n');
+        fprintf(fid,'\\clearpage\n');
+    end
+end
+
+fprintf(fid,'\\section{Draws}\n');
 for jL=1:length(pdList)
     Lj = pdList{jL};
     fprintf(fid,'\\subsection{%s}\n',p.(Lj).Title);

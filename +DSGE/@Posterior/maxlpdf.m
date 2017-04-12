@@ -200,7 +200,12 @@ disp(' ')
 %% show results on screen
 pNames = obj.Model.Param.Names;
 pNameLength = [cellfun('length',pNames)];
-pNameLengthMax = max(pNameLength);
+nameLengthMax = max(pNameLength);
+auxN = obj.Model.AuxParam.N;
+auxNames = obj.Model.AuxParam.Names;
+auxNameLength = [cellfun('length',auxNames)];
+nameLengthMax = max(nameLengthMax,max(auxNameLength));
+
 fprintf('\nResults from maximization of posterior:')
 fprintf('\n=======================================\n')
 DispList = {'','',pNames;
@@ -216,7 +221,7 @@ DispList = {'','',pNames;
            };
 nc = size(DispList,1);
 for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
+    str2show = sprintf(['%-',int2str(nameLengthMax),'s'],DispList{1,jr});
     str2show = sprintf('%s  %-5s',str2show,DispList{2,jr});
     for jc=3:nc
         str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
@@ -224,7 +229,7 @@ for jr=1:2
     disp(str2show)
 end
 for jp=1:obj.Model.Param.N
-    str2show = sprintf(['%',int2str(pNameLengthMax),'s'],DispList{1,3}{jp});
+    str2show = sprintf(['%',int2str(nameLengthMax),'s'],DispList{1,3}{jp});
     str2show = sprintf('%s  %5s',str2show,DispList{2,3}{jp});
     for jc=3:nc
         str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
@@ -233,10 +238,6 @@ for jp=1:obj.Model.Param.N
 end
 fprintf('\n')
 
-auxN = obj.Model.AuxParam.N;
-auxNames = obj.Model.AuxParam.Names;
-auxNameLength = [cellfun('length',auxNames)];
-auxNameLengthMax = max(auxNameLength);
 DispList = {'','',auxNames;
             'Prior','   Mean',obj.Prior.Sample.AuxParam.Mean;
             '','     5%',obj.Prior.Sample.AuxParam.Prc05;
@@ -246,14 +247,14 @@ DispList = {'','',auxNames;
            };
 nc = size(DispList,1);
 for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
+    str2show = sprintf(['%-',int2str(nameLengthMax),'s'],DispList{1,jr});
     for jc=2:nc
         str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
     end
     disp(str2show)
 end
 for jp=1:auxN
-    str2show = sprintf(['%',int2str(auxNameLengthMax),'s'],DispList{1,3}{jp});
+    str2show = sprintf(['%',int2str(nameLengthMax),'s'],DispList{1,3}{jp});
     for jc=2:nc
         str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
     end
@@ -275,7 +276,7 @@ fprintf(fid,'\\end{equation*}\n');
 
 fprintf(fid,'\\newpage \n');
 np = obj.Model.Param.N;
-str = [' & %.',int2str(op.Table.Precision),'f'];
+str = [' & $%.',int2str(op.Table.Precision),'f$'];
 tableBreaks = settablebreaks(np,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
@@ -291,7 +292,7 @@ for jBreak=1:nBreaks
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+7+1+2));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+7+1+2));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Prior} ');
     fprintf(fid,'& & \\multicolumn{2}{c}{Posterior} \\\\[0.5ex]\n');
@@ -333,7 +334,7 @@ for jBreak=1:nBreaks
                 jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4+1+1));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+4+1+1));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior} & & Posterior\\\\[0.5ex]\n');
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% & & Mode \n');
