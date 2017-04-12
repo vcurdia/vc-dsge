@@ -21,8 +21,8 @@ op.TickStep = 4;
 op.FigPanels = obj.setvarfigpanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
-op.PlotDir = 'Plots_IRF/';
 op.Fig.Visible = 'off';
+op.PlotDir = 'Plots_IRF/';
 
 %% Update options
 op = updateoptions(op,varargin{:});
@@ -135,7 +135,9 @@ for jP = 1:nPanels
         else
             h = vcfigureupdate(h,PlotData(:,:,:,jS));
         end
-        printpdf([op.PlotDir,PlotFileName,...
+%         printpdf([op.PlotDir,PlotFileName,...
+%                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
+        print('-dpdf',[op.PlotDir,PlotFileName,...
                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
     end
 end
@@ -152,7 +154,10 @@ for jS=1:nShocks2Show
         fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
+%         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
+%                 op.PlotDir,PlotFileName,Pj,Sj);
+        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+                     '130 230 490 540]{%s%s_%s_%s.pdf}\n'],...
                 op.PlotDir,PlotFileName,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
