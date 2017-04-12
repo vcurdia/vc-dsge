@@ -17,11 +17,10 @@ op.Draws.BurnIn = 0.25;
 op.Draws.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
-op.NDrawsPrior = 10000;
+op.NDrawsPrior = 20000;
 op.NBin = 50;
-op.Fig.Visible = 'off';
 op.Fig.Shape = [3,3];
-op.Fig.Plot.LineColor = colorscheme;
+op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_PriorPost/';
 
@@ -286,7 +285,7 @@ for jP=1:2
     np = obj.Model.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
-        figure('Visible',op.Fig.Visible)
+        figure('Visible','off')
         clear hf
         for jf=1:nPlots 
             jp = (jF-1)*nPlots+jf;
@@ -295,13 +294,17 @@ for jP=1:2
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
-                xcrit = prctile(xjdata,[1,99]);
-                xjdata(xjdata<xcrit(1)) = [];
-                xjdata(xjdata>xcrit(2)) = [];
-                [yData,xData] = histcounts(xjdata,op.NBin);
-                xStep = xData(2)-xData(1);
-                plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
-                     'Color',op.Fig.Plot.LineColor(jD,:),'LineWidth',2)
+%                 xcrit = prctile(xjdata,[1,99]);
+%                 xjdata(xjdata<xcrit(1)) = [];
+%                 xjdata(xjdata>xcrit(2)) = [];
+%                 [yData,xData] = histcounts(xjdata,nBin);
+%                 xStep = xData(2)-xData(1);
+%                 plot(xData(2:end)-xStep/2,yData/sum(yData)/xStep,...
+%                      'Color',op.Fig.Plot.Color(jD,:),'LineWidth',2)
+                histogram(xjdata,op.NBin,...
+                          'Normalization','probability',...
+                          'FaceColor',op.Fig.Color(jD,:),...
+                          'FaceAlpha',0.6)
                 hold on
             end
             hold off
@@ -357,9 +360,11 @@ for jP=1:2
 %             yBounds = max(max(nPlot),max(xPriorPdf));
 %             yBounds = [0,yBounds+0.01*yBounds];
         end
-        printpdf(sprintf('%s_%s_%.0f',fn,Pj,jF))
+%         printpdf(sprintf('%s_%s_%.0f',fn,Pj,jF))
+        print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
     end
 end
+close all
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
@@ -480,8 +485,10 @@ for jP=1:2
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
-                fn,pList{jP},jF);
+%         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
+%                 fn,pList{jP},jF);
+        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+                     '130 230 490 540]{%s_%s_%.0f.pdf}\n'],fn,pList{jP},jF);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end

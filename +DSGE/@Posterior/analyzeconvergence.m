@@ -18,8 +18,7 @@ op.Draws.Thinning = 1;
 op.Draws.AuxParam = 1;
 op.Table = DSGE.Options.Table;
 op.NBin = 50;
-op.Fig.Visible = 'off';
-op.Fig.Plot.LineColor = colorscheme;
+op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_Convergence/';
 
@@ -42,6 +41,8 @@ sample = obj.MCMCSample;
 %% load the mcmc draws
 draws = obj.loaddraws(op.Draws,'BurnIn',0,'CombineChains',0,'ExpandParam',0);
 nDrawsUsed = size(draws.LPDF,2);
+
+if isempty(op.NBin), op.NBin = round(2*nDrawsUsed^(1/3)); end
 
 p.LPDF.Title = 'Log-PDF';
 p.LPDF.Names = {'LPDF'};
@@ -74,7 +75,7 @@ for jL=1:length(pdList)
         pSpread = pMax-pMin;
         pMax = pMax+.01*pSpread;
         pMin = pMin-.01*pSpread;
-        figure('Visible',op.Fig.Visible)
+        figure('Visible','off')
         clear h
         for jChain=1:sample.NChains
             h(jChain,1) = subplot(sample.NChains,nc,(jChain-1)*nc+1);
@@ -85,8 +86,9 @@ for jL=1:length(pdList)
             h(jChain,1).FontSize = op.Fig.FontSize;
             if nc>1
                 h(jChain,2) = subplot(sample.NChains,2,jChain*2);
-                histogram(xd(1,op.Draws.BurnIn*nDrawsUsed+1:end,jChain),100,...
-                          'FaceAlpha',1)
+                histogram(xd(1,op.Draws.BurnIn*nDrawsUsed+1:end,jChain),...
+                          op.NBin,'Normalization','probability',...
+                          'FaceColor',op.Fig.Color(1,:),'FaceAlpha',1)
                 xlim([pMin pMax])
                 h(jChain,2).FontSize = op.Fig.FontSize;
             end
@@ -96,7 +98,8 @@ for jL=1:length(pdList)
             title(h(1,2),sprintf('Hist excluding initial %.0f\\%% of obs',...
                                  100*op.Draws.BurnIn))
         end
-        printpdf(sprintf('%s_%s',pdFN,p.(Lj).Names{jF}))
+%         printpdf(sprintf('%s_%s',pdFN,p.(Lj).Names{jF}))
+        print('-dpdf',sprintf('%s_%s.pdf',pdFN,p.(Lj).Names{jF}))
     end
 end
 close all
@@ -130,8 +133,10 @@ for jL=1:length(pdList)
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
-                pdFN,p.(Lj).Names{jF});
+%         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
+%                 pdFN,p.(Lj).Names{jF});
+        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+                     '130 230 490 540]{%s_%s.pdf}\n'],pdFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
