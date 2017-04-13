@@ -357,11 +357,11 @@ for jBreak=1:nBreaks
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4+1+6));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+4+1+6));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior} ');
     fprintf(fid,'& & \\multicolumn{6}{c}{Posterior} \\\\[0.5ex]\n');
-    fprintf(fid,'& Dist & $5\\%% & Median & 95\\%% ');
+    fprintf(fid,'& Dist & 5\\%% & Median & 95\\%% ');
     fprintf(fid,'& & Mode & Mean & SD & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
@@ -400,7 +400,7 @@ for jBreak=1:nBreaks
                 jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+3+1+5));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+3+1+5));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{3}{c}{Prior} ');
     fprintf(fid,'& & \\multicolumn{5}{c}{Posterior} \\\\[0.5ex]\n');

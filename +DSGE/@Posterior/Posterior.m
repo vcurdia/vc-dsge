@@ -80,19 +80,16 @@ classdef Posterior < handle
             xx(obj.EstimateIdx,:,:) = x;
         end
         
-        function xd = draw(obj,nDraws,sid)
+        function xd = draw(obj,nDraws)
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 
             end
-            if nargin<3 || isempty(sid)
-                sid = length(obj.Sample);
-            end
-            if isempty(obj.Sample(sid).NDrawsRedux)
+            if isempty(obj.MCMCSample.FileNameRedux)
                 obj.mcmcredux
             end
-            load(obj.Sample(sid).FileNameRedux,'xDraws')
+            draws = load(obj.MCMCSample.FileNameRedux);
             xd = obj.expandparam(...
-                xDraws(:,randi(obj.Sample(sid).NDrawsRedux,1,nDraws)));
+                draws.Param(:,randi(draws.N,1,nDraws)));
         end
         
         function new = copy(obj)
