@@ -36,6 +36,8 @@ DSGE.linkobj(model,prior,post)
 % options.MaxPost.Min.Ritmin = 5;
 % post.maxlpdf(options.MaxPost)
 % save([specName,'_MaxPost'])
+% model.makeirf(post.Mode,'FileNameSuffix','_Mode')
+% model.makevd(post.Mode,'FileNameSuffix','_Mode')
 
 %% MCMC
 options.MCMC.NDraws = 1000;
@@ -51,6 +53,7 @@ for s=1
     post.analyzeparam
     post.mcmcredux
     model.makeirf(post.draw(100),'FileNameSuffix',sprintf('_MCMC_%.0f',s))
+    model.makevd(post.draw(100),'FileNameSuffix',sprintf('_MCMC_%.0f',s))
     save([fn,'_Analysis'])
     save(specName)
 end

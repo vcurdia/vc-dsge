@@ -79,6 +79,7 @@ for jL=1:nList
             FigPanels(jP).PrettyNames = obj.(Lj).PrettyNames(...
                 (j-1)*nMaxVar+1:min(j*nMaxVar,obj.(Lj).N));
         end
+        FigPanels(jP).N = length(FigPanels(jP).Names);
         FigPanels(jP).FigShape = op.FigShape{jL};
         FigPanels(jP).Scale = ...
             repmat(op.Scale{jL},1,length(FigPanels(jP).Names));

@@ -1,7 +1,3 @@
-function setupmatlab
-
-% setupmatlab
-
 
 %% Setup path
 MyPath.Root = fullfile(pwd,'../../../Matlab/');
@@ -22,4 +18,6 @@ addpath(MyPath.Add{:})
 
 
 %% change text interpreter
-set(0,'defaultTextInterpreter','latex');
+set(groot,'defaultTextInterpreter','latex');
+set(groot,'defaultLegendInterpreter','latex');
+

@@ -20,7 +20,7 @@ op.Table = DSGE.Options.Table;
 op.NDrawsPrior = 20000;
 op.NBin = 50;
 op.Fig.Visible = 'off';
-op.Fig.Shape = [3,3];
+op.Fig.Shape = {3,3};
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
 op.PlotDir = 'Plots_PriorPost/';
@@ -263,7 +263,7 @@ disp(' ')
 fprintf('Making Prior-Posterior Plots...\n')
 fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Model.Name,obj.MCMCStage);
-nPlots = prod(op.Fig.Shape);
+nPlots = prod([op.Fig.Shape{:}]);
 drawsPrior.Param = obj.Prior.draw(op.NDrawsPrior);
 fh = @(x)obj.Model.mats(x,'SolveREE',0);
 dAux = zeros(nAux,op.NDrawsPrior);
@@ -289,7 +289,7 @@ for jP=1:2
         for jf=1:nPlots 
             jp = (jF-1)*nPlots+jf;
             if jp>np, break, end
-            hf(jf) = subplot(op.Fig.Shape(1),op.Fig.Shape(2),jf);
+            hf(jf) = subplot(op.Fig.Shape{:},jf);
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
@@ -307,7 +307,7 @@ for jP=1:2
             if jf==nPlots || jp==np
                 hl = legend(dList,'Orientation','horizontal');
                 legPos = hl.Position;
-                xIdx = (max(1,op.Fig.Shape(1)-1))*op.Fig.Shape(2);
+                xIdx = (max(1,op.Fig.Shape{1}-1))*op.Fig.Shape{2};
                 xR = hf(xIdx).Position;
                 xL = hf(min(jf,xIdx+1)).Position;
                 legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
