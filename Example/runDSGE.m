@@ -50,6 +50,7 @@ for s=1
     save(fn)
     post.analyzeparam
     post.mcmcredux
+    model.makeirf(post.draw(100),'FileNameSuffix',sprintf('_MCMC_%.0f',s))
     save([fn,'_Analysis'])
     save(specName)
 end
