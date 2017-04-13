@@ -51,7 +51,6 @@ end
 nDraws = size(xd,2);
 
 %% Generate IRF
-fprintf('Generating IRFs...\n');
 fnmats = @(x)obj.mats(x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 IRFCheck = ones(1,nDraws);
