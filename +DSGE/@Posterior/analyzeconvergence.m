@@ -245,7 +245,7 @@ fprintf('\ncritical value (95%%) for chi-square(%.0f) is %f\n\n',...
 for jL=1:length(cList)
     Lj = cList{jL};
     xd = draws.(Lj);
-    SPMj = cell(1,sample.NChains);
+    SPMj = zeros(p.(Lj).N,sample.NChains);
     parfor jChain=1:sample.NChains
         mean_jp = zeros(p.(Lj).N,op.NMeansSPM);
         S0 = zeros(p.(Lj).N,op.NMeansSPM);
@@ -271,9 +271,9 @@ for jL=1:length(cList)
             Vp = Vp/npm;
             SPMjj(j) = hp'*inv(Vp)*hp;
         end
-        SPMj{jChain} = SPMjj;
+        SPMj(:,jChain) = SPMjj;
     end
-    conv.SPM.(Lj) = [SPMj{:}];
+    conv.SPM.(Lj) = SPMj;
     for jp=1:p.(Lj).N
         fprintf(['%',int2str(nameLengthMax),'s', ...
                  repmat(' %10.4f',1,sample.NChains),'\n'],...
@@ -289,7 +289,7 @@ fprintf('\n=====================\n\n')
 for jL=1:length(cList)
     Lj = cList{jL};
     xd = draws.(Lj);
-    neffj = cell(sample.NChains);
+    neffj = zeros(p.(Lj).N,sample.NChains);
     parfor jChain=1:sample.NChains
         xj = xd(:,:,jChain);
         xj = xj-repmat(mean(xj,2),1,nDrawsUsed);
@@ -299,9 +299,9 @@ for jL=1:length(cList)
             cL = sum(xj(:,1+jL:nDrawsUsed).*xj(:,1:nDrawsUsed-jL),2)/nDrawsUsed;
             S0 = S0 + 2*(L-jL)/L*cL;
         end
-        neffj{jChain} = nDrawsUsed*c0./S0;
+        neffj(:,jChain) = nDrawsUsed*c0./S0;
     end
-    conv.NEff.(Lj) = [neffj{:}];
+    conv.NEff.(Lj) = neffj;
     for jp=1:p.(Lj).N
         fprintf(['%',int2str(nameLengthMax),'s',...
                  repmat(' %10.0f',1,sample.NChains),'\n'],...
