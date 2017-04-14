@@ -89,7 +89,6 @@ fnmats = @(x)obj.mats(x,...
 VDCheck = ones(1,nDraws);
 idxMat = eye(nShockVar);
 VD = nan(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons,nDraws);
-vd = cell(1,nDraws);
 VDCheck = zeros(1,nDraws);
 isSilent = op.Silent;
 parfor jd=1:nDraws
