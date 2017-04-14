@@ -90,7 +90,7 @@ VDCheck = ones(1,nDraws);
 idxMat = eye(nShockVar);
 VD = nan(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons,nDraws);
 vd = cell(1,nDraws);
-VDCheck = cell(1,nDraws);
+VDCheck = zeros(1,nDraws);
 isSilent = op.Silent;
 parfor jd=1:nDraws
     matj = fnmats(xd(:,jd));
@@ -113,8 +113,6 @@ parfor jd=1:nDraws
                         matj.AuxREE.G1*V(:,:,jH-1)*matj.AuxREE.G1';
                 end
             end
-%             V = V(:,:,VDHorizons(1:end-isInfHorizon));
-%             VAux = VAux(:,:,VDHorizons(1:end-isInfHorizon));
             if isInfHorizon
                 V(:,:,nHorizons) = real(...
                     lyapcsdsilent(matj.REE.G1,V(:,:,1),isSilent));
@@ -133,14 +131,12 @@ parfor jd=1:nDraws
                 Vj(:,jS,jH) = v;
             end
         end
-        vd{jd} = abs(Vj./repmat(sum(Vj,2),[1,nShockVar,1]));
-        VDCheck{jd} = 1;
+        VD(:,:,:,jd) = abs(Vj./repmat(sum(Vj,2),[1,nShockVar,1]));
+        VDCheck(jd) = 1;
     else
-        VDCheck{jd} = 0;
+        VDCheck(jd) = 0;
     end
 end
-for jd=1:nDraws, VD(:,:,:,jd) = vd{jd}; end, clear vd
-VDCheck = [VDCheck{:}];
 VD(:,:,:,~VDCheck) = [];
 VDCheck(~VDCheck) = [];
 nDrawsUsed = length(VDCheck);
