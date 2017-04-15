@@ -17,7 +17,7 @@ classdef Data
         Var
         SampleStart
         Tick
-        TickLabels
+        TickLabel
     end
 
     properties (SetAccess=protected)
@@ -39,7 +39,7 @@ classdef Data
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
                 obj.TimeIdx = Raw.textdata(2:end,1)';
-                obj = obj.setticklabels;
+                obj = obj.setticklabel;
             end
         end
         
@@ -80,37 +80,32 @@ classdef Data
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
         end
         
-        function obj = set.TickLabels(obj,tDates)
-            tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
-            obj.TickLabels = tDates;
-            if isempty(obj.Tick) ...
-                    || ~all(ismember(tDates,obj.TimeIdx(obj.Tick)))
-                obj.Tick = obj.TickLabels;
+        function obj = set.Tick(obj,tDates)
+            tDates = tDates(ismember(tDates,obj.TimeIdx));
+            obj.Tick = tDates;
+            if isempty(obj.TickLabel)...
+                    || ~any(ismember(obj.TickLabel,tDates))
+                obj.TickLabel = tDates;
             end
-            tDates = obj.TimeIdx(obj.Tick);
-            tDates(~ismember(tDates,obj.TickLabels)) = {''};
-            obj.TickLabels = tDates;
+            tDates(~ismember(tDates,obj.TickLabel)) = {''};
+            obj.TickLabel = tDates;
         end
         
-        function obj = set.Tick(obj,idx)
-            if iscell(idx)
-                idx = find(ismember(obj.TimeIdx,idx));
+        function obj = set.TickLabel(obj,tDates)
+            tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
+            obj.TickLabel = tDates;
+            if isempty(obj.Tick) ...
+                    || ~all(ismember(tDates,obj.Tick))
+                obj.Tick = obj.TickLabel;
             end
-            idx = idx(idx>0);
-            idx = idx(idx<obj.T);
-            obj.Tick = idx;
-            TickLabels = obj.TimeIdx(idx);
-            if isempty(obj.TickLabels)...
-                    || ~any(ismember(obj.TickLabels,TickLabels))
-                obj.TickLabels = TickLabels;
-            end
-            TickLabels(~ismember(TickLabels,obj.TickLabels)) = {''};
-            obj.TickLabels = TickLabels;
+            tDates = obj.Tick;
+            tDates(~ismember(tDates,obj.TickLabel)) = {''};
+            obj.TickLabel = tDates;
         end
         
         function obj = settickannual(obj,q)
             if nargin<2, q = 4; end
-            obj.Tick = obj.findquarter(q):4:obj.T;
+            obj.Tick = obj.TimeIdx(obj.findquarter(q):4:obj.T);
         end
         
         function t = findquarter(obj,q)
@@ -122,13 +117,13 @@ classdef Data
             end
         end
         
-        function obj = setticklabels(obj,n,q)
+        function obj = setticklabel(obj,n,q)
             if nargin<2, n = 5; end
             if nargin<3, q = 4; end
             obj = obj.settickannual(q);
             tStep = ceil(obj.T/(n-1));
             while mod(tStep,4), tStep = tStep-1; end
-            obj.TickLabels = obj.TimeIdx(obj.findquarter(q):tStep:obj.T);
+            obj.TickLabel = obj.TimeIdx(obj.findquarter(q):tStep:obj.T);
         end
         
 %         function new = copy(obj)
