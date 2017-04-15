@@ -154,7 +154,7 @@ model.StateEq = {...
 
 %% Generate Mats
 model.genmats
-Mats = model.mats(model.Param.Values);
+mats = model.mats(model.Param.Values);
 % model.makeirf
 
 %% Describe Prior
@@ -163,9 +163,8 @@ prior.analyze
 
 %% Data
 data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
-data.TimeIdx = {'1987q3','2009q3'};
-data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
 data.Var = model.ObsVar.Names;
+data.TickLabel = {'1990q4','1995q4','2000q4','2005q4'};
 
 %% Create posterior
 post = DSGE.Posterior(model,prior,data);

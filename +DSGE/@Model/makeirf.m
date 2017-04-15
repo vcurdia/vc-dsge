@@ -53,16 +53,16 @@ nDraws = size(xd,2);
 %% Generate IRF
 fnmats = @(x)obj.mats(x,...
                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
-IRFCheck = ones(1,nDraws);
 nSteps = op.NSteps;
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
 nAuxVar = obj.AuxVar.N;
-IRF = nan(nStateVar+nObsVar+nAuxVar,nSteps,nShocks2Show,nDraws);
 ShockIdx = zeros(nShocks2Show,1);
 for j = 1:nShocks2Show
     ShockIdx(j) = find(ismember(obj.ShockVar.Names,op.Shocks2Show(j)));
 end   
+IRF = nan(nStateVar+nObsVar+nAuxVar,nSteps,nShocks2Show,nDraws);
+IRFCheck = ones(1,nDraws);
 parfor jd=1:nDraws
     matj = fnmats(xd(:,jd));
     checkj = all(matj.REE.eu==1);

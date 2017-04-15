@@ -1,4 +1,4 @@
-function simstates(obj,xd,data,varargin)
+function simstates(obj,data,xd,varargin)
 
 % simstates
 % 
@@ -17,7 +17,14 @@ function simstates(obj,xd,data,varargin)
 %% Default Options
 op.FileNameSuffix = '';
 op.DrawStates = [];
-op.FigPanels = obj.setvarfigpanels;
+if obj.AuxVar.N>0
+    op.FigPanels = obj.setvarfigpanels('PanelList',{'StateVar','AuxVar'});
+else
+    op.FigPanels = obj.setvarfigpanels('PanelList',{'StateVar'});
+end
+op.TimeIdx = data.TimeIdx;
+op.Tick = data.Tick;
+op.TickLabel = data.TickLabel;
 op.Fig.Visible = 'off';
 op.PlotDir = 'Plots_States/';
 
@@ -36,72 +43,60 @@ ReportFileName = sprintf('%s_Report_States%s',obj.Name,op.FileNameSuffix);
 ReportTitle = sprintf('%s\\\\States Report %s',obj.Name,...
                       strrep(op.FileNameSuffix,'_',''));
 
-if nargin<2 || isempty(xd)
+if nargin<2 || isempty(data)
+    error('Cannot simulate states without data')
+end
+
+if nargin<3 || isempty(xd)
     xd = obj.Param.Values;
 end
 nDraws = size(xd,2);
 
 if isempty(op.DrawStates),op.DrawStates = (nDraws>1); end
 
-
-HERE HERE HERE
-
-
-%% Generate IRF
-fnmats = @(x)obj.mats(x,...
-               'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
-IRFCheck = ones(1,nDraws);
-nSteps = op.NSteps;
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
 nAuxVar = obj.AuxVar.N;
-IRF = nan(nStateVar+nObsVar+nAuxVar,nSteps,nShocks2Show,nDraws);
-ShockIdx = zeros(nShocks2Show,1);
-for j = 1:nShocks2Show
-    ShockIdx(j) = find(ismember(obj.ShockVar.Names,op.Shocks2Show(j)));
-end   
+
+
+%% simulate states
+States = nan(nStateVar+nObsVar+nAuxVar,data.T,nDraws);
+StatesCheck = zeros(1,nDraws);
 parfor jd=1:nDraws
-    matj = fnmats(xd(:,jd));
-    checkj = all(matj.REE.eu==1);
+    mats = obj.mats(xd(:,jd));
+    checkj = all(mats.REE.eu==1);
     if ~checkj
-        IRFCheck(jd) = 0;
+        StatesCheck(jd) = 0;
         continue
     end
-    irf = zeros(nStateVar,nShocks2Show,nSteps);
-    irf(:,:,1) = matj.REE.G2(:,ShockIdx);
-    for t=2:nSteps
-        irf(:,:,t) = matj.REE.G1*irf(:,:,t-1);
-    end
-    IRFj = irf;
-    if nObsVar>0
-        irfObs = zeros(nObsVar,nShocks2Show,nSteps);
-        for t=1:nSteps
-            irfObs(:,:,t) = matj.ObsEq.H*irf(:,:,t);
-        end
-        IRFj = [IRFj;irfObs];
-    end
+    dj = dksmoother(mats,data,op.DrawStates);
+    sj = [dj.StateVar;
+          mats.KF.ObsVarBar+mats.ObsEq.H*dj.StateVar];
     if nAuxVar>0
-        irfAux = zeros(nAuxVar,nShocks2Show,nSteps);
-        irfAux(:,:,1) = matj.AuxREE.G2(:,ShockIdx);
-        for t=2:nSteps
-            irfAux(:,:,t) = matj.AuxREE.G1*irf(:,:,t-1);
-        end
-        IRFj = [IRFj;irfAux];
+        sj = [sj;
+              mats.AuxREE.GBar ...
+              + mats.AuxREE.G1*[dj.StateVar0,dj.StateVar(:,1:T-1)] ...
+              + mats.AuxREE.G2*dj.ShockVar;
+             ];
     end
-    IRF(:,:,:,jd) = permute(IRFj,[1,3,2]);
+    States(:,:,jd) = sj;
 end
-IRF(:,:,:,~IRFCheck) = [];
-IRFCheck(~IRFCheck) = [];
-nDrawsUsed = length(IRFCheck);
+States(:,:,~StatesCheck) = [];
+StatesCheck(~StatesCheck) = [];
+nDrawsUsed = length(StatesCheck);
 
-%% Plot IRFs
-fprintf('Plotting IRFs...\n');
+
+%% Plot States
+fprintf('Plotting States...\n');
 Fig = op.Fig;
 Fig.PlotBands = (nDraws>1);
-Fig.XTick = 1:op.TickStep:nSteps;
-Fig.XTickLabel = 0:op.TickStep:(nSteps-1);
 VarNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
 nPanels = length(op.FigPanels);
+TimeIdx = op.TimeIdx(ismember(op.TimeIdx,data.TimeIdx));
+tid = ismember(data.TimeIdx,TimeIdx);
+ntid = length(TimeIdx);
+Fig.XTick = find(ismember(op.Tick,TimeIdx);
+Fig.XTickLabel = op.TickLabel(ismember(TimeIdx,op.TickLabel));
 for jP = 1:nPanels
     Pj = op.FigPanels(jP);
     Figj = Fig;
@@ -114,7 +109,7 @@ for jP = 1:nPanels
         Figj.Shape = Pj.FigShape;
     end
     nVar = length(Pj.Names);
-    PlotData = nan(nDrawsUsed,nSteps,nVar,nShocks2Show);
+    PlotData = nan(nDrawsUsed,TimeIdx,nVar);
     for jV=1:nVar
         Vj = Pj.Names{jV};
         [tf,idxV] = ismember(Vj,VarNames);
@@ -131,10 +126,7 @@ for jP = 1:nPanels
         else
             h = vcfigureupdate(h,PlotData(:,:,:,jS));
         end
-%         printpdf([op.PlotDir,PlotFileName,...
-%                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
-        print('-dpdf',[op.PlotDir,PlotFileName,...
-                    '_',Pj.Title,'_',op.Shocks2Show{jS}])
+        print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
     end
 end
 
