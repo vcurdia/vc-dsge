@@ -16,8 +16,6 @@ classdef Data
         TimeIdx
         Var
         SampleStart
-        Tick
-        TickLabel
     end
 
     properties (SetAccess=protected)
@@ -39,7 +37,6 @@ classdef Data
                     Raw.data;
                     NaN(size(Raw.textdata,1)-1-size(Raw.data,1),obj.NVar)];
                 obj.TimeIdx = Raw.textdata(2:end,1)';
-                obj = obj.setticklabel;
             end
         end
         
@@ -78,52 +75,6 @@ classdef Data
             end
             obj.SampleStart = t;
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
-        end
-        
-        function obj = set.Tick(obj,tDates)
-            tDates = tDates(ismember(tDates,obj.TimeIdx));
-            obj.Tick = tDates;
-            if isempty(obj.TickLabel)...
-                    || ~any(ismember(obj.TickLabel,tDates))
-                obj.TickLabel = tDates;
-            end
-            tDates(~ismember(tDates,obj.TickLabel)) = {''};
-            obj.TickLabel = tDates;
-        end
-        
-        function obj = set.TickLabel(obj,tDates)
-            tDates = obj.TimeIdx(ismember(obj.TimeIdx,tDates));
-            obj.TickLabel = tDates;
-            if isempty(obj.Tick) ...
-                    || ~all(ismember(tDates,obj.Tick))
-                obj.Tick = obj.TickLabel;
-            end
-            tDates = obj.Tick;
-            tDates(~ismember(tDates,obj.TickLabel)) = {''};
-            obj.TickLabel = tDates;
-        end
-        
-        function obj = settickannual(obj,q)
-            if nargin<2, q = 4; end
-            obj.Tick = obj.TimeIdx(obj.findquarter(q):4:obj.T);
-        end
-        
-        function t = findquarter(obj,q)
-            if nargin<2, q = 4; end
-            for t=1:obj.T
-                if strcmp(obj.TimeIdx{t}(end),int2str(q))
-                    break
-                end
-            end
-        end
-        
-        function obj = setticklabel(obj,n,q)
-            if nargin<2, n = 5; end
-            if nargin<3, q = 4; end
-            obj = obj.settickannual(q);
-            tStep = ceil(obj.T/(n-1));
-            while mod(tStep,4), tStep = tStep-1; end
-            obj.TickLabel = obj.TimeIdx(obj.findquarter(q):tStep:obj.T);
         end
         
 %         function new = copy(obj)
