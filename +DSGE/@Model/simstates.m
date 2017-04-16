@@ -22,9 +22,8 @@ if obj.AuxVar.N>0
 else
     op.FigPanels = obj.setvarfigpanels('PanelList',{'StateVar'});
 end
-op.TimeIdx = data.TimeIdx;
-op.Tick = data.Tick;
-op.TickLabel = data.TickLabel;
+op.Time2Show = data.TimeIdx([1,end]);
+op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 op.PlotDir = 'Plots_States/';
 
@@ -61,7 +60,7 @@ nAuxVar = obj.AuxVar.N;
 
 %% simulate states
 States = nan(nStateVar+nObsVar+nAuxVar,data.T,nDraws);
-StatesCheck = zeros(1,nDraws);
+StatesCheck = ones(1,nDraws);
 parfor jd=1:nDraws
     mats = obj.mats(xd(:,jd));
     checkj = all(mats.REE.eu==1);
@@ -69,13 +68,13 @@ parfor jd=1:nDraws
         StatesCheck(jd) = 0;
         continue
     end
-    dj = dksmoother(mats,data,op.DrawStates);
+    dj = dksmoother(mats,data.Values,op.DrawStates);
     sj = [dj.StateVar;
           mats.KF.ObsVarBar+mats.ObsEq.H*dj.StateVar];
     if nAuxVar>0
         sj = [sj;
               mats.AuxREE.GBar ...
-              + mats.AuxREE.G1*[dj.StateVar0,dj.StateVar(:,1:T-1)] ...
+              + mats.AuxREE.G1*[dj.StateVar0,dj.StateVar(:,1:data.T-1)] ...
               + mats.AuxREE.G2*dj.ShockVar;
              ];
     end
@@ -90,13 +89,13 @@ nDrawsUsed = length(StatesCheck);
 fprintf('Plotting States...\n');
 Fig = op.Fig;
 Fig.PlotBands = (nDraws>1);
-VarNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
+vNames = [obj.StateVar.Names;obj.ObsVar.Names;obj.AuxVar.Names];
 nPanels = length(op.FigPanels);
-TimeIdx = op.TimeIdx(ismember(op.TimeIdx,data.TimeIdx));
-tid = ismember(data.TimeIdx,TimeIdx);
-ntid = length(TimeIdx);
-Fig.XTick = find(ismember(op.Tick,TimeIdx);
-Fig.XTickLabel = op.TickLabel(ismember(TimeIdx,op.TickLabel));
+tid = timeidx(op.Time2Show{:});
+tid = tid(ismember(tid,data.TimeIdx));
+idxT = ismember(data.TimeIdx,tid);
+T = length(tid);
+[Fig.XTick,Fig.XTickLabel] = setticklabel(tid,op.Tick);
 for jP = 1:nPanels
     Pj = op.FigPanels(jP);
     Figj = Fig;
@@ -109,47 +108,32 @@ for jP = 1:nPanels
         Figj.Shape = Pj.FigShape;
     end
     nVar = length(Pj.Names);
-    PlotData = nan(nDrawsUsed,TimeIdx,nVar);
+    PlotData = nan(nDrawsUsed,T,nVar);
     for jV=1:nVar
         Vj = Pj.Names{jV};
-        [tf,idxV] = ismember(Vj,VarNames);
+        [tf,idxV] = ismember(Vj,vNames);
         if tf
-            for jS=1:nShocks2Show
-                PlotData(:,:,jV,jS) = Pj.Scale(jV)*...
-                    op.ShockSize(jS)*squeeze(IRF(idxV,:,jS,:))';
-            end
+            PlotData(:,:,jV) = Pj.Scale(jV)*squeeze(States(idxV,idxT,:))';
         end
     end
-    for jS=1:nShocks2Show
-        if jS==1
-            h = vcfigure(PlotData(:,:,:,jS),Figj);
-        else
-            h = vcfigureupdate(h,PlotData(:,:,:,jS));
-        end
-        print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
-    end
+    h = vcfigure(PlotData,Figj);
+    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
 end
 
 %% Make report with IRF
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
-for jS=1:nShocks2Show
-    Sj = op.Shocks2Show{jS};
-    fprintf(fid,'\\section{Shock: %s}\n',strrep(Sj,'_',''));
-    for jP = 1:nPanels
-        Pj = op.FigPanels(jP).Title;
-        fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
-        fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
-        fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
-%         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
-%                 op.PlotDir,PlotFileName,Pj,Sj);
-        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                     '130 230 490 560]{%s%s_%s_%s.pdf}\n'],...
-                op.PlotDir,PlotFileName,Pj,Sj);
-        fprintf(fid,'\\end{figure}\n');
-        fprintf(fid,'\\newpage \n');
-    end
+for jP = 1:nPanels
+    Pj = op.FigPanels(jP).Title;
+    fprintf(fid,'\\section{%s}\n',strrep(Pj,'_',': '));
+    fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
+    fprintf(fid,'\\label{States_%s}\n',Pj);
+    fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+                 '130 230 490 560]{%s%s_%s.pdf}\n'],...
+            op.PlotDir,PlotFileName,Pj);
+    fprintf(fid,'\\end{figure}\n');
+    fprintf(fid,'\\newpage \n');
 end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);

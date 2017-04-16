@@ -17,17 +17,19 @@ clear all
 % startup
 TimeElapsed = TimeTracker;
 
-%% Settings
+%% Load DSGE
 specName = 'MyDSGE';
 specPath = specName;
+basePath = cd(specPath);
+load(specName)
+DSGE.linkobj(model,prior,post)
 
 %% Initiate parallel pool
 % parpool(2)
 
-%% Load DSGE
-basePath = cd(specPath);
-load(specName)
-DSGE.linkobj(model,prior,post)
+%% Settings
+options.States.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
+
 
 %% MaxPost
 % options.MaxPost.NMax = 4;
@@ -44,7 +46,8 @@ options.MCMC.NDraws = 1000;
 options.MCMC.NDrawsCalibrate = 200;
 for s=1
     post.MCMCStage = s;
-    fn = sprintf('%s_MCMC_%.0f',specName,s);
+    fnSuffix = sprintf('_MCMC_%.0f',s);
+    fn = [specName,fnSuffix];
     options.MCMC.JumpScale = 2.4; %reset to default
     options.MCMC.JumpScale = post.calibratemcmc(options.MCMC);
     save([fn,'_CalibrateJump'])
@@ -52,8 +55,10 @@ for s=1
     save(fn)
     post.analyzeparam
     post.mcmcredux
-    model.makeirf(post.draw(100),'FileNameSuffix',sprintf('_MCMC_%.0f',s))
-    model.makevd(post.draw(100),'FileNameSuffix',sprintf('_MCMC_%.0f',s))
+    xd = post.draw(100);
+    model.makeirf(xd,'FileNameSuffix',fnSuffix)
+    model.makevd(xd,'FileNameSuffix',fnSuffix)
+    model.simstates(data,xd,options.States,'FileNameSuffix',fnSuffix)
     save([fn,'_Analysis'])
     save(specName)
 end

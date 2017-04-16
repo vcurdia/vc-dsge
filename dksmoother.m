@@ -25,7 +25,7 @@ s00 = mats.KF.s00;
 G1 = mats.REE.G1;
 G2 = mats.REE.G2;
 H = mats.ObsEq.H;
-idxNAN = isnan(data);
+idxNaN = isnan(data);
 
 [nStateVar,nShockVar] = size(G2);
 [T,nObsVar] = size(data);
@@ -57,10 +57,10 @@ r = zeros(nStateVar,T);
 K = cell(T,1);
 Om = G2*G2';
 for t=1:T
-    Ht = H(~IdxNaN(t,:),:);
+    Ht = H(~idxNaN(t,:),:);
     sigtt1 = G1*sigtt*G1'+Om;
     Ft = Ht*sigtt1*Ht';
-    vt = DataDiff(~IdxNaN(t,:),t)-Ht*G1*stt;
+    vt = DataDiff(~idxNaN(t,:),t)-Ht*G1*stt;
     Kt = sigtt1*Ht'/Ft;
     stt = G1*stt+Kt*vt;
     sigtt = (eye(nStateVar)-Kt*Ht)*sigtt1;
@@ -71,7 +71,7 @@ end
 %% Run DK
 for t=T-1:-1:1
     r(:,t) = r(:,t)+(eye(nStateVar)-...
-                     H(~IdxNaN(t,:),:)'*K{t}')*G1'*r(:,t+1);
+                     H(~idxNaN(t,:),:)'*K{t}')*G1'*r(:,t+1);
 end
 r0 = G1'*r(:,1);
 
