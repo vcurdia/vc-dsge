@@ -29,7 +29,7 @@ if isempty(op.PanelList)
 end
 nList = length(op.PanelList);
 if isempty(op.FigShape), op.FigShape = cell(1,nList); end
-if ~iscell(op.FigShape)
+if ~isempty(op.FigShape{1}) && ~iscell(op.FigShape{1})
     FigShape = op.FigShape;
     op.FigShape = cell(1,nList);
     for j=1:nList, op.FigShape{j} = FigShape; end
