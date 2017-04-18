@@ -24,6 +24,7 @@ op.TraceStep = [];
 op.Fig.Visible = 'off';
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
+% op.Fig.PaperPosition = [1,2.25,6.5,6.5];
 op.PlotDirDraws = 'Plots_Draws/';
 op.PlotDirTrace = 'Plots_Trace/';
 
@@ -92,7 +93,7 @@ for jL=1:length(pdList)
         pSpread = pMax-pMin;
         pMax = pMax+.01*pSpread;
         pMin = pMin-.01*pSpread;
-        figure('Visible',op.Fig.Visible)
+        hf = figure('Visible',op.Fig.Visible);
         clear h
         for jChain=1:sample.NChains
             h(jChain,1) = subplot(sample.NChains,nc,(jChain-1)*nc+1);
@@ -115,6 +116,7 @@ for jL=1:length(pdList)
             title(h(1,2),sprintf('Hist excluding initial %.0f\\%% of obs',...
                                  100*op.Draws.BurnIn))
         end
+%         hf.PaperPosition = op.Fig.PaperPosition;
         print('-dpdf',sprintf('%s_%s.pdf',pdFN,p.(Lj).Names{jF}))
     end
 end
@@ -160,7 +162,7 @@ for jL=1:length(ptList)
         MeanBounds = MeanBounds + ...
             (-1).^(1:-1:0)*0.01*(MeanBounds(2)-MeanBounds(1));
         SDBounds = [0 1.01*max(max(RollingSD(:)),2*pSD)];
-        figure('Visible',op.Fig.Visible)
+        hf = figure('Visible',op.Fig.Visible);
         clear h
         for jChain=1:sample.NChains
             h(jChain,1) = subplot(sample.NChains,2,(jChain-1)*nc+1);
@@ -188,6 +190,7 @@ for jL=1:length(ptList)
         end
         title(h(1,1),sprintf('Rolling Mean of %s',p.(Lj).PrettyNames{jF}))
         title(h(1,2),sprintf('Rolling SD of %s',p.(Lj).PrettyNames{jF}))
+%         hf.PaperPosition = op.Fig.PaperPosition;
         print('-dpdf',sprintf('%s_%s.pdf',ptFN,p.(Lj).Names{jF}))
     end
 end
@@ -439,6 +442,13 @@ for jL=1:length(pdList)
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
                      '130 230 490 540]{%s_%s.pdf}\n'],pdFN,p.(Lj).Names{jF});
+%         fprintf(fid,['\\includegraphics[width=0.75\\textwidth,clip,viewport=' ...
+%                      '70 80 550 730]{%s_%s.pdf}\n'],pdFN,p.(Lj).Names{jF});
+%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+%                      '%.0fin %.0fin %.0fin %.0fin]{%s_%s.pdf}\n'],...
+%                 op.Fig.PaperPosition(1:2),...
+%                 op.Fig.PaperPosition(1:2)+op.Fig.PaperPosition(3:4),...
+%                 pdFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
@@ -456,6 +466,11 @@ for jL=1:length(ptList)
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
                      '130 230 490 540]{%s_%s.pdf}\n'],ptFN,p.(Lj).Names{jF});
+%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+%                      '%.0fin %.0fin %.0fin %.0fin]{%s_%s.pdf}\n'],...
+%                 op.Fig.PaperPosition(1:2),...
+%                 op.Fig.PaperPosition(1:2)+op.Fig.PaperPosition(3:4),...
+%                 ptFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end

@@ -17,17 +17,23 @@ function simstates(obj,data,xd,varargin)
 %% Default Options
 op.FileNameSuffix = '';
 op.DrawStates = [];
-if obj.AuxVar.N>0
-    op.FigPanels = obj.setvarfigpanels('PanelList',{'StateVar','AuxVar'});
-else
-    op.FigPanels = obj.setvarfigpanels('PanelList',{'StateVar'});
-end
 op.Time2Show = data.TimeIdx([1,end]);
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 op.PlotDir = 'Plots_States/';
+op.FigPanelsOptions = struct;
 
 op = updateoptions(op,varargin{:});
+
+if ~isfield(op,'FigPanels')
+    if obj.AuxVar.N>0
+        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
+                                           'PanelList',{'StateVar','AuxVar'});
+    else
+        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
+                                           'PanelList',{'StateVar'});
+    end
+end
 
 
 %% Preamble
@@ -129,9 +135,11 @@ for jP = 1:nPanels
     fprintf(fid,'\\section{%s}\n',strrep(Pj,'_',': '));
     fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
     fprintf(fid,'\\label{States_%s}\n',Pj);
-    fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                 '120 230 490 560]{%s%s_%s.pdf}\n'],...
+    fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n'],...
             op.PlotDir,PlotFileName,Pj);
+%     fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+%                  '120 230 490 560]{%s%s_%s.pdf}\n'],...
+%             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');
 end

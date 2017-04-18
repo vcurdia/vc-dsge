@@ -22,7 +22,10 @@ op.NBin = 50;
 op.Fig.Visible = 'off';
 op.Fig.Shape = {3,3};
 op.Fig.Color = colorscheme;
-op.Fig.FontSize = 6;
+op.Fig.FontSize = 8;
+op.PaperSize = [6.5, 6.5];
+op.PaperPosition = [0. 0, 6.5, 6.5];
+op.AxisGap = 0.02;
 op.PlotDir = 'Plots_PriorPost/';
 
 op = updateoptions(op,varargin{:});
@@ -284,7 +287,7 @@ for jP=1:2
     np = obj.Model.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
-        figure('Visible',op.Fig.Visible)
+        hfig = figure('Visible',op.Fig.Visible);
         clear hf
         for jf=1:nPlots 
             jp = (jF-1)*nPlots+jf;
@@ -293,6 +296,13 @@ for jP=1:2
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
+                if strcmp(Dj,'Prior')
+                    xjdata(xjdata>obj.Prior.Sample.(Pj).Prc99(jp)) = [];
+                    xjdata(xjdata<obj.Prior.Sample.(Pj).Prc01(jp)) = [];
+                else
+                    xjdata(xjdata>obj.MCMCSample.(Pj).Prc99(jp)) = [];
+                    xjdata(xjdata<obj.MCMCSample.(Pj).Prc01(jp)) = [];
+                end
                 histogram(xjdata,op.NBin,...
                           'Normalization','probability',...
                           'FaceColor',op.Fig.Color(jD,:),...
@@ -313,9 +323,27 @@ for jP=1:2
                 legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
                 legPos(2) = 0;
                 hl.Position = legPos;
+                dLeg = legPos(4);
             end
             title(obj.Model.(Pj).PrettyNames{jp})
         end
+        axGap = op.AxisGap;
+        dLeg = dLeg+axGap;
+        axWidth = (1-(op.Fig.Shape{2}-1)*axGap)/op.Fig.Shape{2};
+        axHeight = (1-dLeg-(op.Fig.Shape{1}-1)*axGap)/op.Fig.Shape{1};
+        for jR=1:op.Fig.Shape{1}
+            for jC=1:op.Fig.Shape{2}
+                jPlot = (jR-1)*op.Fig.Shape{2}+jC;
+                if jPlot<=nPlots && jPlot<=np
+                    hf(jPlot).OuterPosition = [...
+                        (jC-1)*(axWidth+axGap),...
+                        (op.Fig.Shape{1}-jR)*(axHeight+axGap)+dLeg,...
+                        axWidth,axHeight];
+                end
+            end
+        end
+        hfig.PaperSize = op.PaperSize;
+        hfig.PaperPosition = op.PaperPosition;
         print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
     end
 end
@@ -440,10 +468,10 @@ for jP=1:2
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
-%         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
-%                 fn,pList{jP},jF);
-        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                     '130 230 490 540]{%s_%s_%.0f.pdf}\n'],fn,pList{jP},jF);
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
+                fn,pList{jP},jF);
+%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
+%                      '130 230 490 540]{%s_%s_%.0f.pdf}\n'],fn,pList{jP},jF);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
