@@ -284,6 +284,8 @@ for jP=1:2
     Pj = pList{jP};
     xj.Post = draws.(Pj);
     xj.Prior = drawsPrior.(Pj);
+    xBounds = [min(obj.Prior.Sample.(Pj).Prc01,obj.MCMCSample.(Pj).Prc01),...
+               max(obj.Prior.Sample.(Pj).Prc99,obj.MCMCSample.(Pj).Prc99)];
     np = obj.Model.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
@@ -296,17 +298,20 @@ for jP=1:2
             for jD=1:2
                 Dj = dList{jD};
                 xjdata = xj.(Dj)(jp,:);
-                if strcmp(Dj,'Prior')
-                    xjdata(xjdata>obj.Prior.Sample.(Pj).Prc99(jp)) = [];
-                    xjdata(xjdata<obj.Prior.Sample.(Pj).Prc01(jp)) = [];
+                xjdata(xjdata>xBounds(jp,2)) = [];
+                xjdata(xjdata<xBounds(jp,1)) = [];
+                binWidth = xBounds(jp,:)*[-1;1]/op.NBin;
+                if binWidth~=0
+                    histogram(xjdata,xBounds(jp,1):binWidth:xBounds(jp,2),...
+                              'Normalization','probability',...
+                              'FaceColor',op.Fig.Color(jD,:),...
+                              'FaceAlpha',0.6);
                 else
-                    xjdata(xjdata>obj.MCMCSample.(Pj).Prc99(jp)) = [];
-                    xjdata(xjdata<obj.MCMCSample.(Pj).Prc01(jp)) = [];
-                end
-                histogram(xjdata,op.NBin,...
+                    histogram(xjdata,11,...
                           'Normalization','probability',...
                           'FaceColor',op.Fig.Color(jD,:),...
-                          'FaceAlpha',0.6)
+                          'FaceAlpha',0.6);
+                end
                 hold on
             end
             hold off
