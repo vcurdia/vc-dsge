@@ -15,7 +15,7 @@ function FigPanels = setvarfigpanels(obj,varargin)
 
 %% Options
 op.PanelList = {};
-op.FigShape = {};
+op.FigShape = {3,2};
 op.Scale = 1;
 
 %% Update options
