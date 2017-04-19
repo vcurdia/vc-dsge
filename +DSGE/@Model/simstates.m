@@ -14,13 +14,13 @@ function simstates(obj,data,xd,varargin)
 % Copyright 2017 by Vasco Curdia
 
 
-%% Default Options
+%% Options
 op.FileNameSuffix = '';
 op.DrawStates = [];
 op.Time2Show = data.TimeIdx([1,end]);
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
-op.Fig.YMinScale = 0.01;
+% op.Fig.YMinScale = 0.01;
 op.PlotDir = 'Plots_States/';
 op.FigPanelsOptions = struct;
 

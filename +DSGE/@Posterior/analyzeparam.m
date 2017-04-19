@@ -23,9 +23,10 @@ op.Fig.Visible = 'off';
 op.Fig.Shape = {3,3};
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 8;
+op.TightFig = 1;
+op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0. 0, 6.5, 6.5];
-op.AxisGap = 0.02;
 op.PlotDir = 'Plots_PriorPost/';
 
 op = updateoptions(op,varargin{:});
@@ -332,23 +333,11 @@ for jP=1:2
             end
             title(obj.Model.(Pj).PrettyNames{jp})
         end
-        axGap = op.AxisGap;
-        dLeg = dLeg+axGap;
-        axWidth = (1-(op.Fig.Shape{2}-1)*axGap)/op.Fig.Shape{2};
-        axHeight = (1-dLeg-(op.Fig.Shape{1}-1)*axGap)/op.Fig.Shape{1};
-        for jR=1:op.Fig.Shape{1}
-            for jC=1:op.Fig.Shape{2}
-                jPlot = (jR-1)*op.Fig.Shape{2}+jC;
-                if jPlot<=nPlots && jPlot<=np
-                    hf(jPlot).OuterPosition = [...
-                        (jC-1)*(axWidth+axGap),...
-                        (op.Fig.Shape{1}-jR)*(axHeight+axGap)+dLeg,...
-                        axWidth,axHeight];
-                end
-            end
-        end
         hfig.PaperSize = op.PaperSize;
         hfig.PaperPosition = op.PaperPosition;
+        if op.TightFig
+            tightfig(hfig,op.Fig.Shape,hf,op.TightFigOptions)
+        end
         print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
     end
 end
