@@ -211,9 +211,12 @@ for jP=1:length(op.FigPanels)
     else
         hl.Orientation = 'horizontal';
         legPos = hl.Position;
-        xL = hf((Figj.Shape{1}-1)*Figj.Shape{2}+1).Position;
-        xR = hf((Figj.Shape{1}-1)*Figj.Shape{2}).Position;
-        legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
+%         xIdx = (max(1,Figj.Shape{1}-1))*Figj.Shape{2};
+%         xL = hf(min(Pj.N,xIdx+1)).Position;
+%         rIdx = min(Pj.N,Figj.Shape{2});
+%         xR = hf(rIdx).Position;
+%         legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
+        legPos(1) = 0.5-legPos(3)/2;
         legPos(2) = 0;
         hl.Position = legPos;
     end
