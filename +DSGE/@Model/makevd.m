@@ -31,6 +31,10 @@ op.Fig.ShowPlotTitle = 1;
 op.Fig.LegPos = 'EO';
 op.Fig.LegOrientation = 'vertical';
 op.Fig.FontSize = 8;
+op.TightFig = 1;
+op.TightFigOptions = struct;
+op.PaperSize = [6.5, 6.5];
+op.PaperPosition = [0. 0, 6.5, 6.5];
 op.PlotDir = 'Plots_VD/';
 
 op = updateoptions(op,varargin{:});
@@ -179,10 +183,11 @@ for jP=1:length(op.FigPanels)
     Figj = op.Fig;
     Figj.TitleList = Pj.PrettyNames;
     Figj.Shape = Pj.FigShape;
-    figure('Visible',Figj.Visible)
+    hf = figure('Visible',Figj.Visible);
+    clear ha
     for jV=1:Pj.N
         Vj = Pj.Names{jV};
-        hf(jV) = subplot(Figj.Shape{:},jV);
+        ha(jV) = subplot(Figj.Shape{:},jV);
         vIdx = ismember(vNames,Vj);
         if nDrawsUsed==1
             PlotData = squeeze(VD(vIdx,:,:));
@@ -202,23 +207,24 @@ for jP=1:length(op.FigPanels)
         ax.XTickLabel = Figj.XTickLabel;
         ax.FontSize = Figj.FontSize;
     end
-    hl = legend(obj.ShockVar.PrettyNames,'Location',op.Fig.LegPos);
     if prod([Figj.Shape{:}])==1
+        hl = legend(obj.ShockVar.PrettyNames,'Location',op.Fig.LegPos);
         hl.Orientation = op.Fig.LegOrientation;
         if strcmp(op.Fig.LegPos,'SO')
             hl.Position(2) = 0;
         end
     else
+        hl = legend(obj.ShockVar.PrettyNames,'Location','S');
         hl.Orientation = 'horizontal';
         legPos = hl.Position;
-%         xIdx = (max(1,Figj.Shape{1}-1))*Figj.Shape{2};
-%         xL = hf(min(Pj.N,xIdx+1)).Position;
-%         rIdx = min(Pj.N,Figj.Shape{2});
-%         xR = hf(rIdx).Position;
-%         legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
         legPos(1) = 0.5-legPos(3)/2;
         legPos(2) = 0;
         hl.Position = legPos;
+    end
+    hf.PaperSize = op.PaperSize;
+    hf.PaperPosition = op.PaperPosition;
+    if op.TightFig
+        tightfig(hf,Figj.Shape,ha,op.TightFigOptions)
     end
     print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
 end
@@ -286,8 +292,7 @@ for jP=1:length(op.FigPanels)
     fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
     fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
     fprintf(fid,'\\label{VD_%s}\n',Pj);
-    fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                 '130 230 490 560]{%s%s_%s.pdf}\n'],...
+    fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n',...
             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');

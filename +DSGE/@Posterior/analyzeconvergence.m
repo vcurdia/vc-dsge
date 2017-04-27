@@ -24,7 +24,10 @@ op.TraceStep = [];
 op.Fig.Visible = 'off';
 op.Fig.Color = colorscheme;
 op.Fig.FontSize = 6;
-% op.Fig.PaperPosition = [1,2.25,6.5,6.5];
+op.PaperSize = [6.5, 6.5];
+op.PaperPosition = [0. 0, 6.5, 6.5];
+op.TightFig = 1;
+op.TightFigOptions = struct;
 op.PlotDirDraws = 'Plots_Draws/';
 op.PlotDirTrace = 'Plots_Trace/';
 
@@ -95,28 +98,35 @@ for jL=1:length(pdList)
         pMin = pMin-.01*pSpread;
         hf = figure('Visible',op.Fig.Visible);
         clear h
+        jh = 0;
         for jChain=1:sample.NChains
-            h(jChain,1) = subplot(sample.NChains,nc,(jChain-1)*nc+1);
-            plot(xd(1,:,jChain))
+            jh = jh+1;
+            h(jh) = subplot(sample.NChains,nc,jh);
+            plot(xd(1,:,jChain),'LineWidth',1)
             ylim([pMin pMax])
-            h(jChain,1).XTick = [op.Draws.BurnIn,1]*nDrawsUsed;
-            h(jChain,1).XGrid = 'on';
-            h(jChain,1).FontSize = op.Fig.FontSize;
+            h(jh).XTick = [op.Draws.BurnIn,1]*nDrawsUsed;
+            h(jh).XGrid = 'on';
+            h(jh).FontSize = op.Fig.FontSize;
             if nc>1
-                h(jChain,2) = subplot(sample.NChains,2,jChain*2);
+                jh = jh+1;
+                h(jh) = subplot(sample.NChains,2,jh);
                 histogram(xd(1,op.Draws.BurnIn*nDrawsUsed+1:end,jChain),...
                           op.NBin,'Normalization','probability',...
                           'FaceColor',op.Fig.Color(1,:),'FaceAlpha',1)
                 xlim([pMin pMax])
-                h(jChain,2).FontSize = op.Fig.FontSize;
+                h(jh).FontSize = op.Fig.FontSize;
             end
         end
-        title(h(1,1),sprintf('%s in each chain',p.(Lj).PrettyNames{jF}))
+        title(h(1),sprintf('%s in each chain',p.(Lj).PrettyNames{jF}))
         if nc>1
-            title(h(1,2),sprintf('Hist excluding initial %.0f\\%% of obs',...
+            title(h(2),sprintf('Hist excluding initial %.0f\\%% of obs',...
                                  100*op.Draws.BurnIn))
         end
-%         hf.PaperPosition = op.Fig.PaperPosition;
+        hf.PaperSize = op.PaperSize;
+        hf.PaperPosition = op.PaperPosition;
+        if op.TightFig
+            tightfig(hf,{sample.NChains,nc},h,op.TightFigOptions)
+        end
         print('-dpdf',sprintf('%s_%s.pdf',pdFN,p.(Lj).Names{jF}))
     end
 end
@@ -164,8 +174,10 @@ for jL=1:length(ptList)
         SDBounds = [0 1.01*max(max(RollingSD(:)),2*pSD)];
         hf = figure('Visible',op.Fig.Visible);
         clear h
+        jh=0;
         for jChain=1:sample.NChains
-            h(jChain,1) = subplot(sample.NChains,2,(jChain-1)*nc+1);
+            jh = jh+1;
+            h(jh) = subplot(sample.NChains,2,jh);
             plot(SampleID,pMean*ones(size(SampleID)),'-',...
                  'Color',op.Fig.Color(1,:))
             hold on
@@ -177,8 +189,9 @@ for jL=1:length(ptList)
                  'LineWidth',2)
             ylim(MeanBounds)
             xlim(SampleID([1,end]))
-            h(jChain,1).FontSize = op.Fig.FontSize;
-            h(jChain,2) = subplot(sample.NChains,2,jChain*2);
+            h(jh).FontSize = op.Fig.FontSize;
+            jh = jh+1;
+            h(jh) = subplot(sample.NChains,2,jh);
             plot(SampleID,pSD*ones(size(SampleID)),'-',...
                  'Color',op.Fig.Color(1,:))
             hold on
@@ -186,11 +199,15 @@ for jL=1:length(ptList)
                  'LineWidth',2)
             ylim(SDBounds)
             xlim(SampleID([1,end]))
-            h(jChain,2).FontSize = op.Fig.FontSize;
+            h(jh).FontSize = op.Fig.FontSize;
         end
-        title(h(1,1),sprintf('Rolling Mean of %s',p.(Lj).PrettyNames{jF}))
-        title(h(1,2),sprintf('Rolling SD of %s',p.(Lj).PrettyNames{jF}))
-%         hf.PaperPosition = op.Fig.PaperPosition;
+        title(h(1),sprintf('Rolling Mean of %s',p.(Lj).PrettyNames{jF}))
+        title(h(1),sprintf('Rolling SD of %s',p.(Lj).PrettyNames{jF}))
+        hf.PaperSize = op.PaperSize;
+        hf.PaperPosition = op.PaperPosition;
+        if op.TightFig
+            tightfig(hf,{sample.NChains,2},h,op.TightFigOptions)
+        end
         print('-dpdf',sprintf('%s_%s.pdf',ptFN,p.(Lj).Names{jF}))
     end
 end
@@ -440,15 +457,8 @@ for jL=1:length(pdList)
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
-        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                     '130 230 490 540]{%s_%s.pdf}\n'],pdFN,p.(Lj).Names{jF});
-%         fprintf(fid,['\\includegraphics[width=0.75\\textwidth,clip,viewport=' ...
-%                      '70 80 550 730]{%s_%s.pdf}\n'],pdFN,p.(Lj).Names{jF});
-%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                      '%.0fin %.0fin %.0fin %.0fin]{%s_%s.pdf}\n'],...
-%                 op.Fig.PaperPosition(1:2),...
-%                 op.Fig.PaperPosition(1:2)+op.Fig.PaperPosition(3:4),...
-%                 pdFN,p.(Lj).Names{jF});
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
+                pdFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
@@ -464,13 +474,8 @@ for jL=1:length(ptList)
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
-        fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-                     '130 230 490 540]{%s_%s.pdf}\n'],ptFN,p.(Lj).Names{jF});
-%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                      '%.0fin %.0fin %.0fin %.0fin]{%s_%s.pdf}\n'],...
-%                 op.Fig.PaperPosition(1:2),...
-%                 op.Fig.PaperPosition(1:2)+op.Fig.PaperPosition(3:4),...
-%                 ptFN,p.(Lj).Names{jF});
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
+                ptFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
