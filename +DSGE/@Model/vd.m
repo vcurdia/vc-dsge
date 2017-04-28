@@ -1,6 +1,6 @@
-function makevd(obj,xd,varargin)
+function vd(obj,xd,varargin)
 
-% makevd
+% vd
 % 
 % Generates variance decomposition for DSGE model
 % 

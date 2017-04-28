@@ -1,6 +1,6 @@
-function simstates(obj,data,xd,varargin)
+function states(obj,data,xd,varargin)
 
-% simstates
+% states
 % 
 % Simulate states of DSGE model
 % 
@@ -127,7 +127,7 @@ for jP = 1:nPanels
     print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
 end
 
-%% Make report with IRF
+%% Make report 
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');

@@ -1,6 +1,6 @@
-function makeirf(obj,xd,varargin)
+function irf(obj,xd,varargin)
 
-% makeirf
+% irf
 % 
 % Generates IRF for DSGE model
 % 
