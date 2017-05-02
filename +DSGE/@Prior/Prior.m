@@ -33,7 +33,7 @@ classdef Prior < handle
     methods
         function obj = Prior(m,p)
             if nargin>0
-                fprintf('\n*** Initiating prior\n')
+                fprintf('\n*** Preparing prior\n')
                 obj.TimeElapsed = TimeTracker;
                 obj.Model = m;
             end

@@ -13,7 +13,7 @@ function maxlpdf(obj,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Preamble
-fprintf('\n*** Search for posterior mode\n')
+fprintf('\n*** Maximizing posterior log-pdf\n')
 ttName = 'MaxLPDF';
 obj.TimeElapsed.start(ttName)
 
@@ -26,12 +26,12 @@ np = obj.NEstimate;
 pIdx = obj.EstimateIdx;
 
 %% Options
-op.NMax = 1;
+op.NMax = 20;
 op.ShowRobustness = 1;
 op.DrawAll = 0;
 op.Min.verbose = 1;
 op.Min.H0 = obj.Var(pIdx,pIdx);
-op.Guess = obj.Mode(pIdx);
+op.Guess = [obj.Mode(pIdx),obj.Prior.Mean(pIdx)];
 op.GuessMaxDraws = 1000;
 % op.GuessUsePriorDist = 0;
 op.GuessPrcUsePriorDist = 0.5;
@@ -39,6 +39,8 @@ op.GuessMean = obj.Prior.Mean(pIdx);
 op.GuessSD = obj.Prior.SD(pIdx);
 op.GuessDF = 4;
 op.Table = DSGE.Options.Table;
+op.KeepLogs = 1;
+op.KeepMats = 1;
 
 op = updateoptions(op,varargin{:});
 
@@ -62,7 +64,7 @@ for jm=1:nMax
     else
         for jg=1:op.GuessMaxDraws
             if jm<nx0+nDrawPrior
-                x0g = obj.Prior.Draw(1);
+                x0g = obj.Prior.draw(1);
                 x0(:,jm) = x0g(pIdx);
             else
                 for jp=1:np
@@ -93,10 +95,11 @@ end
 
 %% Run minimizations
 MaxPostOut = cell(1,nMax);
+x0j = op.GuessMean;
 parfor jm=1:nMax
-    fid = fopen(sprintf('MaxPost_%03.0f.log',jm),'wt');
+    fid = fopen(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm),'wt');
     opj = op.Min;
-    opj.MatFn = sprintf('MaxPost_%03.0f',jm);
+    opj.MatFn = sprintf('%s_MaxPost_%03.0f',obj.Model.Name,jm);
     opj.LogFn = fid;
     opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
     MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
@@ -104,6 +107,20 @@ parfor jm=1:nMax
 end
 MaxPostOut = [MaxPostOut{:}];
 nMax = length(MaxPostOut);
+
+%% extract the best one
+[LPDFMode, idxMax] = min([MaxPostOut(:).f]);
+obj.Mode(pIdx) = MaxPostOut(idxMax).x;
+obj.LPDFMode = -MaxPostOut(idxMax).f;
+obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
+obj.SD = diag(obj.Var).^(1/2);
+
+Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
+xAux = Mats.AuxParam;
+
+
+%% save minimization output
+save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
 
 %% Show history evolution of robustness
 if op.ShowRobustness
@@ -180,17 +197,15 @@ for jm=1:nMax
 end
 disp(' ')
 
-%% extract the best one
-[ModeLPDF, idxMax] = min([MaxPostOut(:).f]);
-obj.Mode(pIdx) = MaxPostOut(idxMax).x;
-obj.ModeLPDF = -MaxPostOut(idxMax).f;
-obj.Var(pIdx,pIdx) = MaxPostOut(idxMax).H;
-obj.SD = diag(obj.Var).^(1/2);
-
-%% display results on screen
+%% show results on screen
 pNames = obj.Model.Param.Names;
 pNameLength = [cellfun('length',pNames)];
-pNameLengthMax = max(pNameLength);
+nameLengthMax = max(pNameLength);
+auxN = obj.Model.AuxParam.N;
+auxNames = obj.Model.AuxParam.Names;
+auxNameLength = [cellfun('length',auxNames)];
+nameLengthMax = max(nameLengthMax,max(auxNameLength));
+
 fprintf('\nResults from maximization of posterior:')
 fprintf('\n=======================================\n')
 DispList = {'','',pNames;
@@ -206,7 +221,7 @@ DispList = {'','',pNames;
            };
 nc = size(DispList,1);
 for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
+    str2show = sprintf(['%-',int2str(nameLengthMax),'s'],DispList{1,jr});
     str2show = sprintf('%s  %-5s',str2show,DispList{2,jr});
     for jc=3:nc
         str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
@@ -214,46 +229,70 @@ for jr=1:2
     disp(str2show)
 end
 for jp=1:obj.Model.Param.N
-    str2show = sprintf(['%',int2str(pNameLengthMax),'s'],DispList{1,3}{jp});
+    str2show = sprintf(['%',int2str(nameLengthMax),'s'],DispList{1,3}{jp});
     str2show = sprintf('%s  %5s',str2show,DispList{2,3}{jp});
     for jc=3:nc
         str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
     end
     disp(str2show)
 end
-fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.ModeLPDF)
+fprintf('\n')
 
-%% save minimization output
-save([obj.Model.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
+DispList = {'','',auxNames;
+            'Prior','   Mean',obj.Prior.Sample.AuxParam.Mean;
+            '','     5%',obj.Prior.Sample.AuxParam.Prc05;
+            '',' Median',obj.Prior.Sample.AuxParam.Median;
+            '','    95%',obj.Prior.Sample.AuxParam.Prc95;
+            'Posterior','   Mode',xAux;
+           };
+nc = size(DispList,1);
+for jr=1:2
+    str2show = sprintf(['%-',int2str(nameLengthMax),'s'],DispList{1,jr});
+    for jc=2:nc
+        str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
+    end
+    disp(str2show)
+end
+for jp=1:auxN
+    str2show = sprintf(['%',int2str(nameLengthMax),'s'],DispList{1,3}{jp});
+    for jc=2:nc
+        str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
+    end
+    disp(str2show)
+end
+fprintf('\n')
+
+fprintf('\nposterior log-pdf at mode: %.6f\n\n',obj.LPDFMode)
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 
-% value of the posterior density
 fprintf(fid,'\\begin{equation*} \n');
 fprintf(fid,'\\begin{tabular}{rl} \n');
-fprintf(fid,'posterior log density at mode: & %.4f\n',obj.ModeLPDF);
+fprintf(fid,'posterior log density at mode: & %.4f\n',obj.LPDFMode);
 fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
 
 fprintf(fid,'\\newpage \n');
-fprintf(fid,'\\section{Parameters}\n');
 np = obj.Model.Param.N;
-str = [' & %.',int2str(op.Table.Precision),'f'];
+str = [' & $%.',int2str(op.Table.Precision),'f$'];
 tableBreaks = settablebreaks(np,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+7+1+2));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+7+1+2));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Prior} ');
     fprintf(fid,'& & \\multicolumn{2}{c}{Posterior} \\\\[0.5ex]\n');
@@ -283,50 +322,19 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-%% show auxiliary parameters
-fprintf(fid,'\\section{Auxiliary Parameters}\n');
-np = obj.Model.AuxParam.N;
-pNames = obj.Model.AuxParam.Names;
-pNameLength = [cellfun('length',pNames)];
-pNameLengthMax = max(pNameLength);
-Mats = obj.Model.mats(obj.Mode,'SolveREE',0);
-xAux = Mats.AuxParam;
-
-DispList = {'','',pNames;
-            'Prior','   Mean',obj.Prior.Sample.AuxParam.Mean;
-            '','     5%',obj.Prior.Sample.AuxParam.Prc05;
-            '',' Median',obj.Prior.Sample.AuxParam.Median;
-            '','    95%',obj.Prior.Sample.AuxParam.Prc95;
-            'Posterior','   Mode',xAux;
-           };
-nc = size(DispList,1);
-for jr=1:2
-    str2show = sprintf(['%-',int2str(pNameLengthMax),'s'],DispList{1,jr});
-    for jc=2:nc
-        str2show = sprintf('%s  %-7s',str2show,DispList{jc,jr});
-    end
-    disp(str2show)
-end
-for jp=1:np
-    str2show = sprintf(['%',int2str(pNameLengthMax),'s'],DispList{1,3}{jp});
-    for jc=2:nc
-        str2show = sprintf('%s  %7.3f',str2show,DispList{jc,3}(jp));
-    end
-    disp(str2show)
-end
-fprintf('\n')
-
-str = [' & %.',int2str(op.Table.Precision),'f'];
-tableBreaks = settablebreaks(np,op.Table.MaxRows);
+tableBreaks = settablebreaks(auxN,op.Table.MaxRows);
 idxPar = 0;
 nBreaks = length(tableBreaks);
 for jBreak=1:nBreaks
     idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if jBreak>1
-        fprintf(fid,'\\section{Auxiliary Parameters (Cont)}\n');
+    if nBreaks==1
+        fprintf(fid,'\\subsection{Auxiliary Parameters}\n');
+    else
+        fprintf(fid,'\\subsection{Auxiliary Parameters (%.0f/%.0f)}\n',...
+                jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('c',1,1+4+1+1));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+4+1+1));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{4}{c}{Prior} & & Posterior\\\\[0.5ex]\n');
     fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% & & Mode \n');
@@ -354,6 +362,14 @@ fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
 
+for jm=1:nMax
+    if ~op.KeepLogs
+        delete(sprintf('%s_MaxPost_%03.0f.log',obj.Model.Name,jm))
+    end
+    if ~op.KeepMats
+        delete(sprintf('%s_MaxPost_%03.0f.mat',obj.Model.Name,jm))
+    end
+end
 
 
 %% Finish up

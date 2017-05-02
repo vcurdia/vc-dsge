@@ -14,8 +14,7 @@
 
 %% Preamble
 clear all
-setpath
-set(0,'defaultTextInterpreter','latex');
+% startup
 TimeElapsed = TimeTracker;
 TimeElapsed.start('Setup')
 
@@ -155,18 +154,17 @@ model.StateEq = {...
 
 %% Generate Mats
 model.genmats
-Mats = model.mats(model.Param.Values);
-% model.makeirf
+mats = model.mats(model.Param.Values);
+% model.irf
 
 %% Describe Prior
 prior.analyze
-% model.makeirf(prior.draw(100),'FileNameSuffix','_PriorDraws')
+% model.irf(prior.draw(100),'FileNameSuffix','_PriorDraws')
 
 %% Data
 data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
-data.TimeIdx = {'1987q3','2009q3'};
-data.TickLabels = {'1990q4','1995q4','2000q4','2005q4'};
 data.Var = model.ObsVar.Names;
+data.TickLabel = {'1990q4','1995q4','2000q4','2005q4'};
 
 %% Create posterior
 post = DSGE.Posterior(model,prior,data);

@@ -1,6 +1,5 @@
-function setpath
-% SetPath
 
+%% Setup path
 MyPath.Root = fullfile(pwd,'../../../Matlab/');
 MyPath.List = {...
     'vcDSGE',...
@@ -16,3 +15,9 @@ for j=1:length(MyPath.List)
     MyPath.Add{j} = [MyPath.Root,MyPath.List{j}];
 end
 addpath(MyPath.Add{:})
+
+
+%% change text interpreter
+set(groot,'defaultTextInterpreter','latex');
+set(groot,'defaultLegendInterpreter','latex');
+

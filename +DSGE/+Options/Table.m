@@ -1,6 +1,6 @@
 function op = Table(varargin)
 
-% Table
+% DSGE.Options.Table
 %
 % Set Table options
 %

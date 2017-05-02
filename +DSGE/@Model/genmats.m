@@ -19,8 +19,7 @@ function genmats(obj)
 % Copyright (C) 2016-2017 Vasco Curdia
 
 %% Preamble
-fprintf('\n*** Generate DSGE mats\n')
-fprintf('Generating symbolic variables and systems of equations\n')
+fprintf('\n*** Generating DSGE mats\n')
 ttName = 'GenMats';
 obj.TimeElapsed.start(ttName)
 

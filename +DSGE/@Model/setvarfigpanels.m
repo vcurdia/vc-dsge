@@ -15,7 +15,7 @@ function FigPanels = setvarfigpanels(obj,varargin)
 
 %% Options
 op.PanelList = {};
-op.FigShape = {};
+op.FigShape = {3,2};
 op.Scale = 1;
 
 %% Update options
@@ -29,7 +29,7 @@ if isempty(op.PanelList)
 end
 nList = length(op.PanelList);
 if isempty(op.FigShape), op.FigShape = cell(1,nList); end
-if ~iscell(op.FigShape)
+if ~isempty(op.FigShape{1}) && ~iscell(op.FigShape{1})
     FigShape = op.FigShape;
     op.FigShape = cell(1,nList);
     for j=1:nList, op.FigShape{j} = FigShape; end
@@ -45,13 +45,13 @@ for j=1:nList
     if ~isempty(op.FigShape{j}), continue, end
     nVarj = obj.(op.PanelList{j}).N;
     if nVarj==1
-        op.FigShape{j} = [1,1];
+        op.FigShape{j} = {1,1};
     elseif nVarj<=4*2
-        op.FigShape{j} = [2,2];
+        op.FigShape{j} = {2,2};
     elseif nVarj<=9*3
-        op.FigShape{j} = [3,3];
+        op.FigShape{j} = {3,3};
     else
-        op.FigShape{j} = [4,4];
+        op.FigShape{j} = {4,4};
     end
 end
 
@@ -60,7 +60,7 @@ FigPanels = struct;
 jP = 0;
 for jL=1:nList
     Lj = op.PanelList{jL};
-    nMaxVar = prod(op.FigShape{jL});
+    nMaxVar = prod([op.FigShape{jL}{:}]);
     nPj = ceil(obj.(Lj).N/nMaxVar);
     for j=1:nPj
         jP = jP+1;
@@ -79,6 +79,7 @@ for jL=1:nList
             FigPanels(jP).PrettyNames = obj.(Lj).PrettyNames(...
                 (j-1)*nMaxVar+1:min(j*nMaxVar,obj.(Lj).N));
         end
+        FigPanels(jP).N = length(FigPanels(jP).Names);
         FigPanels(jP).FigShape = op.FigShape{jL};
         FigPanels(jP).Scale = ...
             repmat(op.Scale{jL},1,length(FigPanels(jP).Names));

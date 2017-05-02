@@ -17,14 +17,17 @@ classdef Posterior < handle
         EstimateIdx
         NEstimate
         Mode
-        ModeLPDF
+        LPDFMode
         Mean
         SD
         Var
+        Corr
         Median
         Prc05
         Prc95
-        Sample
+        LogMgLikelihood
+        MCMCStage
+        MCMCSample
     end
    
     properties (SetAccess = protected)
@@ -34,7 +37,7 @@ classdef Posterior < handle
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0
-                fprintf('\n*** Initiating posterior\n')
+                fprintf('\n*** Preparing posterior\n')
                 obj.TimeElapsed = TimeTracker;
                 obj.Model = model;
                 obj.Prior = prior;
@@ -42,9 +45,9 @@ classdef Posterior < handle
                 obj.EstimateIdx = ~ismember(prior.Dist,{'C'});
                 obj.NEstimate = sum(obj.EstimateIdx);
                 obj.Mode = model.Param.Values;
-                obj.ModeLPDF = obj.lpdf(obj.Mode);
+                obj.LPDFMode = obj.lpdf(obj.Mode);
                 fprintf('Posterior log-pdf using Param.Values is %0.4f.\n',...
-                        obj.ModeLPDF);
+                        obj.LPDFMode);
                 obj.Mean = prior.Mean;
                 obj.SD = prior.SD;
                 obj.Var = diag(prior.SD.^2);
@@ -73,16 +76,20 @@ classdef Posterior < handle
         end
         
         function xx = expandparam(obj,x)
-            xx = repmat(obj.Model.Param.Values,1,size(x,2));
-            xx(obj.EstimateIdx,:) = x;
+            xx = repmat(obj.Model.Param.Values,1,size(x,2),size(x,3));
+            xx(obj.EstimateIdx,:,:) = x;
         end
         
         function xd = draw(obj,nDraws)
             if nargin<2 || isempty(nDraws)
                 nDraws = 1; 
             end
-            xd = nan(obj.NParam,nDraws);
-            error('Posterior draw method is not ready yet.')
+            if isempty(obj.MCMCSample.FileNameRedux)
+                obj.mcmcredux
+            end
+            draws = load(obj.MCMCSample.FileNameRedux);
+            xd = obj.expandparam(...
+                draws.Param(:,randi(draws.N,1,nDraws)));
         end
         
         function new = copy(obj)
