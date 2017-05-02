@@ -31,14 +31,14 @@ classdef Posterior < handle
     end
    
     properties (SetAccess = protected)
-        TimeElapsed
+        TimeTracker
     end
     
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0
                 fprintf('\n*** Preparing posterior\n')
-                obj.TimeElapsed = TimeTracker;
+                obj.TimeTracker = TimeTracker;
                 obj.Model = model;
                 obj.Prior = prior;
                 obj.Data = data;

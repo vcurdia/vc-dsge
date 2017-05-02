@@ -15,8 +15,8 @@
 %% Preamble
 clear all
 % startup
-TimeElapsed = TimeTracker;
-TimeElapsed.start('Setup')
+tt = TimeTracker;
+tt.start('Setup')
 
 %% Initiate DSGE
 model = DSGE.Model('MyDSGE');
@@ -171,6 +171,6 @@ post = DSGE.Posterior(model,prior,data);
 
 
 %% Finish up
-fprintf('\n'),TimeElapsed.stop('Setup')
+fprintf('\n'),tt.stop('Setup')
 save(model.Name)
 cd(basePath)

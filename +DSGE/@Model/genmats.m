@@ -21,7 +21,7 @@ function genmats(obj)
 %% Preamble
 fprintf('\n*** Generating DSGE mats\n')
 ttName = 'GenMats';
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 %% basic check
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
@@ -482,4 +482,4 @@ if Mats.Status==0
 end
 
 %% Save timer
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)

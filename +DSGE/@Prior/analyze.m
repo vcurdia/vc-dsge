@@ -17,7 +17,7 @@ function analyze(obj,varargin)
 %% Preamble
 fprintf('\n*** Analyzing DSGE Prior\n')
 ttName = 'Analyze';
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 %% Options
 op.NDraws = 10000;
@@ -220,7 +220,7 @@ fclose(fid);
 pdflatex(ReportFileName)
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 
 end
 

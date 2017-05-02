@@ -27,14 +27,14 @@ classdef Prior < handle
         PDFCmd
         RndCmd
         LPDFCorrection
-        TimeElapsed
+        TimeTracker
     end
     
     methods
         function obj = Prior(m,p)
             if nargin>0
                 fprintf('\n*** Preparing prior\n')
-                obj.TimeElapsed = TimeTracker;
+                obj.TimeTracker = TimeTracker;
                 obj.Model = m;
             end
             if nargin>1 && ~isempty(p)

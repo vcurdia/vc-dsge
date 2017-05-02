@@ -15,7 +15,7 @@ function maxlpdf(obj,varargin)
 %% Preamble
 fprintf('\n*** Maximizing posterior log-pdf\n')
 ttName = 'MaxLPDF';
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 
 %% settings
@@ -373,6 +373,6 @@ end
 
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 end
 

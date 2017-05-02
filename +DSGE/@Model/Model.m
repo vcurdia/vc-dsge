@@ -33,7 +33,7 @@ classdef Model < handle
     end
     
     properties (SetAccess = protected)
-        TimeElapsed
+        TimeTracker
         mats
 %         ObsEqMats
     end
@@ -44,7 +44,7 @@ classdef Model < handle
                 fprintf('\n*** Preparing model\n')
                 fprintf('%s\n',name)
                 obj.Name = name;
-                obj.TimeElapsed = TimeTracker;
+                obj.TimeTracker = TimeTracker;
             end
         end
         

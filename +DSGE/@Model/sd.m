@@ -60,7 +60,7 @@ end
 
 fprintf('\n*** Shock Decomposing\n')
 ttName = ['SD',op.FNSuffix];
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_SD%s',obj.Name,op.FNSuffix); 
@@ -221,4 +221,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
