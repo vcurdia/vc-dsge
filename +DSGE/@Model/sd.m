@@ -58,7 +58,7 @@ end
 
 %% Preamble
 
-fprintf('\n*** Decomposing states\n')
+fprintf('\n*** Shock Decomposing\n')
 ttName = ['SD',op.FNSuffix];
 obj.TimeElapsed.start(ttName)
 

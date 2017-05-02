@@ -38,9 +38,7 @@ options.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 % options.MaxPost.Min.Ritmin = 5;
 % post.maxlpdf(options.MaxPost)
 % save([specName,'_MaxPost'])
-% options.Sim.FNSuffix = '_PostMode';
-% model.irf(post.Mode,options.Sim)
-% model.vd(post.Mode,options.Sim)
+% model.sim(data,post.Mode,options.Sim,'FNSuffix','_PostMode')
 
 %% MCMC
 options.MCMC.NDraws = 1000;
@@ -57,11 +55,7 @@ for s=1
     post.analyzeparam
     post.mcmcredux
     xd = post.draw(100);
-    options.Sim.FNSuffix = fnSuffix;
-    model.irf(xd,options.Sim)
-    model.vd(xd,options.Sim)
-    model.states(data,xd,options.Sim)
-    model.sd(data,xd,options.Sim)
+    model.sim(data,xd,options.Sim,'FNSuffix',fnSuffix)
     save([fn,'_Analysis'])
     save(specName)
 end
