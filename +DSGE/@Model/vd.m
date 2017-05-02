@@ -15,7 +15,7 @@ function vd(obj,xd,varargin)
 
 
 %% Default Options
-op.FileNameSuffix = '';
+op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
 op.FigPanels = obj.setvarfigpanels;
@@ -30,11 +30,11 @@ op.Fig.XTickLabel = {1,4:4:32,'   inf'};
 op.Fig.ShowPlotTitle = 1;
 op.Fig.LegPos = 'EO';
 op.Fig.LegOrientation = 'vertical';
-op.Fig.FontSize = 8;
+% op.Fig.FontSize = 8;
 op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
-op.PaperPosition = [0. 0, 6.5, 6.5];
+op.PaperPosition = [0, 0, 6.5, 6.5];
 op.PlotDir = 'Plots_VD/';
 
 op = updateoptions(op,varargin{:});
@@ -43,14 +43,14 @@ op = updateoptions(op,varargin{:});
 %% Preamble
 
 fprintf('\n*** Making VD\n')
-ttName = ['VD',op.FileNameSuffix];
+ttName = ['VD',op.FNSuffix];
 obj.TimeElapsed.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_VD%s',obj.Name,op.FileNameSuffix); 
-ReportFileName = sprintf('%s_Report_VD%s',obj.Name,op.FileNameSuffix);
+PlotFileName = sprintf('%s_VD%s',obj.Name,op.FNSuffix); 
+ReportFileName = sprintf('%s_Report_VD%s',obj.Name,op.FNSuffix);
 ReportTitle = sprintf('%s\\\\VD Report %s',obj.Name,...
-                      strrep(op.FileNameSuffix,'_',''));
+                      strrep(op.FNSuffix,'_',''));
 
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
@@ -147,8 +147,8 @@ nDrawsUsed = length(VDCheck);
 %% Create tables
 fprintf('\nVariance decomposition:')
 fprintf('\n=======================\n')
-if ~isempty(op.FileNameSuffix)
-    fprintf('%s\n',op.FileNameSuffix)
+if ~isempty(op.FNSuffix)
+    fprintf('%s\n',op.FNSuffix)
 end
 for jH=op.Fig.XTick
     for jL=1:length(tList)
@@ -202,10 +202,9 @@ for jP=1:length(op.FigPanels)
             title(Pj.PrettyNames{jV});
         end
         ylim([0,1])
-        ax = gca;
-        ax.XTick = Figj.XTick;
-        ax.XTickLabel = Figj.XTickLabel;
-        ax.FontSize = Figj.FontSize;
+        ha(jV).XTick = Figj.XTick;
+        ha(jV).XTickLabel = Figj.XTickLabel;
+%         ha(jV).FontSize = Figj.FontSize;
     end
     if prod([Figj.Shape{:}])==1
         hl = legend(obj.ShockVar.PrettyNames,'Location',op.Fig.LegPos);

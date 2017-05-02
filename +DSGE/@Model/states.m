@@ -15,14 +15,16 @@ function states(obj,data,xd,varargin)
 
 
 %% Options
-op.FileNameSuffix = '';
+op.FNSuffix = '';
 op.DrawStates = [];
 op.Time2Show = data.TimeIdx([1,end]);
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 % op.Fig.YMinScale = 0.01;
+op.Fig.Plot.LineWidth = 1.5;
 op.PlotDir = 'Plots_States/';
 op.FigPanelsOptions = struct;
+op.FigPanelsOptions.FigShape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
@@ -40,14 +42,14 @@ end
 %% Preamble
 
 fprintf('\n*** Simulating States\n')
-ttName = ['States',op.FileNameSuffix];
+ttName = ['States',op.FNSuffix];
 obj.TimeElapsed.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_States%s',obj.Name,op.FileNameSuffix); 
-ReportFileName = sprintf('%s_Report_States%s',obj.Name,op.FileNameSuffix);
+PlotFileName = sprintf('%s_States%s',obj.Name,op.FNSuffix); 
+ReportFileName = sprintf('%s_Report_States%s',obj.Name,op.FNSuffix);
 ReportTitle = sprintf('%s\\\\States Report %s',obj.Name,...
-                      strrep(op.FileNameSuffix,'_',''));
+                      strrep(op.FNSuffix,'_',''));
 
 if nargin<2 || isempty(data)
     error('Cannot simulate states without data')
