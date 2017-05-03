@@ -22,12 +22,13 @@ specName = 'MyDSGE';
 specPath = specName;
 basePath = cd(specPath);
 load(specName)
+sim = DSGE.Sim(model,prior,post,data);
 
 %% Initiate parallel pool
 % parpool(2)
 
 %% Settings
-options.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
+sim.TimeLabels = {'1990q1','1995q1','2000q1','2005q1'};
 
 
 %% MaxPost
@@ -46,8 +47,7 @@ for s=1
     post.MCMCStage = s;
     post.mcmc(options.MCMC)
     save(specName)
-    model.sim(data,post.draw(100),options.Sim,...
-              'FNSuffix',sprintf('%s_MCMC_%.0f',specName,s))
+    model.sim(data,post.draw(100),options.Sim,'FNSuffix','_PostDraws')
 end
 
 
