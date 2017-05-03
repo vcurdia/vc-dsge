@@ -1,11 +1,11 @@
-function sim(obj,data,xd,varargin)
+function sim(obj,varargin)
 
 % sim
 % 
 % Simulate DSGE model
 % 
 % See also:
-% DSGE, SetupMyDSGE
+% DSGE.Model, setupMyDSGE, runDSGE
 %
 % .............................................................................
 % 
@@ -16,6 +16,9 @@ function sim(obj,data,xd,varargin)
 
 %% Default Options
 op.FNSuffix = '';
+op.Prior = [];
+op.Post = [];
+op.Data = [];
 
 op = updateoptions(op,varargin{:});
 

@@ -11,21 +11,35 @@ classdef Sim < handle
 % Copyright (C) 2017 Vasco Curdia
     
     properties
+        Name
         Model
         Prior
         Post
         Data
-        Suffix
+        Dist
+        NDraws = 1;
         Time2Show
         TimeLabels
     end
    
+    properties (SetAccess = protected)
+        TimeTracker
+    end
+    
     methods
         function obj = Sim(model,prior,post,data)
-            if nargin>0, obj.Model = model; end
+            if nargin>0
+                obj.Model = model; 
+                obj.TimeTracker = TimeTracker;
+            end
             if nargin>1, obj.Prior = prior; end
             if nargin>2, obj.Post = post; end
             if nargin>3, obj.Data = data; end
+        end
+        
+        function set.Model(obj,m)
+            obj.Model = m;
+            if isempty(obj.Name), obj.Name = m.Name; end
         end
         
         function set.Prior(obj,p)
