@@ -52,7 +52,7 @@ if isempty(op.Fig.Color)
 end
 
 if ~isfield(op,'FigPanels')
-    op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions);
+    op.FigPanels = obj.figpanels(op.FigPanelsOptions);
 end
 
 

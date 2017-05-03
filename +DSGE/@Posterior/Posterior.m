@@ -28,12 +28,9 @@ classdef Posterior < handle
         LogMgLikelihood
         MCMCStage
         MCMCSample
-    end
-   
-    properties (SetAccess = protected)
         TimeTracker
     end
-    
+   
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0

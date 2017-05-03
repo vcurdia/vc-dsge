@@ -18,7 +18,7 @@ function irf(obj,xd,varargin)
 op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.setvarfigpanels;
+op.FigPanels = obj.figpanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Fig.Visible = 'off';

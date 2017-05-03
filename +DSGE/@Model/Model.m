@@ -30,21 +30,17 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
-    end
-    
-    properties (SetAccess = protected)
         TimeTracker
         mats
-%         ObsEqMats
     end
-   
+    
     methods
         function obj = Model(name)
+            obj.TimeTracker = TimeTracker;
             if nargin>0
                 fprintf('\n*** Preparing model\n')
                 fprintf('%s\n',name)
                 obj.Name = name;
-                obj.TimeTracker = TimeTracker;
             end
         end
         

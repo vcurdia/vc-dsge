@@ -30,11 +30,11 @@ op = updateoptions(op,varargin{:});
 
 if ~isfield(op,'FigPanels')
     if obj.AuxVar.N>0
-        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
-                                           'PanelList',{'StateVar','AuxVar'});
+        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
+                                     'PanelList',{'StateVar','AuxVar'});
     else
-        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
-                                           'PanelList',{'StateVar'});
+        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
+                                     'PanelList',{'StateVar'});
     end
 end
 

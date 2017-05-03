@@ -1,4 +1,4 @@
-function sim(obj,varargin)
+function sim(obj,xd,varargin)
 
 % sim
 % 
@@ -16,15 +16,16 @@ function sim(obj,varargin)
 
 %% Default Options
 op.FNSuffix = '';
-op.Prior = [];
-op.Post = [];
+op.List = {'IRF','VD','States','SD'};
 op.Data = [];
 
 op = updateoptions(op,varargin{:});
 
 %% run sim
-obj.irf(xd,op)
-obj.vd(xd,op)
-obj.states(data,xd,op)
-obj.sd(data,xd,op)
+if ismember('IRF',op.List), obj.irf(xd,op), end
+if ismember('VD',op.List), obj.vd(xd,op), end
+if ~isempty(op.Data)
+    if ismember('States',op.List), obj.states(op.Data,xd,op), end
+    if ismember('SD',op.List), obj.sd(op.Data,xd,op), end
+end
 

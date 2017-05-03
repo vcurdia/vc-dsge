@@ -18,7 +18,7 @@ function vd(obj,xd,varargin)
 op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.setvarfigpanels;
+op.FigPanels = obj.figpanels;
 op.VDHorizons = [1:34,inf];
 op.Silent = 1;
 op.VDPrctiles = [50,5,95];
@@ -150,10 +150,11 @@ fprintf('\n=======================\n')
 if ~isempty(op.FNSuffix)
     fprintf('%s\n',op.FNSuffix)
 end
+fprintf('\n')
 for jH=op.Fig.XTick
     for jL=1:length(tList)
         Lj = tList{jL};
-        fprintf('\nHorizon: %.0f, %s\n',VDHorizons(jH),Lj)
+        fprintf('Horizon: %.0f, %s\n',VDHorizons(jH),Lj)
         vj = obj.(Lj).Names;
         nj = obj.(Lj).N;
         vIdx = ismember(vNames,vj);
@@ -173,6 +174,7 @@ for jH=op.Fig.XTick
                          repmat(['   %',int2str(sNameLengthMax),'.3f'],1,...
                                 nShockVar),'\n'],vj{jV},VDj(jV,:))
             end
+            fprintf('\n')
         end
     end
 end
