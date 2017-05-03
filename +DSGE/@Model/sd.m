@@ -1,4 +1,4 @@
-function sd(obj,data,xd,varargin)
+function sd(obj,xd,varargin)
 
 % sd
 % 
@@ -16,9 +16,10 @@ function sd(obj,data,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
+op.Data = [];
 op.DrawStates = [];
 op.ShowOther = 1;
-op.Time2Show = data.TimeIdx([1,end]);
+op.Time2Show = [];
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 op.Fig.Color = [];
@@ -36,6 +37,11 @@ op.FigPanelsOptions = struct;
 op.FigPanelsOptions.FigShape = {3,1};
 
 op = updateoptions(op,varargin{:});
+
+if isempty(op.Data)
+    error('Data is empty. Cannot simulate states.')
+end
+if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
 
 if ~isfield(op,'ShockGroups')
     op.ShockGroups = cell(obj.ShockVar.N,2);
