@@ -1,4 +1,4 @@
-function run(obj,dist,ndraws)
+function run(obj,dist,nDraws,sList)
 
 % run
 % 
@@ -15,8 +15,9 @@ function run(obj,dist,ndraws)
 
 
 %% Preamble
-if nargin>1, obj.Dist = dist; end
-if nargin>2, obj.NDraws = ndraws; end
+if nargin>1 && ~isempty(dist), obj.Dist = dist; end
+if nargin>2 && ~isempty(nDraws), obj.NDraws = nDraws; end
+if nargin>3 && ~isempty(sList), obj.list(sList), end
 
 %% Prepare parameter draws
 if strcmp(obj.Dist,'PriorDraws')
@@ -37,7 +38,16 @@ fprintf('\n*** Running simulations\n')
 fprintf('%s\n',simName)
 obj.TimeTracker.start(simName)
 
-
+%% IRF Preparations
+if obj.IRF
+    if isempty(obj.IRFFigPanels), obj.IRFFigPanels = obj.figpanels; end
+    if isempty(obj.IRFShocks2Show), 
+        op.IRFShocks2Show = obj.Model.ShockVar.Names; 
+    end
+    nShocks2Show = length(obj.Shocks2Show);
+    if isempty(obj.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
+    if ~isdir(obj.IRFPlotDir),mkdir(obj.IRFPlotDir),end
+end
 obj.irf(xd,op)
 obj.vd(xd,op)
 obj.states(data,xd,op)

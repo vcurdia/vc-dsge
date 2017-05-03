@@ -20,6 +20,17 @@ classdef Sim < handle
         NDraws = 1;
         Time2Show
         TimeLabels
+        IRF = 1;
+        VD = 1;
+        States = 1;
+        SD = 1;
+        IRFNSteps = 25;
+        IRFTickStep = 4;
+        IRFFigPanels
+        Shocks2Show
+        ShockSize
+        IRFPlotDir = 'Plots_IRF';
+        Fig = figdefaultoptions;
     end
    
     properties (SetAccess = protected)
@@ -28,13 +39,11 @@ classdef Sim < handle
     
     methods
         function obj = Sim(model,prior,post,data)
-            if nargin>0
-                obj.Model = model; 
-                obj.TimeTracker = TimeTracker;
-            end
-            if nargin>1, obj.Prior = prior; end
-            if nargin>2, obj.Post = post; end
-            if nargin>3, obj.Data = data; end
+            obj.TimeTracker = TimeTracker;
+            if nargin>0 && ~isempty(model), obj.Model = model; end
+            if nargin>1 && ~isempty(prior), obj.Prior = prior; end
+            if nargin>2 && ~isempty(post), obj.Post = post; end
+            if nargin>3 && ~isempty(data), obj.Data = data; end
         end
         
         function set.Model(obj,m)
@@ -82,6 +91,20 @@ classdef Sim < handle
                 end
                 error('Parameters do not match. Cannot proceed.')
             end
+        end
+        
+        function list(obj,slist)
+            simList = {'IRF','VD','States','SD'};
+            tf = ismember(simList,sList);
+            for j=1:length(simList)
+                obj.(simList{j}) = tf(j);
+            end
+        end
+        
+        function Fig = figdefaultoptions
+            Fig = struct;
+            Fig.Visible = 'off';
+            Fig.Plot.LineWidth = 1.5;
         end
         
         function new = copy(obj)
