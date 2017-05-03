@@ -29,7 +29,9 @@ op.FigPanelsOptions.FigShape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
-if isempty(op.Data)
+if ~isempty(op.Data)
+    data = op.Data;
+else
     error('Data is empty. Cannot simulate states.')
 end
 if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
