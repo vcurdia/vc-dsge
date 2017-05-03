@@ -1,6 +1,6 @@
-function FigPanels = setvarfigpanels(obj,varargin)
+function FigPanels = figpanels(obj,varargin)
 
-% setvarfigpanels
+% figpanels
 % 
 % Generates figure panels to show variables from DSGE model
 % 

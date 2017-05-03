@@ -1,4 +1,4 @@
-classdef Data
+classdef Data < matlab.mixin.Copyable
 % DSGE.Data class
 % 
 % See also:
@@ -40,7 +40,7 @@ classdef Data
             end
         end
         
-        function obj = set.Var(obj,Var)
+        function set.Var(obj,Var)
             if ~isempty(obj.Var)
                 [tf,idx] = ismember(Var,obj.Var);
                 if ~all(tf)
@@ -52,7 +52,7 @@ classdef Data
             obj.NVar = length(Var);
         end
         
-        function obj = set.TimeIdx(obj,tid)
+        function set.TimeIdx(obj,tid)
             if length(tid)==2
                 tid = timeidx(tid{:});
             end
@@ -69,7 +69,7 @@ classdef Data
             end
         end
         
-        function obj = set.SampleStart(obj,t)
+        function set.SampleStart(obj,t)
             if ~ismember(t,obj.TimeIdx)
                 error('Requested SampleStart out of data scope.')
             end
@@ -77,15 +77,6 @@ classdef Data
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
         end
         
-%         function new = copy(obj)
-%             new = DSGE.Data;
-%             % Copy all non-hidden properties.
-%             pList = properties(obj);
-%             for j = 1:length(pList)
-%                 new.(pList{j}) = obj.(pList{j});
-%             end
-%         end
-    
     end %methods
     
 end %class

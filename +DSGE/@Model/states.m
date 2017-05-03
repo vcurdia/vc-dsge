@@ -1,4 +1,4 @@
-function states(obj,data,xd,varargin)
+function states(obj,xd,varargin)
 
 % states
 % 
@@ -16,8 +16,9 @@ function states(obj,data,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
+op.Data = [];
 op.DrawStates = [];
-op.Time2Show = data.TimeIdx([1,end]);
+op.Time2Show = [];
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 % op.Fig.YMinScale = 0.01;
@@ -28,13 +29,18 @@ op.FigPanelsOptions.FigShape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
+if isempty(op.Data)
+    error('Data is empty. Cannot simulate states.')
+end
+if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
+
 if ~isfield(op,'FigPanels')
     if obj.AuxVar.N>0
-        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
-                                           'PanelList',{'StateVar','AuxVar'});
+        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
+                                     'PanelList',{'StateVar','AuxVar'});
     else
-        op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions,...
-                                           'PanelList',{'StateVar'});
+        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
+                                     'PanelList',{'StateVar'});
     end
 end
 

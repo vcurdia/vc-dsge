@@ -19,8 +19,9 @@ obj.TimeTracker.start(ttName)
 
 
 %% settings
-ReportFileName = sprintf('%s_Report_Posterior_Mode',obj.Model.Name);
-ReportTitle = sprintf('%s\\\\Posterior Mode',obj.Model.Name);
+ReportFileName = sprintf('%s_Report_Param_PostMode',obj.Model.Name);
+ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Posterior Mode',...
+                      obj.Model.Name);
 
 np = obj.NEstimate;
 pIdx = obj.EstimateIdx;

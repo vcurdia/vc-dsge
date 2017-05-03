@@ -27,27 +27,27 @@ load(specName)
 % parpool(2)
 
 %% Settings
-options.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
+op.Sim.Data = data;
+op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 
 
 %% MaxPost
-% options.MaxPost.NMax = 4;
-% options.MaxPost.Min.nit = 100;
-% options.MaxPost.Min.Ritmax = 10;
-% options.MaxPost.Min.Ritmin = 5;
-% post.maxlpdf(options.MaxPost)
+% op.MaxPost.NMax = 4;
+% op.MaxPost.Min.nit = 100;
+% op.MaxPost.Min.Ritmax = 10;
+% op.MaxPost.Min.Ritmin = 5;
+% post.maxlpdf(op.MaxPost)
 % save([specName,'_MaxPost'])
-% model.sim(data,post.Mode,options.Sim,'FNSuffix','_PostMode')
+% model.sim(post.Mode,op.Sim,'FNSuffix','_PostMode')
 
 %% MCMC
-options.MCMC.NDraws = 1000;
-options.MCMC.NDrawsCalibrate = 200;
+op.MCMC.NDraws = 1000;
+op.MCMC.NDrawsCalibrate = 200;
 for s=1
     post.MCMCStage = s;
-    post.mcmc(options.MCMC)
+    post.mcmc(op.MCMC)
     save(specName)
-    model.sim(data,post.draw(100),options.Sim,...
-              'FNSuffix',sprintf('%s_MCMC_%.0f',specName,s))
+    model.sim(post.draw(100),op.Sim,'FNSuffix','_PostDraws')
 end
 
 

@@ -1,4 +1,4 @@
-classdef Prior < handle
+classdef Prior < matlab.mixin.Copyable
 % DSGE.Prior class
 % 
 % See also:
@@ -15,9 +15,6 @@ classdef Prior < handle
         Dist
         Mean
         SD
-    end
-   
-    properties (SetAccess = protected)
         Mode
         Median
         Prc05
@@ -29,7 +26,7 @@ classdef Prior < handle
         LPDFCorrection
         TimeTracker
     end
-    
+   
     methods
         function obj = Prior(m,p)
             if nargin>0
@@ -88,15 +85,6 @@ classdef Prior < handle
             p = log(obj.pdf(x));
         end
         
-        function new = copy(obj)
-            new = DSGE.Prior;
-            % Copy all non-hidden properties.
-            pList = properties(obj);
-            for j = 1:length(pList)
-                new.(pList{j}) = obj.(pList{j});
-            end
-        end
-    
     end %methods
     
 end %class
