@@ -1,15 +1,16 @@
-% runMyDSGE
+% estimateDSGE
 %
-% This file gives an example of how to use the vcDSGE package
+% This file gives an example of how to estimate a DSGE using the vcDSGE toolbox.
+% It assumes that the DSGE was previously setup by setupDSGE.
 %
 % See also:
-% setupDSGE
+% setupDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior
 %
 % ...........................................................................
 %
 % Created: January 21, 2016 by Vasco Curdia
 % 
-% Copyright (C) 2016 Vasco Curdia
+% Copyright (C) 2016-2017 Vasco Curdia
 
 
 %% Preamble
