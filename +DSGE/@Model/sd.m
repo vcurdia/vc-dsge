@@ -1,4 +1,4 @@
-function sd(obj,data,xd,varargin)
+function sd(obj,xd,varargin)
 
 % sd
 % 
@@ -16,9 +16,10 @@ function sd(obj,data,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
+op.Data = [];
 op.DrawStates = [];
 op.ShowOther = 1;
-op.Time2Show = data.TimeIdx([1,end]);
+op.Time2Show = [];
 op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 op.Fig.Color = [];
@@ -37,6 +38,13 @@ op.FigPanelsOptions.FigShape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
+if ~isempty(op.Data)
+    data = op.Data;
+else
+    error('Data is empty. Cannot generate shock decomposition.')
+end
+if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
+
 if ~isfield(op,'ShockGroups')
     op.ShockGroups = cell(obj.ShockVar.N,2);
     for j=1:obj.ShockVar.N
@@ -52,15 +60,15 @@ if isempty(op.Fig.Color)
 end
 
 if ~isfield(op,'FigPanels')
-    op.FigPanels = obj.setvarfigpanels(op.FigPanelsOptions);
+    op.FigPanels = obj.figpanels(op.FigPanelsOptions);
 end
 
 
 %% Preamble
 
-fprintf('\n*** Shock Decomposing\n')
+fprintf('\n*** Shock Decomposition\n')
 ttName = ['SD',op.FNSuffix];
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_SD%s',obj.Name,op.FNSuffix); 
@@ -221,4 +229,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)

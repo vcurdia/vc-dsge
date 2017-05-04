@@ -32,7 +32,7 @@ if isempty(obj.MCMCStage), obj.MCMCStage = 1; end
 fprintf('\n*** Calibrating Jump Distribution for MCMC Sample %.0f\n',...
         obj.MCMCStage)
 ttName = sprintf('CalibrateMCMC%.0f',obj.MCMCStage);
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 pIdx = obj.EstimateIdx;
 jumpScale = op.JumpScale;
@@ -142,6 +142,8 @@ else
     fprintf('Results confirmed.\n\n')
 end
 
+%% save workspace
+save(sprintf('_%s_MCMC_%.0f_Calibration',obj.Model.Name,obj.MCMCStage))
 
 %% Clean up
 if ~op.KeepFilesCalibrate
@@ -153,6 +155,6 @@ end
  
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 
 

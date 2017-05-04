@@ -18,7 +18,7 @@ function irf(obj,xd,varargin)
 op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.setvarfigpanels;
+op.FigPanels = obj.figpanels;
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Fig.Visible = 'off';
@@ -37,7 +37,7 @@ if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 
 fprintf('\n*** Making IRF\n')
 ttName = ['IRF',op.FNSuffix];
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FNSuffix); 
@@ -170,4 +170,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)

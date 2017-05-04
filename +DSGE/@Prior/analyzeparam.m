@@ -1,6 +1,6 @@
-function analyze(obj,varargin)
+function analyzeparam(obj,varargin)
 
-% analyze
+% analyzeparam
 %
 % Analyzes a the prior distribution. Not
 %
@@ -17,7 +17,7 @@ function analyze(obj,varargin)
 %% Preamble
 fprintf('\n*** Analyzing DSGE Prior\n')
 ttName = 'Analyze';
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 %% Options
 op.NDraws = 10000;
@@ -27,8 +27,8 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin{:});
 
 %% other settings
-ReportFileName = sprintf('%s_Report_Prior',obj.Model.Name);
-ReportTitle = sprintf('%s\\\\Prior Analysis',obj.Model.Name);
+ReportFileName = sprintf('%s_Report_Param_Prior',obj.Model.Name);
+ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Prior',obj.Model.Name);
 
 %% useful variables
 np = obj.Model.Param.N;
@@ -220,7 +220,7 @@ fclose(fid);
 pdflatex(ReportFileName)
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 
 end
 

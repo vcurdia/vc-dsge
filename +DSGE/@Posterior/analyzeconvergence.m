@@ -37,13 +37,13 @@ op = updateoptions(op,varargin{:});
 
 fprintf('\n*** Analyzing convergence of MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.MCMCStage);
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDirDraws),mkdir(op.PlotDirDraws),end
 if ~isdir(op.PlotDirTrace),mkdir(op.PlotDirTrace),end
-ReportFileName = sprintf('%s_Report_MCMC_%.0f_Convergence',obj.Model.Name,...
+ReportFileName = sprintf('%s_Report_Convergence_MCMC_%.0f',obj.Model.Name,...
                          obj.MCMCStage);
-ReportTitle = sprintf('%s\\\\MCMC Stage %.0f\\\\Convergence Analysis',...
+ReportTitle = sprintf('%s\\\\Convergence Analysis\\\\MCMC Stage %.0f',...
                       obj.Model.Name,obj.MCMCStage);
 
 sample = obj.MCMCSample;
@@ -486,5 +486,5 @@ fclose(fid);
 pdflatex(ReportFileName)
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 

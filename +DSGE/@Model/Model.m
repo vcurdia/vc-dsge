@@ -1,4 +1,4 @@
-classdef Model < handle
+classdef Model < matlab.mixin.Copyable
 % DSGE.Model class
 % 
 % See also:
@@ -30,21 +30,17 @@ classdef Model < handle
         GensysAuthor = 'CS';
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
+        TimeTracker
+        mats
     end
     
-    properties (SetAccess = protected)
-        TimeElapsed
-        mats
-%         ObsEqMats
-    end
-   
     methods
         function obj = Model(name)
+            obj.TimeTracker = TimeTracker;
             if nargin>0
                 fprintf('\n*** Preparing model\n')
                 fprintf('%s\n',name)
                 obj.Name = name;
-                obj.TimeElapsed = TimeTracker;
             end
         end
         
@@ -161,15 +157,6 @@ classdef Model < handle
 %             end
 %         end
             
-        function new = copy(obj)
-            new = DSGE.Model;
-            % Copy all non-hidden properties.
-            pList = properties(obj);
-            for j = 1:length(pList)
-                new.(pList{j}) = obj.(pList{j});
-            end
-        end
-    
     end %methods
     
     methods(Static)

@@ -35,12 +35,12 @@ op = updateoptions(op,varargin{:});
 
 fprintf('\n*** Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeParamMCMC%.0f',obj.MCMCStage);
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-ReportFileName = sprintf('%s_Report_MCMC_%.0f_Param',obj.Model.Name,...
+ReportFileName = sprintf('%s_Report_Param_MCMC_%.0f',obj.Model.Name,...
                          obj.MCMCStage);
-ReportTitle = sprintf('%s\\\\MCMC Stage %.0f\\\\Parameter Analysis',...
+ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\MCMC Stage %.0f',...
                       obj.Model.Name,obj.MCMCStage);
 
 sample = obj.MCMCSample;
@@ -478,5 +478,5 @@ pdflatex(ReportFileName)
 
 
 %% Finish up
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
 

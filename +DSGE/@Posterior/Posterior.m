@@ -1,4 +1,5 @@
-classdef Posterior < handle
+classdef Posterior < matlab.mixin.Copyable
+
 % DSGE.Posterior class
 % 
 % See also:
@@ -28,17 +29,14 @@ classdef Posterior < handle
         LogMgLikelihood
         MCMCStage
         MCMCSample
+        TimeTracker
     end
    
-    properties (SetAccess = protected)
-        TimeElapsed
-    end
-    
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0
                 fprintf('\n*** Preparing posterior\n')
-                obj.TimeElapsed = TimeTracker;
+                obj.TimeTracker = TimeTracker;
                 obj.Model = model;
                 obj.Prior = prior;
                 obj.Data = data;
@@ -92,15 +90,6 @@ classdef Posterior < handle
                 draws.Param(:,randi(draws.N,1,nDraws)));
         end
         
-        function new = copy(obj)
-            new = DSGE.Posterior;
-            % Copy all non-hidden properties.
-            pList = properties(obj);
-            for j = 1:length(pList)
-                new.(pList{j}) = obj.(pList{j});
-            end
-        end
-    
     end %methods
     
 end %class

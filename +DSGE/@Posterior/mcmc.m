@@ -19,15 +19,29 @@ op.NChains = 4;
 op.JumpScale = 2.4;
 op.Augment = 0;
 op.NDraws = 50000;
+op.CalibrateMCMC = [];
+op.AnalyzeParam = 1;
+op.AnalyzeConvergence = 1;
+op.MCMCRedux = 1;
+
 
 op = updateoptions(op,varargin{:});
+
+%% MCMC calibration
+if isempty(op.CalibrateMCMC)
+    op.CalibrateMCMC = ~op.Augment;
+end
+if op.CalibrateMCMC
+    op.JumpScale = post.calibratemcmc(op);
+    save(fnTmpCalibrateMCMC)
+end
 
 %% Preparations
 
 if isempty(obj.MCMCStage), obj.MCMCStage = 1; end
 fprintf('\n*** Making MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.MCMCStage);
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 pIdx = obj.EstimateIdx;
 
@@ -76,6 +90,8 @@ for jChain=1:op.NChains
 end
 fprintf('\n')
 
+%% save workspace
+save(sprintf('_%s_MCMC_%.0f',obj.Model.Name,obj.MCMCStage))
 
 %% Clean up
 if ~op.KeepLogs
@@ -84,7 +100,13 @@ if ~op.KeepLogs
     end
 end
 
-%% Finish up
-obj.TimeElapsed.stop(ttName)
+%% Finish up MCMC
+obj.TimeTracker.stop(ttName)
+
+%% Run MCMC analysis
+if op.AnalyzeParam, obj.analyzeparam, end
+if op.AnalyzeConvergence, obj.analyzeconvergence, end
+if op.MCMCRedux, obj.mcmcredux, end
+
 
 

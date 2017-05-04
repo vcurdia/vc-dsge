@@ -18,14 +18,14 @@ function vd(obj,xd,varargin)
 op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.setvarfigpanels;
+op.FigPanels = obj.figpanels;
 op.VDHorizons = [1:34,inf];
 op.Silent = 1;
 op.VDPrctiles = [50,5,95];
 op.Table = DSGE.Options.Table;
 op.Fig.Visible = 'off';
 op.Fig.Color = [];
-op.Fig.XTick = [1,4:4:32,35];
+op.Fig.XTick = [1,4,8:8:32,35];
 op.Fig.XTickLabel = {1,4:4:32,'   inf'};
 op.Fig.ShowPlotTitle = 1;
 op.Fig.LegPos = 'EO';
@@ -44,7 +44,7 @@ op = updateoptions(op,varargin{:});
 
 fprintf('\n*** Making VD\n')
 ttName = ['VD',op.FNSuffix];
-obj.TimeElapsed.start(ttName)
+obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_VD%s',obj.Name,op.FNSuffix); 
@@ -150,10 +150,11 @@ fprintf('\n=======================\n')
 if ~isempty(op.FNSuffix)
     fprintf('%s\n',op.FNSuffix)
 end
+fprintf('\n')
 for jH=op.Fig.XTick
     for jL=1:length(tList)
         Lj = tList{jL};
-        fprintf('\nHorizon: %.0f, %s\n',VDHorizons(jH),Lj)
+        fprintf('Horizon: %.0f, %s\n',VDHorizons(jH),Lj)
         vj = obj.(Lj).Names;
         nj = obj.(Lj).N;
         vIdx = ismember(vNames,vj);
@@ -173,6 +174,7 @@ for jH=op.Fig.XTick
                          repmat(['   %',int2str(sNameLengthMax),'.3f'],1,...
                                 nShockVar),'\n'],vj{jV},VDj(jV,:))
             end
+            fprintf('\n')
         end
     end
 end
@@ -305,4 +307,4 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeElapsed.stop(ttName)
+obj.TimeTracker.stop(ttName)
