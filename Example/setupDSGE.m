@@ -3,7 +3,7 @@
 % This file gives an example of how to setup a DSGE using the vcDSGE toolbox.
 %
 % See also:
-% estimateDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior
+% estimateDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
 % ...........................................................................
 %
@@ -168,7 +168,7 @@ op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 post = DSGE.Posterior(model,prior,data);
 
 %% Simulate model at prior
-model.sim(prior.draw(100),op.Sim,'FNSuffix','_PriorDraws')
+model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
 fprintf('\n'),tt.stop('Setup')
