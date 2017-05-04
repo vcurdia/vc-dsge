@@ -49,7 +49,7 @@ obj.TimeTracker.start(ttName)
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_VD%s',obj.Name,op.FNSuffix); 
 ReportFileName = sprintf('%s_Report_VD%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\VD Report %s',obj.Name,...
+ReportTitle = sprintf('%s\\\\VD\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'_',''));
 
 nStateVar = obj.StateVar.N;

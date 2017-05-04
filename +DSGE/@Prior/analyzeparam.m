@@ -15,8 +15,8 @@ function analyzeparam(obj,varargin)
 
 
 %% Preamble
-fprintf('\n*** Analyzing DSGE Prior\n')
-ttName = 'Analyze';
+fprintf('\n*** Analyzing Parameters Prior\n')
+ttName = 'AnalyzeParam';
 obj.TimeTracker.start(ttName)
 
 %% Options

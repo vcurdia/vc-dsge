@@ -42,7 +42,7 @@ obj.TimeTracker.start(ttName)
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FNSuffix); 
 ReportFileName = sprintf('%s_Report_IRF%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\IRF Report %s',obj.Name,...
+ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'_',''));
 
 %% Prepare for IRF

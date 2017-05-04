@@ -14,7 +14,6 @@
 
 %% Preamble
 clear all
-% startup
 tt = TimeTracker;
 
 %% Load DSGE
@@ -26,19 +25,16 @@ load(specName)
 %% Initiate parallel pool
 % parpool(2)
 
-%% Settings
-op.Sim.Data = data;
-op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
-
 
 %% MaxPost
-% op.MaxPost.NMax = 4;
-% op.MaxPost.Min.nit = 100;
-% op.MaxPost.Min.Ritmax = 10;
-% op.MaxPost.Min.Ritmin = 5;
-% post.maxlpdf(op.MaxPost)
-% save([specName,'_MaxPost'])
-% model.sim(post.Mode,op.Sim,'FNSuffix','_PostMode')
+op.MaxPost.NMax = 4;
+op.MaxPost.Min.nit = 100;
+op.MaxPost.Min.Ritmax = 4;
+op.MaxPost.Min.Ritmin = 2;
+post.maxlpdf(op.MaxPost)
+save([specName,'_MaxPost'])
+model.sim(post.Mode,op.Sim,'FNSuffix','_PostMode')
+
 
 %% MCMC
 op.MCMC.NDraws = 1000;
@@ -46,6 +42,7 @@ op.MCMC.NDrawsCalibrate = 200;
 for s=1
     post.MCMCStage = s;
     post.mcmc(op.MCMC)
+    save([specName,'_MCMC_',int2str(s)])
     save(specName)
     model.sim(post.draw(100),op.Sim,'FNSuffix','_PostDraws')
 end
