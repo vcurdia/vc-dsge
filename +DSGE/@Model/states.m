@@ -56,7 +56,7 @@ obj.TimeTracker.start(ttName)
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_States%s',obj.Name,op.FNSuffix); 
 ReportFileName = sprintf('%s_Report_States%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\States Report %s',obj.Name,...
+ReportTitle = sprintf('%s\\\\States\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'_',''));
 
 if nargin<2 || isempty(data)
