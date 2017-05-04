@@ -1,6 +1,6 @@
 function dStats = sumstats(data,Percentiles)
 
-% genstats
+% sumstats
 %
 % Generate descriptive statistics
 %
