@@ -253,7 +253,7 @@ if obj.ObsVar.N>0
     fprintf(fid,'\n%% Observation equations\n');
     H0 = -jacobian(ObsEq,ObsVar_t);
     H = jacobian(ObsEq,StateVar_t);
-    HBar = ObsEq-H*StateVar_t.'+H0*ObsVar_t.';
+    HBar = simplify(ObsEq-H*StateVar_t.'+H0*ObsVar_t.');
 %     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
     SymMats.ObsEq.HBar = H0\HBar;
     SymMats.ObsEq.H = H0\H;
@@ -308,11 +308,11 @@ SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
 % SymMats.StateEq.GammaBar = jacobian(StateEq,one);
-SymMats.StateEq.GammaBar = StateEq ...
+SymMats.StateEq.GammaBar = simplify(StateEq ...
     + SymMats.StateEq.Gamma0*StateVar_tF.' ...
     - SymMats.StateEq.Gamma1*StateVar_t.' ...
     - SymMats.StateEq.Gamma4*StateVar_tL.' ...
-    - SymMats.StateEq.Gamma2*ShockVar_t.';
+    - SymMats.StateEq.Gamma2*ShockVar_t.');
 idxEq = ( any(SymMats.StateEq.Gamma0~=0,2) ...
           & any(SymMats.StateEq.Gamma4~=0,2) );
 if any(idxEq)
@@ -438,11 +438,11 @@ if obj.AuxVar.N>0
     SymMats.AuxEq.Phi2 = jacobian(AuxEq,ShockVar_t);
     SymMats.AuxEq.Phi3 = jacobian(AuxEq,StateVar_tF);
     SymMats.AuxEq.Phi4 = jacobian(AuxEq,StateVar_tL);
-    SymMats.AuxEq.PhiBar = AuxEq ...
+    SymMats.AuxEq.PhiBar = simplify(AuxEq ...
         - SymMats.AuxEq.Phi1*StateVar_t.' ...
         - SymMats.AuxEq.Phi2*ShockVar_t.' ...
         - SymMats.AuxEq.Phi3*StateVar_tF.' ...
-        - SymMats.AuxEq.Phi4*StateVar_tL.';
+        - SymMats.AuxEq.Phi4*StateVar_tL.');
     MatNames = {'PhiBar','Phi1','Phi2','Phi3','Phi4'};
     nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
     fprintf(fid,'if op.StoreAuxEq || op.StoreAuxREE\n');
