@@ -9,13 +9,20 @@ function [REE,fmat,fwt,ywt,gev] = solveree(StateEq,Author,varargin)
 % the fast gensys from Jae Won and if it does not yield a normal solution it
 % runs the original gensys.
 %
+% Usage:
+%   [REE,fmat,fwt,ywt,gev] = solveree(StateEq)
+%   [REE,fmat,fwt,ywt,gev] = solveree(StateEq,Author)
+%   [REE,fmat,fwt,ywt,gev] = solveree(StateEq,Author,varargin)
+%
+% See also:
+% gensys, gensysvb, fastgensysJaeWonvb
+%
 % ...........................................................................
 % 
 % Created: January 25, 2016 by Vasco Curdia
 % 
-% Copyright 2016 by Vasco Curdia
+% Copyright 2016-2017 by Vasco Curdia
 
-%% -------------------------------------------------------------------
 
 %% Preamble
 REE.GBar = [];
@@ -37,5 +44,4 @@ if all(REE.eu(:)==1), return, end
     gensysvb(StateEq.Gamma0,StateEq.Gamma1,StateEq.GammaBar,...
              StateEq.Gamma2,StateEq.Gamma3,varargin{:});
 
-%% -------------------------------------------------------------------
 

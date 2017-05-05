@@ -1,22 +1,27 @@
 classdef Param
+
 % DSGE.Param class
 % 
+% DSGE object representing parameters, used in the Model object.
+%
 % See also:
 % setupMyDSGE, DSGE.Model
 %
-% ...........................................................................
-%
-% Created: November 7, 2016 by Vasco Curdia
-% 
-% Copyright (C) 2016-2017 Vasco Curdia
+% Created: November 7, 2016
+% Copyright 2016-2017 Vasco Curdia
     
-    properties
-        Names
+    properties 
+        %Names List of parameter names to be used in equations and commands.
+        Names 
+        % PrettyNames - List of parameter names formatted for LaTeX
+        %  Use this property to create LaTeX output and figures.
         PrettyNames
+        %Values Vector of parameter values used in calibrated simulations.
         Values
     end
     
     properties (SetAccess = protected)
+        %N Number of parameters in instance
         N = 0;
     end
     

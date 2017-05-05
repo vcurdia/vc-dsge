@@ -1,22 +1,25 @@
 classdef Var
+
 % DSGE.Var class
+% 
+% DSGE object representing variables, used in the model object.
 % 
 % See also:
 % setupMyDSGE, DSGE.Model
 %
-% ...........................................................................
-%
-% Created: November 7, 2016 by Vasco Curdia
-% 
-% Copyright (C) 2016-2017 Vasco Curdia
+% Created: November 7, 2016 
+% Copyright 2016-2017 Vasco Curdia
     
     properties
-        Names
-        PrettyNames
+        %Names List of variable names to be used in equations and commands
+        Names 
+        %PrettyNames List of variable names formatted for LaTeX output
+        PrettyNames 
     end
     
     properties (SetAccess = protected)
-        N = 0;
+        %N number of variables in instance
+        N = 0; 
     end
     
     methods

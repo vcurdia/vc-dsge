@@ -1,14 +1,32 @@
 classdef Model < matlab.mixin.Copyable
+
 % DSGE.Model class
+%
+% This is the main object of the DSGE. It describes all the variables,
+% equations, and parameters of the DSGE model andincludes methods to solve and
+% simulate the DSGE.
+%
+% There are several types of variables:
+%   ObsVar: (optional) observation variables
+%   StateVar: State variables (endogenous, and exogenous variables)
+%   ShockVar: Innovations to the exogenous variables
+%   AuxVar: (optional) variablesnot needed to solve REE but useful to track
+%
+% There are several types of equations:
+%
+% Several types of parameters:
 % 
+% Convention for variable timing
+%
+% Model structure assumptions
+%
+% Model solutions structure
+%
 % See also:
-% SetupMyDSGE
+% setupMyDSGE, DSGE.Var, DSGE.Param, solveree, gensysvb
 %
-% ...........................................................................
-%
-% Created: November 7, 2016 by Vasco Curdia
-% 
-% Copyright (C) 2016-2017 Vasco Curdia
+% Created: November 7, 2016
+% Copyright 2016-2017 Vasco Curdia
     
     properties
         Name = '';

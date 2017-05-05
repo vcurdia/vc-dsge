@@ -4,10 +4,7 @@ function op = Table(varargin)
 %
 % Set Table options
 %
-% ...........................................................................
-% 
-% Created: March 21, 2017 by Vasco Curdia
-% 
+% Created: March 21, 2017 
 % Copyright 2017 by Vasco Curdia
 
 %% Default Options

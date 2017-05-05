@@ -1,14 +1,14 @@
 classdef Sim < handle
+
 % DSGE.Sim class
 % 
+% Unfinished class to implement model simulations as an object.
+%
 % See also:
-% setupMyDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior
+% setupMyDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
-% ...........................................................................
-%
-% Created: May 2, 2017 by Vasco Curdia
-% 
-% Copyright (C) 2017 Vasco Curdia
+% Created: May 2, 2017
+% Copyright 2017 Vasco Curdia
     
     properties
         Name
