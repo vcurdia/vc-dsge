@@ -44,8 +44,8 @@ end
 % SymCompoundParam = sList.CompoundParam;
 % SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
 
-%% Constant
-vcsym('one')
+% %% Constant
+% vcsym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
@@ -252,8 +252,11 @@ fprintf(fid,'end\n');
 if obj.ObsVar.N>0
     fprintf(fid,'\n%% Observation equations\n');
     H0 = -jacobian(ObsEq,ObsVar_t);
-    SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
-    SymMats.ObsEq.H = H0\jacobian(ObsEq,StateVar_t);
+    H = jacobian(ObsEq,StateVar_t);
+    HBar = simplify(ObsEq-H*StateVar_t.'+H0*ObsVar_t.');
+%     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
+    SymMats.ObsEq.HBar = H0\HBar;
+    SymMats.ObsEq.H = H0\H;
     idxEq = ( any(jacobian(ObsEq,StateVar_tF)~=0,2) ...
             & any(jacobian(ObsEq,StateVar_tL)~=0,2) ...
             & any(jacobian(ObsEq,ShockVar_t)~=0,2) );
@@ -299,11 +302,17 @@ if obj.ObsVar.N>0
 end
 
 fprintf(fid,'\n%% State equation matrices\n');
-SymMats.StateEq.GammaBar = jacobian(StateEq,one);
+SymMats.StateEq.GammaBar = [];
 SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
+% SymMats.StateEq.GammaBar = jacobian(StateEq,one);
+SymMats.StateEq.GammaBar = simplify(StateEq ...
+    + SymMats.StateEq.Gamma0*StateVar_tF.' ...
+    - SymMats.StateEq.Gamma1*StateVar_t.' ...
+    - SymMats.StateEq.Gamma4*StateVar_tL.' ...
+    - SymMats.StateEq.Gamma2*ShockVar_t.');
 idxEq = ( any(SymMats.StateEq.Gamma0~=0,2) ...
           & any(SymMats.StateEq.Gamma4~=0,2) );
 if any(idxEq)
@@ -424,12 +433,21 @@ end
 
 if obj.AuxVar.N>0
     fprintf(fid,'\n%% Auxiliary equations matrices\n');
-    MatNames = {'one','StateVar_t','StateVar_tF','StateVar_tL','ShockVar_t'};
-    nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N,obj.ShockVar.N];
+    SymMats.AuxEq.PhiBar = [];
+    SymMats.AuxEq.Phi1 = jacobian(AuxEq,StateVar_t);
+    SymMats.AuxEq.Phi2 = jacobian(AuxEq,ShockVar_t);
+    SymMats.AuxEq.Phi3 = jacobian(AuxEq,StateVar_tF);
+    SymMats.AuxEq.Phi4 = jacobian(AuxEq,StateVar_tL);
+    SymMats.AuxEq.PhiBar = simplify(AuxEq ...
+        - SymMats.AuxEq.Phi1*StateVar_t.' ...
+        - SymMats.AuxEq.Phi2*ShockVar_t.' ...
+        - SymMats.AuxEq.Phi3*StateVar_tF.' ...
+        - SymMats.AuxEq.Phi4*StateVar_tL.');
+    MatNames = {'PhiBar','Phi1','Phi2','Phi3','Phi4'};
+    nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
     fprintf(fid,'if op.StoreAuxEq || op.StoreAuxREE\n');
     for jM=1:length(MatNames)
         Mj = MatNames{jM};
-        SymMats.AuxEq.(Mj) = jacobian(AuxEq,eval(Mj));
         fprintf(fid,'    AuxEq.%s = [...\n',Mj);
         for jeq=1:obj.AuxVar.N
             fprintf(fid,'       ');
@@ -451,13 +469,13 @@ if obj.AuxVar.N>0
     fprintf(fid,'    if op.SolveREE && op.StoreAuxREE\n');
     fprintf(fid,'        if ~isempty(REE.G1)\n');
     fprintf(fid,['            AuxREE.GBar = ',...
-                     'AuxEq.one+AuxEq.StateVar_tF*REE.GBar',...
-                     '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.GBar',...
+                     'AuxEq.PhiBar+AuxEq.Phi3*REE.GBar',...
+                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.GBar',...
                      ';\n']);
-    fprintf(fid,['            AuxREE.G1 = AuxEq.StateVar_tL',...
-                     '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G1;\n']);
-    fprintf(fid,['            AuxREE.G2 = AuxEq.ShockVar_t',...
-                     '+(AuxEq.StateVar_t+AuxEq.StateVar_tF*REE.G1)*REE.G2;\n']);
+    fprintf(fid,['            AuxREE.G1 = AuxEq.Phi4',...
+                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.G1;\n']);
+    fprintf(fid,['            AuxREE.G2 = AuxEq.Phi2',...
+                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.G2;\n']);
     fprintf(fid,'        else\n');
     fprintf(fid,'            AuxREE.GBar = [];\n');
     fprintf(fid,'            AuxREE.G1 = [];\n');
