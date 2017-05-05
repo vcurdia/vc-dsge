@@ -121,9 +121,9 @@ model.ShockVar = {...
 model.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
 model.ObsEq = {...
-    'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
-    'pistar*one+400*pi_t - PI_t';
-    '(ra+pistar)*one+400*ir_t - FFR_t';
+    'gammaa+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
+    'pistar+400*pi_t - PI_t';
+    'ra+pistar+400*ir_t - FFR_t';
                };
 
 model.StateEq = {...

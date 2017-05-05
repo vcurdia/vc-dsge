@@ -6,22 +6,73 @@ classdef Model < matlab.mixin.Copyable
 % equations, and parameters of the DSGE model andincludes methods to solve and
 % simulate the DSGE.
 %
-% There are several types of variables:
-%   ObsVar: (optional) observation variables
-%   StateVar: State variables (endogenous, and exogenous variables)
-%   ShockVar: Innovations to the exogenous variables
-%   AuxVar: (optional) variablesnot needed to solve REE but useful to track
-%
-% There are several types of equations:
-%
-% Several types of parameters:
+% Variables
+% ---------
 % 
-% Convention for variable timing
+%   ObsVar (optional) 
+%   Observation variables. Their names need to match with variable names in the 
+%   DSGE.Data object.
 %
-% Model structure assumptions
+%   StateVar
+%   State variables, including jump variables and pre-determined variables, 
+%   endogenous or exogenous. It can also include any additional auxiliary 
+%   variables needed to satisfy equation canonic form, such as adding lags or 
+%   leads beyond one period.
+% 
+%   ShockVar
+%   Innovations to the exogenous variables. Assumed to be iid normal 
+%   distributed.
 %
-% Model solutions structure
+%   AuxVar (optional) 
+%   Variables not needed to solve REE but which are useful to track for later 
+%   simulations. Any variable that is not strictly needed for REE solution 
+%   should be included in this object, so that the state space is kept as 
+%   small as possible to improve performance.
 %
+% Variable objects do not include any time subscripts of any sort, just the
+% variable names. In the equations need to reference variables always with a
+% time subscript, subject to the following conventions:
+%   x_t refers to x(t)
+%   x_tF refers to E_t[x(t+1)] 
+%   x_tL refers to x(t-1)
+% 
+% Equations
+% ---------
+%
+%   ObsEq (optional)
+%   Observation equations. Link ObsVar to StateVar:
+%     0 = HBar + H*StateVar_t - H0*ObsVar_t
+%   rules:
+%     - no leads or lags fo any variables
+%     - no ShockVar_t or AuxVar_t
+%     
+%   StateEq
+%   State equations with laws of motion of economy in Chris Sims gensys 
+%   canonical form:
+%     0 = GammaBar + Gamma1*StateVar_tL + Gamma2*ShockVar_t + Gamma3*eta_t
+%         - Gamma0*StateVar_t
+%   where eta_t is an endogenous expectation error. The codes identify 
+%   equations with forward looking components and automatically rearrange
+%   matrices to fit in this canonical form.
+%   rules:
+%     - cannot have both leads and lags in same equation
+%     - in order to use leads and lags in same equation create artificial 
+%       variables, e.g. xL_t = x_tL means that new variable 'xL' is the lag 
+%       of 'x'
+%     - for higher order leads or lags use auxiliary variables as needed.
+%   The solution of the REE yields:
+%     StateVar_t = REE.GBar + REE.G1*StateVar_tL + REE.G2*ShockVar_t
+%   
+%   AuxEq (optional) 
+%   Link AuxVar to StateVar:
+%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t 
+%                + Phi3*StateVar_tF + Phi4*StateVar_tL
+%   After solving REE and plugging into this equation we get
+%     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
+%
+% Parameters
+% ----------
+% 
 % See also:
 % setupMyDSGE, DSGE.Var, DSGE.Param, solveree, gensysvb
 %
