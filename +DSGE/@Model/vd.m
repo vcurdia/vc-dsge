@@ -21,7 +21,7 @@ op.TickStep = 4;
 op.FigPanels = obj.figpanels;
 op.VDHorizons = [1:34,inf];
 op.Silent = 1;
-op.VDPrctiles = [50,5,95];
+op.VDPrctiles = [50]; % can create many at the same time
 op.Table = DSGE.Options.Table;
 op.Fig.Visible = 'off';
 op.Fig.Color = [];
@@ -154,7 +154,7 @@ fprintf('\n')
 for jH=op.Fig.XTick
     for jL=1:length(tList)
         Lj = tList{jL};
-        fprintf('Horizon: %.0f, %s\n',VDHorizons(jH),Lj)
+        fprintf('Horizon: %.0f, %s',VDHorizons(jH),Lj)
         vj = obj.(Lj).Names;
         nj = obj.(Lj).N;
         vIdx = ismember(vNames,vj);
@@ -163,9 +163,10 @@ for jH=op.Fig.XTick
                 VDj = VD(vIdx,:,jH);
             else
                 Prcj = op.VDPrctiles(jPrc);
-                fprintf('Percentile: %.1f\n',Prcj)
+                fprintf(', Percentile %.1f',Prcj)
                 VDj = prctile(VD(vIdx,:,jH,:),Prcj,4);
             end
+            fprintf('\n',Prcj)
             fprintf(['%-',int2str(vNameLengthMax),'s',...
                      repmat(['   %',int2str(sNameLengthMax),'s'],1,nShockVar),...
                      '\n'],'',sNames{:})
@@ -248,20 +249,17 @@ for jH=op.Fig.XTick
         nBreaks = length(tableBreaks);
         for jBreak=1:nBreaks
             idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-            if nBreaks==1
-                fprintf(fid,'\\subsection{%s}\n',Lj);
-            else
-                fprintf(fid,'\\subsection{%s (%.0f/%.0f)}\n',Lj,...
-                        jBreak,nBreaks);
-            end
             for jPrc=1:max(length(op.VDPrctiles)*(nDrawsUsed>1),1)
+                fprintf(fid,'\\subsection{%s',Lj);
                 if nDrawsUsed==1
                     VDj = VD(vIdx,:,jH);
                 else
                     Prcj = op.VDPrctiles(jPrc);
-                    fprintf(fid,'\\subsubsection{Percentile: %.0f}\n',Prcj);
+                    fprintf(fid,', Prc %.0f',Prcj);
                     VDj = prctile(VD(vIdx,:,jH,:),Prcj,4);
                 end
+                if nBreaks>1, fprintf(fid,' (%.0f/%.0f)',jBreak,nBreaks); end
+                fprintf(fid,'}\n');
                 fprintf(fid,'\\begin{equation*}\n');
                 if op.Table.MoveLeft
                     fprintf(fid,'\\hspace{-0.5in}\n');
@@ -287,7 +285,7 @@ for jH=op.Fig.XTick
     end
 end
 
-fprintf(fid,'\\section{VD Plots: Median}\n');
+fprintf(fid,'\\section{Plots, Median}\n');
 for jP=1:length(op.FigPanels)
     Pj = op.FigPanels(jP).Title;
     fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));

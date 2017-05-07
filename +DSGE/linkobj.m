@@ -7,7 +7,7 @@ function linkobj(model,prior,post)
 % ............................................................................
 %
 % Created: March 23, 2017 by Vasco Curdia
-% Copyright (C) 2017 by Vasco Curdia
+% Copyright 2017 by Vasco Curdia
 
 if nargin>1
     prior.Model = model;

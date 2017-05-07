@@ -32,14 +32,14 @@ if isempty(op.CalibrateMCMC)
     op.CalibrateMCMC = ~op.Augment;
 end
 if op.CalibrateMCMC
-    op.JumpScale = post.calibratemcmc(op);
-    save(fnTmpCalibrateMCMC)
+    op.JumpScale = obj.calibratemcmc(op);
+    save(sprintf('_%s_MCMC_%.0f_CalibrateJump',obj.Model.Name,obj.MCMCStage))
 end
 
 %% Preparations
 
 if isempty(obj.MCMCStage), obj.MCMCStage = 1; end
-fprintf('\n*** Making MCMC Sample %.0f\n',obj.MCMCStage)
+fprintf('\n*** Generating MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.MCMCStage);
 obj.TimeTracker.start(ttName)
 

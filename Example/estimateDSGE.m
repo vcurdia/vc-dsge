@@ -1,15 +1,16 @@
-% runMyDSGE
+% estimateDSGE
 %
-% This file gives an example of how to use the vcDSGE package
+% This file gives an example of how to estimate a DSGE using the vcDSGE toolbox.
+% It assumes that the DSGE was previously setup by setupDSGE.
 %
 % See also:
-% setupDSGE
+% setupDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
 % ...........................................................................
 %
 % Created: January 21, 2016 by Vasco Curdia
 % 
-% Copyright (C) 2016 Vasco Curdia
+% Copyright (C) 2016-2017 Vasco Curdia
 
 
 %% Preamble
@@ -27,24 +28,24 @@ load(specName)
 
 
 %% MaxPost
-op.MaxPost.NMax = 4;
-op.MaxPost.Min.nit = 100;
-op.MaxPost.Min.Ritmax = 4;
-op.MaxPost.Min.Ritmin = 2;
+op.MaxPost.NMax = 10;
+op.MaxPost.Min.nit = 1000;
+op.MaxPost.Min.Ritmax = 20;
+op.MaxPost.Min.Ritmin = 5;
 post.maxlpdf(op.MaxPost)
 save([specName,'_MaxPost'])
 model.sim(post.Mode,op.Sim,'FNSuffix','_PostMode')
 
 
 %% MCMC
-op.MCMC.NDraws = 1000;
-op.MCMC.NDrawsCalibrate = 200;
+op.MCMC.NDraws = 50000;
+op.MCMC.NDrawsCalibrate = 100;
 for s=1
     post.MCMCStage = s;
     post.mcmc(op.MCMC)
     save([specName,'_MCMC_',int2str(s)])
+    model.sim(post.draw(1000),op.Sim,'FNSuffix','_PostDraws')
     save(specName)
-    model.sim(post.draw(100),op.Sim,'FNSuffix','_PostDraws')
 end
 
 

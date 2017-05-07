@@ -2,7 +2,11 @@ function tableBreaks = settablebreaks(nRows,maxRows)
 
 % settablebreaks
 %
-% Set index of table breaks
+% Set index of table breaks.
+% 
+% Usage:
+%   tableBreaks = settablebreaks(nRows)
+%   tableBreaks = settablebreaks(nRows,maxRows)
 %
 % ...........................................................................
 % 

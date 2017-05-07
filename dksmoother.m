@@ -3,11 +3,21 @@ function draw = dksmoother(mats,data,isDrawStates)
 % dksmoother
 % 
 % Draw from the Durbin Koopman Disturbance Smoother.
+%
+% Usage:
+%   draw = dksmoother(mats,data)
+%   draw = dksmoother(mats,data,isDrawStates)
 % 
 % NOTE: assume that states have zero steady state
+% 
+% Options:
+%   - isDrawStates (logical)
+%     if set to 1, states are recursively drawn from conditional distributions.
+%     if set to 0, states are set to their conditional distribution mean.
+%     default: 1
 %
 % See also:
-% DSGE, SetupMyDSGE
+% DSGE.Model, DSGE.Model.states
 %
 % .............................................................................
 % 

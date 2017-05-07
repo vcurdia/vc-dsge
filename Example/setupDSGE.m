@@ -1,15 +1,15 @@
 % setupDSGE
 %
-% This file gives an example of how to setup the DSGE
+% This file gives an example of how to setup a DSGE using the vcDSGE toolbox.
 %
 % See also:
-% runDSGE
+% estimateDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
 % ...........................................................................
 %
 % Created: January 21, 2016 by Vasco Curdia
 % 
-% Copyright (C) 2016 Vasco Curdia
+% Copyright (C) 2016-2017 Vasco Curdia
 
 
 %% Preamble
@@ -121,9 +121,9 @@ model.ShockVar = {...
 model.AuxVar = {'r','ir_t-pi_tF','$r$'};
 
 model.ObsEq = {...
-    'gammaa*one+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
-    'pistar*one+400*pi_t - PI_t';
-    '(ra+pistar)*one+400*ir_t - FFR_t';
+    'gammaa+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
+    'pistar+400*pi_t - PI_t';
+    'ra+pistar+400*ir_t - FFR_t';
                };
 
 model.StateEq = {...
@@ -168,7 +168,7 @@ op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 post = DSGE.Posterior(model,prior,data);
 
 %% Simulate model at prior
-model.sim(prior.draw(100),op.Sim,'FNSuffix','_PriorDraws')
+model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
 fprintf('\n'),tt.stop('Setup')
