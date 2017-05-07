@@ -11,14 +11,24 @@ classdef Var
 % Copyright 2016-2017 Vasco Curdia
     
     properties
-        %Names List of variable names to be used in equations and commands
+% Names List of variable names to be used in equations and commands
+%
+% These are the names that will show up in equations and model manipulations.
         Names 
-        %PrettyNames List of variable names formatted for LaTeX output
+        
+% PrettyNames List of variable names formatted for LaTeX output
+%
+% These are expressions that will represent the variables when plotting or 
+% creating LaTeX output.
+% 
+% In not explicitly specified, then Names is used.
         PrettyNames 
     end
     
     properties (SetAccess = protected)
-        %N number of variables in instance
+% N number of variables in instance
+%
+% This property is automatically populated every time that Names is changed.
         N = 0; 
     end
     

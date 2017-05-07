@@ -19,7 +19,7 @@ classdef Model < matlab.mixin.Copyable
 %   Variable objects do not include any time subscripts of any sort, just the
 %   variable names. In the equations need to reference variables always with a
 %   time subscript, subject to the following conventions:
-%     x_t refers to x(t)
+%     x_t  refers to x(t)
 %     x_tF refers to E_t[x(t+1)] 
 %     x_tL refers to x(t-1)
 % 
@@ -29,16 +29,30 @@ classdef Model < matlab.mixin.Copyable
 %   StateEq - State equations
 %   AuxEq   - Auxiliary equations (optional) 
 %
-%   Assumed model structure:
+%   Assumed Model structure:
+%
 %     0 = HBar + H*StateVar_t - H0*ObsVar_t
-%     0 = GammaBar + Gamma1*StateVar_tL + Gamma2*ShockVar_t + Gamma3*eta_t
-%         - Gamma0*StateVar_t
+%
+%     0 = GammaBar + Gamma1*StateVar_t + Gamma2*ShockVar_t + Gamma4*StateVar_tL
+%         - Gamma0*StateVar_tF
+%
 %     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t 
 %                + Phi3*StateVar_tF + Phi4*StateVar_tL
+%  
+%   Note: cannot include both leads and lags in the same equation. If the model 
+%         specification has equations with both leads and lags, then need to 
+%         create artificial variables as needed. The example illustrates how to
+%         accomplish that.
+%
+%   Method genmats will prepare all matrices and convert the state equations 
+%   into the gensys' canonical form:
+%     0 = GammaBar + Gamma1*StateVar_tL + Gamma2*ShockVar_t + Gamma3*eta_t
+%         - Gamma0*StateVar_t
 %
 %   Model solution:
-%     StateVar_t = REE.GBar + REE.G1*StateVar_tL + REE.G2*ShockVar_t
-%     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
+%     StateVar_t = REE.GBar    + REE.G1*StateVar_tL    + REE.G2*ShockVar_t
+%     ObsVar_t   = ObsEq.HBar  + ObsEq.H*StateVar_t
+%     AuxVar_t   = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
 %
 %
 % * Properties describing model parameters
@@ -61,14 +75,28 @@ classdef Model < matlab.mixin.Copyable
 %   Set Param through DSGE.Prior constructor. The input should contain the 
 %   DSGE.Model and a cell array in which each row has the following:
 %   - name of parameter
-%   - prior distribution code
+%   - prior distribution code within the following list
+%     'C'   - Calibrated parameter
+%     'N'   - Normal
+%     'TN'  - Truncated Normal (truncated at zero)
+%     'B'   - Beta 
+%     'G'   - Gamma
+%     'IG1' - Inverse Gamma type 1 (for standard deviation parameters)
+%     'IG2' - Inverse Gamma type 2 (for variances parameters)
 %   - prior mean
 %   - prior SD
 %   - LaTeX representation of parameter (optional)
+%   
+%   The DSGE.Prior constructor will also update the Model instance Param 
+%   property so that both objects are fully consistent.
+%
+% Refer to setupDSGE in the example folder for a concrete case on how to setup
+% the model, prior and posterior.
 %
 % 
 % See also:
-% setupMyDSGE, DSGE.Var, DSGE.Param, solveree, gensysvb
+% setupMyDSGE, DSGE.Var, DSGE.Param, DSGE.Prior, DSGE.Posterior, 
+% solveree, gensysvb
 %
 % Created: November 7, 2016
 % Copyright 2016-2017 Vasco Curdia
