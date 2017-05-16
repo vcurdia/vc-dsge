@@ -1,11 +1,11 @@
-classdef Var
+classdef Var < matlab.mixin.Copyable
 
 % DSGE.Var class
 % 
 % DSGE object representing variables, used in the model object.
 % 
 % See also:
-% setupMyDSGE, DSGE.Model
+% setupDSGE, DSGE.Model
 %
 % Created: November 7, 2016 
 % Copyright 2016-2017 Vasco Curdia
@@ -44,7 +44,7 @@ classdef Var
             end
         end
         
-        function obj = set.Names(obj,names)
+        function set.Names(obj,names)
             obj.Names = names;
             obj.N = length(names);
             if length(obj.PrettyNames)~=obj.N
@@ -52,7 +52,7 @@ classdef Var
             end
         end
         
-        function obj = set.PrettyNames(obj,prettynames)
+        function set.PrettyNames(obj,prettynames)
             if length(prettynames)==obj.N
                 obj.PrettyNames = prettynames;
             else
@@ -60,7 +60,7 @@ classdef Var
             end
         end
         
-        function obj = add(obj,names)
+        function add(obj,names)
             if ~iscell(names)
                 error('Variables to add need to be in cell array.')
             end
