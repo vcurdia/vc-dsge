@@ -360,7 +360,7 @@ function checkeq(obj,eqType)
     nEq = length(obj.([eqType,'Eq']));
     nVar = obj.([eqType,'Var']).N;
     if nEq~=nVar
-        error(['Number of %sEq (%i) does not match number of ' ...
+        fprintf(['WARNING: Number of %sEq (%i) does not match number of ' ...
                'variables (%i).'],eqType,nEq,nVar)
     end
 end
