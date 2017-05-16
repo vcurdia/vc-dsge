@@ -304,15 +304,15 @@ classdef Model < matlab.mixin.Copyable
             end
         end
         
-        function set.ObsEq(obj,eq)
-            obj.ObsEq = eq;
-            checkeq(obj,'Obs')
-        end
+%         function set.ObsEq(obj,eq)
+%             obj.ObsEq = eq;
+%             checkeq(obj,'Obs')
+%         end
     
-        function set.StateEq(obj,eq)
-            obj.StateEq = eq;
-            checkeq(obj,'State')
-        end
+%         function set.StateEq(obj,eq)
+%             obj.StateEq = eq;
+%             checkeq(obj,'State')
+%         end
         
         function showparamvalues(obj)
             p = struct;
@@ -339,7 +339,16 @@ classdef Model < matlab.mixin.Copyable
                        'length from list of values.'])
             end
         end
-        
+
+        function checkeq(obj,eqType)
+            nEq = length(obj.([eqType,'Eq']));
+            nVar = obj.([eqType,'Var']).N;
+            if nEq~=nVar
+                fprintf(['Warning: Number of %sEq (%i) does not match number ' ...
+                         'of variables (%i).\n'],eqType,nEq,nVar)
+            end
+        end
+
 %         function Mats = evalmats(obj,matname,x)
 %             Mats = struct;
 %             matfields = fieldnames(obj.(matname));
@@ -356,13 +365,5 @@ classdef Model < matlab.mixin.Copyable
     
 end %class
 
-function checkeq(obj,eqType)
-    nEq = length(obj.([eqType,'Eq']));
-    nVar = obj.([eqType,'Var']).N;
-    if nEq~=nVar
-        fprintf(['WARNING: Number of %sEq (%i) does not match number of ' ...
-               'variables (%i).'],eqType,nEq,nVar)
-    end
-end
 
 
