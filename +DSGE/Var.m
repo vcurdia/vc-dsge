@@ -60,6 +60,16 @@ classdef Var
             end
         end
         
+        function obj = add(obj,names)
+            if ~iscell(names)
+                error('Variables to add need to be in cell array.')
+            end
+            [nr,nc] = size(names);
+            idx = obj.N+(1:nr);
+            obj.Names(idx) = {names{:,1}};
+            obj.PrettyNames(idx) = {names{:,nc}};
+        end
+        
     end %methods
     
 end %class
