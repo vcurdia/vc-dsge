@@ -2,14 +2,12 @@
 %
 % This file gives an example of how to setup a DSGE using the vcDSGE toolbox.
 %
+%
 % See also:
 % estimateDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
-% ...........................................................................
-%
 % Created: January 21, 2016 by Vasco Curdia
-% 
-% Copyright (C) 2016-2017 Vasco Curdia
+% Copyright 2016-2017 Vasco Curdia
 
 
 %% Preamble
