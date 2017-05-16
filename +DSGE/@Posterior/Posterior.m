@@ -35,7 +35,7 @@ classdef Posterior < matlab.mixin.Copyable
     methods
         function obj = Posterior(model,prior,data)
             if nargin>0
-                fprintf('\n*** Preparing posterior\n')
+%                 fprintf('\n*** Preparing posterior\n')
                 obj.TimeTracker = TimeTracker;
                 obj.Model = model;
                 obj.Prior = prior;
