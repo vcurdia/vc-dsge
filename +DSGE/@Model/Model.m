@@ -65,15 +65,13 @@ classdef Model < matlab.mixin.Copyable
 %   be used.
 %
 %   For calibrated model simulations:
-%   set directly the Param object using a cell array input in which each row 
-%   contains the following:
+%   Set Param with a cell array in which each row has the following:
 %   - name of parameter
 %   - value of parameter
 %   - LaTeX representation of parameter (optional)
 %
 %   For estimating model:
-%   Set Param through DSGE.Prior constructor. The input should contain the 
-%   DSGE.Model and a cell array in which each row has the following:
+%   Set Param with a cell array in which each row has the following:
 %   - name of parameter
 %   - prior distribution code within the following list
 %     'C'   - Calibrated parameter
@@ -87,9 +85,6 @@ classdef Model < matlab.mixin.Copyable
 %   - prior SD
 %   - LaTeX representation of parameter (optional)
 %   
-%   The DSGE.Prior constructor will also update the Model instance Param 
-%   property so that both objects are fully consistent.
-%
 % Refer to setupDSGE in the example folder for a concrete case on how to setup
 % the model, prior and posterior.
 %
