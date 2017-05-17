@@ -28,30 +28,19 @@ classdef Prior < matlab.mixin.Copyable
     end
    
     methods
-        function obj = Prior(m,p)
+        function obj = Prior(m)
             if nargin>0
-                fprintf('\n*** Preparing prior\n')
+%                 fprintf('\n*** Preparing prior\n')
                 obj.TimeTracker = TimeTracker;
                 obj.Model = m;
-            end
-            if nargin>1 && ~isempty(p)
-                [np,nc] = size(p);
-                if nc>3
-                    obj.Dist = p(:,2);
-                    obj.Mean = [p{:,3}]';
-                    for j=1:np
-                        if isempty(p{j,4})
-                            p{j,4} = 0;
-                        end
-                    end
-                    obj.SD = [p{:,4}]';
-                    p(:,[2,4]) = [];
-                else
-                    obj.Dist(1:np,1) = {'C'};
-                    obj.SD(1:np,1) = 0;
+                if m.Param.N==0
+                    error('There are no parameters in the model.')
                 end
-                m.Param = p;
+                obj.Dist = m.Param.PriorDist;
+                obj.Mean = m.Param.PriorMean;
+                obj.SD = m.Param.PriorSD;
                 obj.analyzedist
+                obj.analyzeparam
             end
         end
         
