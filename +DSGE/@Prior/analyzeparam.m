@@ -15,7 +15,7 @@ function analyzeparam(obj,varargin)
 
 
 %% Preamble
-fprintf('\n*** Analyzing Parameters Prior\n')
+fprintf('\n*** Analyzing Prior for Parameters\n')
 ttName = 'AnalyzeParam';
 obj.TimeTracker.start(ttName)
 
@@ -147,12 +147,12 @@ for jBreak=1:nBreaks
     if op.Table.MoveLeft
         fprintf(fid,'\\hspace{-0.5in}\n');
     end
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+7+1+5));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+7+1+3));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
     fprintf(fid,'& \\multicolumn{7}{c}{Prior Definition} ');
-    fprintf(fid,'& & \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
+    fprintf(fid,'& & \\multicolumn{3}{c}{Prior Sample} \\\\[0.5ex]\n');
     fprintf(fid,'& Dist & Mode & Mean & SD & 5\\%% & Median & 95\\%% ');
-    fprintf(fid,'& & Mean & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'& & 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
         fprintf(fid,'%s',obj.Model.Param.PrettyNames{jr});
@@ -164,8 +164,7 @@ for jBreak=1:nBreaks
         fprintf(fid,str,obj.Median(jr));
         fprintf(fid,str,obj.Prc95(jr));
         fprintf(fid,' &');
-        fprintf(fid,str,obj.Sample.Param.Mean(jr));
-        fprintf(fid,str,obj.Sample.Param.Prc05(jr));
+         fprintf(fid,str,obj.Sample.Param.Prc05(jr));
         fprintf(fid,str,obj.Sample.Param.Median(jr));
         fprintf(fid,str,obj.Sample.Param.Prc95(jr));
         fprintf(fid,' \\\\\n');
@@ -193,14 +192,13 @@ for jBreak=1:nBreaks
                 jBreak,nBreaks);
     end
     fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+4));
+    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+3));
     fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-    fprintf(fid,'& \\multicolumn{4}{c}{Prior Sample} \\\\[0.5ex]\n');
-    fprintf(fid,'& Mean & 5\\%% & Median & 95\\%% \n');
+    fprintf(fid,'& \\multicolumn{3}{c}{Prior Sample} \\\\[0.5ex]\n');
+    fprintf(fid,'& 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
         fprintf(fid,'%s',obj.Model.AuxParam.PrettyNames{jr});
-        fprintf(fid,str,obj.Sample.AuxParam.Mean(jr));
         fprintf(fid,str,obj.Sample.AuxParam.Prc05(jr));
         fprintf(fid,str,obj.Sample.AuxParam.Median(jr));
         fprintf(fid,str,obj.Sample.AuxParam.Prc95(jr));

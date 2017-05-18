@@ -28,9 +28,9 @@ classdef Prior < matlab.mixin.Copyable
     end
    
     methods
-        function obj = Prior(m)
+        function obj = Prior(m,varargin)
             if nargin>0
-%                 fprintf('\n*** Preparing prior\n')
+                fprintf('\n*** Preparing prior\n')
                 obj.TimeTracker = TimeTracker;
                 obj.Model = m;
                 if m.Param.N==0
@@ -40,7 +40,7 @@ classdef Prior < matlab.mixin.Copyable
                 obj.Mean = m.Param.PriorMean;
                 obj.SD = m.Param.PriorSD;
                 obj.analyzedist
-                obj.analyzeparam
+                obj.analyzeparam(varargin{:})
             end
         end
         
