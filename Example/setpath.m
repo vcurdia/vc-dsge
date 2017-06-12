@@ -16,8 +16,3 @@ for j=1:length(MyPath.List)
 end
 addpath(MyPath.Add{:})
 
-
-%% change text interpreter
-set(groot,'defaultTextInterpreter','latex');
-set(groot,'defaultLegendInterpreter','latex');
-

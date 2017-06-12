@@ -12,6 +12,9 @@
 
 %% Preamble
 clear all
+% setpath
+set(groot,'defaultTextInterpreter','latex');
+set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
 tt.start('Setup')
 
