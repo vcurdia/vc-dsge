@@ -161,12 +161,13 @@ for jH=op.Fig.XTick
         for jPrc=1:max(length(op.VDPrctiles)*(nDrawsUsed>1),1)
             if nDrawsUsed==1
                 VDj = VD(vIdx,:,jH);
+                fprintf('\n')
             else
                 Prcj = op.VDPrctiles(jPrc);
                 fprintf(', Percentile %.1f',Prcj)
                 VDj = prctile(VD(vIdx,:,jH,:),Prcj,4);
+                fprintf('\n',Prcj)
             end
-            fprintf('\n',Prcj)
             fprintf(['%-',int2str(vNameLengthMax),'s',...
                      repmat(['   %',int2str(sNameLengthMax),'s'],1,nShockVar),...
                      '\n'],'',sNames{:})
