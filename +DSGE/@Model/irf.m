@@ -97,6 +97,9 @@ end
 IRF(:,:,:,~IRFCheck) = [];
 IRFCheck(~IRFCheck) = [];
 nDrawsUsed = length(IRFCheck);
+if nDrawsUsed==0
+    error('No valid simulations were generated. Cannot proceed.')
+end
 
 %% Plot IRFs
 fprintf('Plotting IRFs...\n');
