@@ -18,12 +18,13 @@ set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
 tt.start('Setup')
 
-%% Initiate DSGE
-model = DSGE.Model('MyDSGE');
-mkdir(model.Name)
-basePath = cd(model.Name);
-
 %% Setup the model
+specName = 'MyDSGE';
+specPath = specName;
+
+mkdir(specPath)
+basePath = cd(specPath);
+model = DSGE.Model(specName);
 
 % % example for calibrated model
 % model.Param = {...
