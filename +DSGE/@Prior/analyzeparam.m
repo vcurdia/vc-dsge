@@ -78,6 +78,8 @@ nAux = obj.Model.AuxParam.N;
 xdAux = zeros(nAux,op.NDraws);
 % Matsd = cell(obj.PriorNDraws);
 parfor jd=1:op.NDraws
+%     jd
+%     xd(:,jd)
     Matsj = fh(xd(:,jd));
     BadDraws(jd) = ~Matsj.Status==1;
     xdAux(:,jd) = Matsj.AuxParam;

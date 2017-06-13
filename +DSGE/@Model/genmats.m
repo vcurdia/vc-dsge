@@ -494,8 +494,9 @@ fclose(fid);
 obj.mats = str2func(MatsFN);
 
 %% Test function
-Mats = obj.mats(obj.Param.Values);
-if Mats.Status==0
+mats = obj.mats(obj.Param.Values);
+obj.AuxParam.Values = mats.AuxParam;
+if mats.Status==0
     fprintf('Warning: REE solution not normal for Param.Values.\n')
 end
 
