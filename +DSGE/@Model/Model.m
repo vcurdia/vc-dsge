@@ -329,7 +329,7 @@ classdef Model < matlab.mixin.Copyable
             end
         end
         
-        function setparamvalues(obj,ParNames,ParValues)
+        function mats = setparamvalues(obj,ParNames,ParValues)
             if ischar(ParNames), ParNames = {ParNames}; end
             np = length(ParNames);
             nv = length(ParValues);
@@ -344,6 +344,8 @@ classdef Model < matlab.mixin.Copyable
                 error(['List of parameter names is empty or has different ' ...
                        'length from list of values.'])
             end
+            mats = obj.mats(obj.Param.Values);
+            obj.AuxParam.Values = mats.AuxParam;
         end
 
         function checkeq(obj,eqType)
