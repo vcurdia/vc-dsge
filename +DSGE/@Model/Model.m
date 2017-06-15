@@ -309,27 +309,7 @@ classdef Model < matlab.mixin.Copyable
 %             checkeq(obj,'State')
 %         end
         
-        function showparamvalues(obj,showAuxParam)
-            if nargin<2 || isempty(showAuxParam)
-                showAuxParam = 1;
-            end
-            p = struct;
-            for j=1:obj.Param.N
-                p.(obj.Param.Names{j}) = obj.Param.Values(j);
-            end
-            fprintf('Param values:\n')
-            disp(p)
-            if showAuxParam
-                p = struct;
-                for j=1:obj.AuxParam.N
-                    p.(obj.AuxParam.Names{j}) = obj.AuxParam.Values(j);
-                end
-                fprintf('\nAuxParam values:\n')
-                disp(p)
-            end
-        end
-        
-        function setparamvalues(obj,ParNames,ParValues)
+        function mats = setparamvalues(obj,ParNames,ParValues)
             if ischar(ParNames), ParNames = {ParNames}; end
             np = length(ParNames);
             nv = length(ParValues);
@@ -344,6 +324,8 @@ classdef Model < matlab.mixin.Copyable
                 error(['List of parameter names is empty or has different ' ...
                        'length from list of values.'])
             end
+            mats = obj.mats(obj.Param.Values);
+            obj.AuxParam.Values = mats.AuxParam;
         end
 
         function checkeq(obj,eqType)

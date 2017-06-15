@@ -83,6 +83,17 @@ classdef Param < matlab.mixin.Copyable
             end
         end            
         
+        function showvalues(obj,x)
+            if nargin<2
+                x = obj.Values;
+            end
+            v = struct;
+            for j=1:obj.N
+                v.(obj.Names{j}) = x(j);
+            end
+            disp(v)
+        end
+    
     end %methods
     
 end %class
