@@ -60,14 +60,52 @@ classdef Var < matlab.mixin.Copyable
             end
         end
         
-        function add(obj,names)
-            if ~iscell(names)
+        function add(obj,v)
+            if ~iscell(v)
                 error('Variables to add need to be in cell array.')
             end
-            [nr,nc] = size(names);
-            idx = obj.N+(1:nr);
-            obj.Names(idx) = {names{:,1}};
-            obj.PrettyNames(idx) = {names{:,nc}};
+            nc = size(v,2);
+            names = [obj.Names;v(:,1)];
+            prettynames = [obj.PrettyNames;v(:,nc)];
+            obj.Names = names;
+            obj.PrettyNames = prettynames;
+        end
+        
+        function v1 = merge(obj,varargin)
+            v1 = copy(obj);
+            isDuplicates = false;
+            for j=1:nargin-1
+                v = varargin{j};
+                if ~strcmp(class(v),'DSGE.Var')
+                    error(['Cannot merge Var. Input needs to be instance of ' ...
+                           'DSGE.Var'])
+                end
+                if v.N==0, continue, end
+                if v1.N==0
+                    v1 = copy(v);
+                    continue
+                end
+                tf = ismember(v.Names,v1.Names);
+                isDuplicates = (isDuplicates || any(tf));
+                if ~all(tf)
+                    names = [v1.Names;v.Names(~tf)];
+                    prettynames = [v1.PrettyNames;v.PrettyNames(~tf)];
+                    v1.Names = names;
+                    v1.PrettyNames = prettynames;
+                end
+            end
+            if isDuplicates
+                fprintf(['Found duplicate variable names. Only merged ' ...
+                         'unique.\n'])
+            end
+        end
+        
+        function prettynames=findprettynames(obj,names)
+            [tf,idx] = ismember(names,obj.Names);
+            if ~all(tf)
+                error('Could not find %s\n',names{~tf})
+            end
+            prettynames = obj.PrettyNames(idx);
         end
         
     end %methods

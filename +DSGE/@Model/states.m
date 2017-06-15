@@ -25,7 +25,7 @@ op.Fig.Visible = 'off';
 op.Fig.Plot.LineWidth = 1.5;
 op.PlotDir = 'Plots_States/';
 op.FigPanelsOptions = struct;
-op.FigPanelsOptions.FigShape = {3,1};
+op.FigPanelsOptions.Shape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
@@ -121,8 +121,8 @@ for jP = 1:nPanels
     else
         Figj.TitleList = Pj.Names;
     end
-    if isfield(Pj,'FigShape');
-        Figj.Shape = Pj.FigShape;
+    if isfield(Pj,'Shape');
+        Figj.Shape = Pj.Shape;
     end
     nVar = length(Pj.Names);
     PlotData = nan(nDrawsUsed,T,nVar);

@@ -34,7 +34,7 @@ op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
 op.PlotDir = 'Plots_SD/';
 op.FigPanelsOptions = struct;
-op.FigPanelsOptions.FigShape = {3,1};
+op.FigPanelsOptions.Shape = {3,1};
 
 op = updateoptions(op,varargin{:});
 
@@ -161,7 +161,7 @@ for jP = 1:nPanels
     Pj = op.FigPanels(jP);
     Figj = Fig;
     Figj.TitleList = Pj.PrettyNames;
-    Figj.Shape = Pj.FigShape;
+    Figj.Shape = Pj.Shape;
     hf = figure('Visible',Figj.Visible);
     clear ha
     for jV=1:Pj.N
