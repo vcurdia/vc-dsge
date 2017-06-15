@@ -336,6 +336,15 @@ classdef Model < matlab.mixin.Copyable
                          'of variables (%i).\n'],eqType,nEq,nVar)
             end
         end
+        
+        function prettynames = findvarprettynames(obj,names)
+            vv = merge(obj.ObsVar,obj.StateVar,obj.AuxVar);
+            [tf,idx] = ismember(names,vv.Names);
+            if ~all(tf)
+                error('Could not find %s\n',names{~tf})
+            end
+            prettynames = vv.PrettyNames(idx);
+        end
 
 %         function Mats = evalmats(obj,matname,x)
 %             Mats = struct;
