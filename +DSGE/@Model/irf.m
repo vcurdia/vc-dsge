@@ -117,8 +117,8 @@ for jP = 1:nPanels
     else
         Figj.TitleList = Pj.Names;
     end
-    if isfield(Pj,'FigShape');
-        Figj.Shape = Pj.FigShape;
+    if isfield(Pj,'Shape');
+        Figj.Shape = Pj.Shape;
     end
     nVar = length(Pj.Names);
     PlotData = nan(nDrawsUsed,nSteps,nVar,nShocks2Show);

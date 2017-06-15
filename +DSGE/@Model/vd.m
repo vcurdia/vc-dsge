@@ -186,7 +186,7 @@ for jP=1:length(op.FigPanels)
     Pj = op.FigPanels(jP);
     Figj = op.Fig;
     Figj.TitleList = Pj.PrettyNames;
-    Figj.Shape = Pj.FigShape;
+    Figj.Shape = Pj.Shape;
     hf = figure('Visible',Figj.Visible);
     clear ha
     for jV=1:Pj.N
