@@ -189,7 +189,8 @@ for jP=1:length(op.FigPanels)
     Figj.Shape = Pj.Shape;
     hf = figure('Visible',Figj.Visible);
     clear ha
-    for jV=1:Pj.N
+    nVar = length(Pj.Names);
+    for jV=1:nVar
         Vj = Pj.Names{jV};
         ha(jV) = subplot(Figj.Shape{:},jV);
         vIdx = ismember(vNames,Vj);

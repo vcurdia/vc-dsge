@@ -18,7 +18,7 @@ function irf(obj,xd,varargin)
 op.FNSuffix = '';
 op.NSteps = 25;
 op.TickStep = 4;
-op.FigPanels = obj.figpanels;
+op.FigPanels = [];
 op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Fig.Visible = 'off';
@@ -29,6 +29,7 @@ op.PlotDir = 'Plots_IRF/';
 op = updateoptions(op,varargin{:});
 
 %% Check options
+if isempty(op.FigPanels), op.FigPanels = obj.figpanels; end
 nShocks2Show = length(op.Shocks2Show);
 if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 
