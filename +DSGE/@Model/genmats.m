@@ -12,10 +12,8 @@ function genmats(obj)
 % See also:
 % DSGE, SetupMyDSGE
 %
-% ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% 
 % Copyright (C) 2016-2017 Vasco Curdia
 
 %% Preamble
@@ -43,9 +41,6 @@ end
 % SymNumsolveParam = sList.NumSolveParam;
 % SymCompoundParam = sList.CompoundParam;
 % SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
-
-% %% Constant
-% vcsym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
@@ -150,9 +145,6 @@ for j=1:obj.Param.N
 end
 fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.Param = x;\n');
-% for j=1:obj.Param.N
-%     fprintf(fid,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-% end
 fprintf(fid,'end\n');
 
 if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
@@ -244,8 +236,6 @@ fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
 for j=1:obj.AuxParam.N
     fprintf(fid,'    Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
-%     fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
-%             obj.AuxParam.Names{j});
 end
 fprintf(fid,'end\n');
 
@@ -307,7 +297,6 @@ SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
-% SymMats.StateEq.GammaBar = jacobian(StateEq,one);
 SymMats.StateEq.GammaBar = simplify(StateEq ...
     + SymMats.StateEq.Gamma0*StateVar_tF.' ...
     - SymMats.StateEq.Gamma1*StateVar_t.' ...
