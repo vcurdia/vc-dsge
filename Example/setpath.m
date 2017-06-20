@@ -1,7 +1,14 @@
+function setpath
 
-%% Setup path
-MyPath.Root = fullfile(pwd,'../../../Matlab/');
-MyPath.List = {...
+% setpath
+%
+% Set path to codes needed.
+%
+% Created: August 18, 2016 by Vasco Curdia
+% Copyright 2016 by Vasco Curdia
+
+pathBase = '../../../Matlab/';
+pathList = {...
     'vcDSGE',...
     'vcTools',...
     'Misc',...
@@ -12,7 +19,6 @@ MyPath.List = {...
     'Misc/JaeWon',...
     };
 for j=1:length(MyPath.List)
-    MyPath.Add{j} = [MyPath.Root,MyPath.List{j}];
+    pathAdd{j} = [pathBase,pathList{j}];
 end
-addpath(MyPath.Add{:})
-
+addpath(pathAdd{:})

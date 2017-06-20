@@ -12,19 +12,17 @@
 
 %% Preamble
 clear all
-% setpath
+setpath
 set(groot,'defaultTextInterpreter','latex');
 set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
 tt.start('Setup')
 
 %% Setup the model
-specName = 'MyDSGE';
-specPath = specName;
+model = DSGE.Model('MyDSGE');
+model.Path = model.Name;
+model.PathMats = 'Mats';
 
-mkdir(specPath)
-basePath = cd(specPath);
-model = DSGE.Model(specName);
 
 % % example for calibrated model
 % model.Param = {...
@@ -161,7 +159,7 @@ mats = model.mats(model.Param.Values);
 prior = DSGE.Prior(model);
 
 %% Data
-data = DSGE.Data('../Data/Data_1987q3_2009q3.csv');
+data = DSGE.Data('Data/Data_1987q3_2009q3.csv');
 data.Var = model.ObsVar.Names;
 op.Sim.Data = data;
 op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
@@ -174,5 +172,4 @@ model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
 fprintf('\n'),tt.stop('Setup')
-save(model.Name)
-cd(basePath)
+save([model.Path,model.Name])
