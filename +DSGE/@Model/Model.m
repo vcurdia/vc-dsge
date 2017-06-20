@@ -337,7 +337,7 @@ classdef Model < matlab.mixin.Copyable
             end
             prettynames = vv.PrettyNames(idx);
         end
-
+        
 %         function Mats = evalmats(obj,matname,x)
 %             Mats = struct;
 %             matfields = fieldnames(obj.(matname));

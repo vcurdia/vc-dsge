@@ -15,7 +15,8 @@
 
 %% Preamble
 clear all
-% setpath
+setpath
+addpath('Mats/')
 set(groot,'defaultTextInterpreter','latex');
 set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
@@ -23,7 +24,8 @@ tt = TimeTracker;
 %% Load DSGE
 specName = 'MyDSGE';
 specPath = specName;
-basePath = cd(specPath);
+
+cd(specPath)
 load(specName)
 
 %% Initiate parallel pool

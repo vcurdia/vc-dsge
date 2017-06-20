@@ -1,4 +1,4 @@
-function genmats(obj)
+function genmats(obj,matspath)
 
 % genmats
 %
@@ -10,20 +10,27 @@ function genmats(obj)
 %             x_tL refers to x(t-1)
 %
 % See also:
-% DSGE, SetupMyDSGE
+% DSGE, setupMyDSGE
 %
-% ...........................................................................
 %
 % Created: January 22, 2016 by Vasco Curdia
-% 
 % Copyright (C) 2016-2017 Vasco Curdia
+
 
 %% Preamble
 fprintf('\n*** Generating DSGE mats\n')
 ttName = 'GenMats';
 obj.TimeTracker.start(ttName)
 
-%% basic check
+%% checks
+if nargin==0 || isempty(matspath)
+    matspath = '';
+else
+    if ~strcmp(matspath(end),'/'), matspath = [matspath,'/']; end
+    if ~isdir(matspath), mkdir(matspath), end
+    addpath(matspath)
+end
+
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
     error('Cannot proceed without specifying state variables and equations')
 end
@@ -43,9 +50,6 @@ end
 % SymNumsolveParam = sList.NumSolveParam;
 % SymCompoundParam = sList.CompoundParam;
 % SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
-
-% %% Constant
-% vcsym('one')
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
@@ -117,10 +121,10 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-MatsFN = sprintf('%s_Mats',obj.Name);
+MatsFN = sprintf('Mats%s',obj.Name);
 
 % Initiate file
-fid = fopen([MatsFN,'.m'],'wt');
+fid = fopen([matspath,MatsFN,'.m'],'wt');
 fprintf(fid,'function Mats = %s(x,varargin)\n\n',MatsFN);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
@@ -150,9 +154,6 @@ for j=1:obj.Param.N
 end
 fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.Param = x;\n');
-% for j=1:obj.Param.N
-%     fprintf(fid,'    Mats.Param.%1$s = %1$s;\n',obj.Param.Names{j});
-% end
 fprintf(fid,'end\n');
 
 if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
@@ -244,8 +245,6 @@ fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
 for j=1:obj.AuxParam.N
     fprintf(fid,'    Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
-%     fprintf(fid,'    Mats.AuxParam.%1$s = %1$s;\n',...
-%             obj.AuxParam.Names{j});
 end
 fprintf(fid,'end\n');
 
@@ -307,7 +306,6 @@ SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
 SymMats.StateEq.Gamma4 = jacobian(StateEq,StateVar_tL);
 SymMats.StateEq.Gamma2 = jacobian(StateEq,ShockVar_t);
-% SymMats.StateEq.GammaBar = jacobian(StateEq,one);
 SymMats.StateEq.GammaBar = simplify(StateEq ...
     + SymMats.StateEq.Gamma0*StateVar_tF.' ...
     - SymMats.StateEq.Gamma1*StateVar_t.' ...

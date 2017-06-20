@@ -42,9 +42,8 @@ obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('%s_Report_IRF%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,...
-                      strrep(op.FNSuffix,'_',''));
+ReportFileName = [obj.Name,'_Report_IRF',op.FNSuffix];
+ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,strrep(op.FNSuffix,'_',''));
 
 %% Prepare for IRF
 if nargin<2 || isempty(xd)
@@ -139,8 +138,6 @@ for jP = 1:nPanels
         else
             h = vcfigureupdate(h,PlotData(:,:,:,jS));
         end
-%         printpdf([op.PlotDir,PlotFileName,...
-%                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
         print('-dpdf',[op.PlotDir,PlotFileName,...
                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
     end
@@ -160,9 +157,6 @@ for jS=1:nShocks2Show
         fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
                 op.PlotDir,PlotFileName,Pj,Sj);
-%         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                      '130 230 490 560]{%s%s_%s_%s.pdf}\n'],...
-%                 op.PlotDir,PlotFileName,Pj,Sj);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\newpage \n');
     end
@@ -170,7 +164,6 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-
 
 %% Finish up
 close all

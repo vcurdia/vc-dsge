@@ -148,16 +148,12 @@ for jP = 1:nPanels
     fprintf(fid,'\\label{States_%s}\n',Pj);
     fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n'],...
             op.PlotDir,PlotFileName,Pj);
-%     fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                  '120 230 490 560]{%s%s_%s.pdf}\n'],...
-%             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');
 end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-
 
 %% Finish up
 close all
