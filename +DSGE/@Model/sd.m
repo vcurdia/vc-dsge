@@ -32,7 +32,6 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
-op.Path = obj.Path;
 op.PlotDir = 'Plots_SD/';
 op.FigPanelsOptions = struct;
 op.FigPanelsOptions.Shape = {3,1};
@@ -207,12 +206,11 @@ for jP = 1:nPanels
     if op.TightFig
         tightfig(hf,Figj.Shape,ha,op.TightFigOptions)
     end
-    print('-dpdf',[op.Path,op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
 end
 
 %% Make report 
-fprintf('Making report: %s\n',[op.Path,ReportFileName]);
-basePath = cd(op.Path);
+fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jP = 1:nPanels
@@ -228,7 +226,6 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-cd(basePath)
 
 
 %% Finish up

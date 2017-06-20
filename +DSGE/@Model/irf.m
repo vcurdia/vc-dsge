@@ -23,7 +23,6 @@ op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Fig.Visible = 'off';
 op.Fig.Plot.LineWidth = 1.5;
-op.Path = obj.Path;
 op.PlotDir = 'Plots_IRF/';
 
 %% Update options
@@ -139,14 +138,13 @@ for jP = 1:nPanels
         else
             h = vcfigureupdate(h,PlotData(:,:,:,jS));
         end
-        print('-dpdf',[op.Path,op.PlotDir,PlotFileName,...
+        print('-dpdf',[op.PlotDir,PlotFileName,...
                     '_',Pj.Title,'_',op.Shocks2Show{jS}])
     end
 end
 
 %% Make report with IRF
-fprintf('Making report: %s\n',[op.Path,ReportFileName]);
-basePath = cd(op.Path);
+fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jS=1:nShocks2Show
@@ -166,7 +164,6 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-cd(basePath)
 
 %% Finish up
 close all

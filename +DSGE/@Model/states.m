@@ -23,7 +23,6 @@ op.Tick.Labels = [];
 op.Fig.Visible = 'off';
 % op.Fig.YMinScale = 0.01;
 op.Fig.Plot.LineWidth = 1.5;
-op.Path = obj.Path;
 op.PlotDir = 'Plots_States/';
 op.FigPanelsOptions = struct;
 op.FigPanelsOptions.Shape = {3,1};
@@ -135,12 +134,11 @@ for jP = 1:nPanels
         end
     end
     h = vcfigure(PlotData,Figj);
-    print('-dpdf',[op.Path,op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
 end
 
 %% Make report 
-fprintf('Making report: %s\n',[op.Path,ReportFileName]);
-basePath = cd(op.Path);
+fprintf('Making report: %s\n',ReportFileName);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jP = 1:nPanels
@@ -156,7 +154,6 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-cd(basePath)
 
 %% Finish up
 close all

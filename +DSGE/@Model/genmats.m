@@ -1,4 +1,4 @@
-function genmats(obj)
+function genmats(obj,matspath)
 
 % genmats
 %
@@ -10,18 +10,27 @@ function genmats(obj)
 %             x_tL refers to x(t-1)
 %
 % See also:
-% DSGE, SetupMyDSGE
+% DSGE, setupMyDSGE
 %
 %
 % Created: January 22, 2016 by Vasco Curdia
 % Copyright (C) 2016-2017 Vasco Curdia
+
 
 %% Preamble
 fprintf('\n*** Generating DSGE mats\n')
 ttName = 'GenMats';
 obj.TimeTracker.start(ttName)
 
-%% basic check
+%% checks
+if nargin==0 || isempty(matspath)
+    matspath = '';
+else
+    if ~strcmp(matspath(end),'/'), matspath = [matspath,'/']; end
+    if ~isdir(matspath), mkdir(matspath), end
+    addpath(matspath)
+end
+
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
     error('Cannot proceed without specifying state variables and equations')
 end
@@ -115,7 +124,7 @@ fprintf('Generating code to evaluate model Mats\n')
 MatsFN = sprintf('Mats%s',obj.Name);
 
 % Initiate file
-fid = fopen([obj.PathMats,MatsFN,'.m'],'wt');
+fid = fopen([matspath,MatsFN,'.m'],'wt');
 fprintf(fid,'function Mats = %s(x,varargin)\n\n',MatsFN);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 

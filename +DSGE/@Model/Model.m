@@ -100,12 +100,6 @@ classdef Model < matlab.mixin.Copyable
 % Name of the model specification
         Name = '';
         
-% Path where to save reports and other model related files.
-        Path = '';
-        
-% Path where to save the mats function.
-        PathMats = '';
-        
 % Param - Set of parameters to be calibrated or estimated
 %
 %   Main set of parameters set or estimated for a model specification.
@@ -233,22 +227,6 @@ classdef Model < matlab.mixin.Copyable
                 fprintf('\n*** Preparing model\n')
                 fprintf('%s\n',name)
                 obj.Name = name;
-            end
-        end
-        
-        function set.Path(obj,p)
-            if ~isempty(p) 
-                if ~strcmp(p(end),'/'), p = [p,'/']; end
-                obj.Path = p;
-            end
-        end
-        
-        function set.PathMats(obj,p)
-            if ~isempty(p) 
-                if ~strcmp(p(end),'/'), p = [p,'/']; end
-                obj.PathMats = p;
-                if ~isdir(obj.PathMats), mkdir(obj.PathMats), end
-                addpath(obj.PathMats)
             end
         end
         
