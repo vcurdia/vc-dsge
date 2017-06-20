@@ -32,6 +32,7 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
+op.Path = obj.Path;
 op.PlotDir = 'Plots_SD/';
 op.FigPanelsOptions = struct;
 op.FigPanelsOptions.Shape = {3,1};
@@ -163,8 +164,9 @@ for jP = 1:nPanels
     Figj.TitleList = Pj.PrettyNames;
     Figj.Shape = Pj.Shape;
     hf = figure('Visible',Figj.Visible);
+    nVar = length(Pj.Names);
     clear ha
-    for jV=1:Pj.N
+    for jV=1:nVar
         Vj = Pj.Names{jV};
         ha(jV) = subplot(Figj.Shape{:},jV);
         vIdx = ismember(vNames,Vj);
@@ -205,11 +207,12 @@ for jP = 1:nPanels
     if op.TightFig
         tightfig(hf,Figj.Shape,ha,op.TightFigOptions)
     end
-    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.Path,op.PlotDir,PlotFileName,'_',Pj.Title])
 end
 
 %% Make report 
-fprintf('Making report: %s\n',ReportFileName);
+fprintf('Making report: %s\n',[op.Path,ReportFileName]);
+basePath = cd(op.Path);
 fid = createtex(ReportFileName,ReportTitle);
 fprintf(fid,'\\newpage \n');
 for jP = 1:nPanels
@@ -225,6 +228,7 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
+cd(basePath)
 
 
 %% Finish up
