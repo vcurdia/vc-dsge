@@ -80,10 +80,14 @@ for j=1:obj.ShockVar.N
 end
 
 %% Aux Var and Eq
-nV = obj.AuxVar.N;
-if nV>0
-    AuxEq = sym(zeros(nV,1));
-    for j=1:nV
+if obj.AuxVar.N>0
+    nEq = length(obj.AuxEq);
+    if nEq~=obj.AuxVar.N
+        error('Number of AuxVar (%.0f) and AuxEq (%.0f) do not match.',...
+              obj.AuxVar.N,nEq)
+    end
+    AuxEq = sym(zeros(obj.AuxVar.N,1));
+    for j=1:obj.AuxVar.N
         vj = [obj.AuxVar.Names{j},'_t'];
         eval([vj,' = ',obj.AuxEq{j},';'])
         AuxEq(j) = eval(vj);
@@ -104,6 +108,11 @@ end
 
 %% Build Observation equations
 if obj.ObsVar.N>0
+    nEq = length(obj.ObsEq);
+    if nEq~=obj.ObsVar.N
+        error('Number of ObsVar (%.0f) and ObsEq (%.0f) do not match.',...
+              obj.ObsVar.N,nEq)
+    end
     ObsEq = sym(zeros(obj.ObsVar.N,1));
     for j=1:obj.ObsVar.N
         ObsEq(j) = eval(obj.ObsEq{j});
@@ -111,6 +120,11 @@ if obj.ObsVar.N>0
 end
 
 %% Build State equations
+nEq = length(obj.StateEq);
+if nEq~=obj.StateVar.N
+    error('Number of StateVar (%.0f) and StateEq (%.0f) do not match.',...
+          obj.StateVar.N,nEq)
+end
 StateEq = sym(zeros(obj.StateVar.N,1));
 for j=1:obj.StateVar.N
     StateEq(j) = eval(obj.StateEq{j});
