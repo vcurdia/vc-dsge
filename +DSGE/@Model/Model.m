@@ -311,11 +311,21 @@ classdef Model < matlab.mixin.Copyable
         
         function mats = setparamvalues(obj,p)
             np = size(p,1);
-            [tf,idxp] = ismember(p(:,1),obj.Param.Names);
-            obj.Param.Values(idxp(tf)) = [p{tf,2}];
-            if ~all(tf)
-                fprintf('Invalid parameter name ignored: %s\n',p{~tf,1})
+            % loop allows for duplicates so that the last within the duplicates 
+            % is the one that remains
+            for jp=1:np
+                idx = ismember(obj.Param.Names,p(jp,1));
+                if any(idx)
+                    obj.Param.Values(idx) = p{jp,2};
+                else
+                    fprintf('Invalid parameter name ignored: %s\n',p{jp,1})
+                end
             end
+%             [tf,idxp] = ismember(p(:,1),obj.Param.Names);
+%             obj.Param.Values(idxp(tf)) = [p{tf,2}];
+%             if ~all(tf)
+%                 fprintf('Invalid parameter name ignored: %s\n',p{~tf,1})
+%             end
             mats = obj.mats(obj.Param.Values);
             obj.AuxParam.Values = mats.AuxParam;
         end
