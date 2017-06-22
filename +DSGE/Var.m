@@ -100,6 +100,11 @@ classdef Var < matlab.mixin.Copyable
             end
         end
         
+        function v1 = subset(obj,names)
+            [tf,idx] = ismember(names,obj.Names);
+            v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
+        end
+        
         function prettynames=findprettynames(obj,names)
             [tf,idx] = ismember(names,obj.Names);
             if ~all(tf)
