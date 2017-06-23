@@ -37,7 +37,7 @@ if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 
 %% Preamble
 
-fprintf('\n*** Making IRF\n')
+fprintf('\nMaking IRF\n')
 ttName = ['IRF',op.FNSuffix];
 obj.TimeTracker.start(ttName)
 
