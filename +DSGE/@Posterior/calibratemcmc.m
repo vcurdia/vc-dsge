@@ -17,10 +17,10 @@ op.NChains = 4;
 op.JumpScale = 2.4;
 op.NDrawsCalibrate = 1000;
 op.KeepFilesCalibrate = 0; 
-op.ScaleIncrements = [0.2,0.05,0.01];
+op.ScaleIncrements = 0.1; %[0.2,0.05,0.01];
 op.NConfirm = 1;
 op.RejectionRateMax = 0.85;
-op.RejectionRateMin = 0.70; 
+op.RejectionRateMin = 0.65; 
 op.MaxReverseDirection = 2; 
 op.MinSearchScale = 0.1; 
 
