@@ -11,27 +11,62 @@ tt.start('Setup')
 
 %% simple example setup
 Param = {'a';'b';'c'};
-AuxParam = {'d','4+a+b'};
+NSParam = {'alpha'};
+NSEq = {'c*d-alpha'};
+CParam = {'d','4+a+b'};
 Var = {'x';'y';'z'};
 Eq = {...
-    'a*x-z';
+    'a*x-z+alpha';
     '2+x*d+b*y';
     '5-c*y';
     };
 x0 = [1;2;3];
 
 %% generate mats
-AllParam = [Param;AuxParam(:,1)];
+AuxParam = [NSParam;CParam(:,1)];
+AllParam = [Param;AuxParam];
 vcsym(AllParam{:})
 
-nAuxParam = size(AuxParam,1);
-fAuxParam = cell(nAuxParam,1);
-for j=1:nAuxParam
-    Auxj = eval(AuxParam{j,2});
-    fAuxParam{j} = matlabFunction(Auxj,'Vars',Param);
+nNSParam = length(NSParam);
+nCParam = size(CParam,1);
+nAuxParam = length(AuxParam);
+
+ftmp = cell(nCParam,1);
+for j=1:nCParam
+    fj = eval(CParam{j,2});
+    ftmp{j} = matlabFunction(fj,'Vars',[Param;NSParam]);
 end
-f.AuxParam = @(x)buildmat(fAuxParam,x,nAuxParam,1);
-clear fAuxParam
+f.CParam = @(x)buildmat(ftmp,x,nCParam,1);
+clear ftmp
+
+ftmp = cell(nNSParam,1);
+for j=1:nNSParam
+    fj = eval(NSEq{j});
+    ftmp{j} = matlabFunction(fj,'Vars',AllParam);
+end
+f.NSEq = @(x)buildmat(ftmp,x,nNSParam,1);
+clear ftmp
+
+function y = solveNSParam(x)
+    
+
+function f=NumSolveEq(x)
+    for jx=1:size(x,2)
+        rA = x(1,jx);
+        rB = x(2,jx);
+        EvalCompoundParam
+        f(1,jx) = (rA+rB)/2-r;
+        f(2,jx) = rA+0.5/400-rB;
+    end
+end
+NumSolveGuess = [...
+    1.0000000000000000;
+    1.0000000000000000;
+    ];
+NumSolveOptions = optimoptions(@fsolve);
+NumSolveOptions.Display = 'off';
+[NumSolveSolution,NumSolveResidual,NumSolveRC,NumSolveOutput] = fsolve(@NumSolveEq,NumSolveGuess,NumSolveOptions);
+
 
 vcsym(Var{:})
 nVar = length(Var);
