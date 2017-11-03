@@ -1,4 +1,4 @@
-function A = buildmat(f,x,m,n)
+function A = buildmat(f,x,m,n,squeezeDim2)
     
 % buildmat
 %
@@ -13,6 +13,9 @@ function A = buildmat(f,x,m,n)
 %
 % Created: March 23, 2017 by Vasco Curdia
 % Copyright 2017 by Vasco Curdia
+
+%% Option
+squeezeDim2 = 0;
     
 if length(f)~=m*n
     error('Length of f needs to match m*n.')
@@ -27,4 +30,6 @@ for jx=1:nx
     end
     A(:,:,jx) = Aj;
 end
-
+if n==1 && squeezeDim2
+    A = permute(A,[1,3,2]);
+end
