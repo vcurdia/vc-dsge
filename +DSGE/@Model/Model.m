@@ -217,7 +217,7 @@ classdef Model < matlab.mixin.Copyable
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
         TimeTracker
-        mats
+        MatFcn
     end
     
     methods
@@ -347,6 +347,20 @@ classdef Model < matlab.mixin.Copyable
             end
             prettynames = vv.PrettyNames(idx);
         end
+        
+        function [xaux,NumSolveResidual,NumSolveRC,NumSolveOutput] = ...
+                evalauxparam(obj,x,xns0)
+            if nargin<2 || isempty(xns0)
+                xns0 = ones(obj.NumSolveParam.N,1);
+            end
+            NumSolveOptions = optimoptions(@fsolve);
+            NumSolveOptions.Display = 'off';
+            [xns1,NumSolveResidual,NumSolveRC,NumSolveOutput] = ...
+                fsolve(@(xns)obj.MatFcn.NumSolveEq([x;xns]),xns0,...
+                       NumSolveOptions);
+            xaux = [xns1;obj.MatFcn.CompoundParam([x;xns1])];
+        end
+
         
 %         function Mats = evalmats(obj,matname,x)
 %             Mats = struct;

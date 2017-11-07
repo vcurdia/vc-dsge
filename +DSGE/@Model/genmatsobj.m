@@ -28,29 +28,26 @@ if (obj.StateVar.N==0) || isempty(obj.StateEq)
 end
 
 %% Sym Params
-list = {'','NumSolve','Compound'};
-% sList = struct;
+list = {'Param','NumSolveParam','CompoundParam'};
+symlist = struct;
 for j=1:length(list)
-    jstr = [list{j},'Param'];
+    jstr = list{j};
     if obj.(jstr).N>0, vcsym(obj.(jstr).Names{:}), end
-%     sList.(jstr) = sym(zeros(1,obj.(jstr).N));
-%     for jp=1:obj.(jstr).N
-%         sList.(jstr)(jp) = eval(obj.(jstr).Names{jp});
-%     end
+    symlist.(jstr) = sym(zeros(1,obj.(jstr).N));
+    for jp=1:obj.(jstr).N
+        symlist.(jstr)(jp) = eval(obj.(jstr).Names{jp});
+    end
 end
-% SymParam = sList.Param;
-% SymNumsolveParam = sList.NumSolveParam;
-% SymCompoundParam = sList.CompoundParam;
-% SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
-AllParam = [obj.Param.Names;
-            obj.NumSolveParam.Names;
-            obj.CompoundParam.Names];
+
+% Combine NumSolve, and Compound into AuxParam
+obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
+obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
+                    obj.CompoundParam.PrettyNames];
+
+% Define AllParam
+AllParam = [obj.Param.Names;obj.AuxParam.Names];
+symAllParam = [symlist.Param,symlist.NumSolveParam,symlist.CompoundParam];
 nAllParam = length(AllParam);
-vcsym(AllParam{:})
-symAllParam = sym(zeros(1,nAllParam));
-for j=1:nAllParam
-    symAllParam(j) = eval(AllParam{j});
-end
 
 
 %% Obs Var
@@ -137,101 +134,26 @@ end
 ftmp = cell(obj.CompoundParam.N,1);
 for j=1:obj.CompoundParam.N
     fj = eval(obj.CompoundExpressions{j});
-    ftmp{j} = matlabFunction(fj,'Vars',[Param;NSParam]);
+    ftmp{j} = matlabFunction(fj,'Vars',[symlist.Param,symlist.NumsolveParam]);
 end
-f.CParam = @(x)buildmat(ftmp,x,nCParam,1);
-clear ftmp
+obj.MatFcn.CompoundParam = @(x)buildmat(ftmp,x,nCParam,1);
 
-
-
-if obj.NumSolveParam.N>0
-    fprintf(fid,'\n%% NumSolve parameters\n');
-    fprintf(fid,'function f=NumSolveEq(x)\n');
-    fprintf(fid,'    for jx=1:size(x,2)\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'        %s = x(%.0f,jx);\n',...
-                obj.NumSolveParam.Names{j},j);
-    end
-    fprintf(fid,'        EvalCompoundParam\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'        f(%.0f,jx) = %s;\n',j,...
-                obj.NumSolveEq{j});
-    end
-    fprintf(fid,'    end\n');
-    fprintf(fid,'end\n');
-    fprintf(fid,'NumSolveGuess = [...\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'    %.16f;\n',obj.NumSolveParam.Values(j));
-    end
-    fprintf(fid,'    ];\n');
-%     fprintf(fid,['[NumSolveSolution,NumSolveRC] = csolvevb(@NumSolveEq,' ...
-%                      'NumSolveGuess,[],%e,%.0f);\n'],...
-%             obj.NumPrecision,obj.NumSolveMaxIterations);
-    fprintf(fid,['NumSolveOptions = optimoptions(@fsolve);\n']);
-    fprintf(fid,'NumSolveOptions.Display = ''off'';\n');
-%     fprintf(fid,'NumSolveOptions.MaxIterations = %f;\n',...
-%             obj.NumSolveMaxIterations);
-%     fprintf(fid,'NumSolveOptions.FunctionTolerance = %f;\n',...
-%             obj.NumSolvePrecision);
-%     fprintf(fid,'NumSolveOptions.OptimalityTolerance = %f;\n',...
-%             obj.NumSolvePrecision);
-%     fprintf(fid,'NumSolveOptions.StepTolerance = %f;\n',...
-%             obj.NumSolvePrecision);
-    fprintf(fid,['[NumSolveSolution,NumSolveResidual,NumSolveRC,',...
-                     'NumSolveOutput] = ',...
-                     'fsolve(@NumSolveEq,NumSolveGuess,NumSolveOptions);\n']);
-    fprintf(fid,'Mats.NumSolveParamRC = NumSolveRC;\n');
-%     fprintf(fid,'if NumSolveRC~=0\n');
-    fprintf(fid,'if NumSolveRC~=1\n');
-    fprintf(fid,'    Mats.Status = 0;\n');
-    txt = 'NumSolveParam solution not normal.';
-    fprintf(fid,'    Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
-            txt);
-    fprintf(fid,'    if op.verbose\n');
-    fprintf(fid,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
-    fprintf(fid,'    end\n');
-    fprintf(fid,'end\n');
-    for j=1:obj.NumSolveParam.N
-        fprintf(fid,'%s = NumSolveSolution(%.0f);\n',...
-                obj.NumSolveParam.Names{j},j);
-    end
+%% function to evaluate NumSolveEq
+ftmp = cell(nNSParam,1);
+for j=1:obj.NumSolveParam.N
+    fj = eval(obj.NumSolveEq{j});
+    ftmp{j} = matlabFunction(fj,'Vars',symAllParam);
 end
+obj.MatFcn.NumSolveEq = @(x)buildmat(ftmp,[x;obj.Mats.CompoundParam(x)],...
+                      obj.NumSolveParam.N,1);
 
-if obj.CompoundParam.N>0
-    fprintf(fid,'\n%% Map compound parameters\n');
-    if obj.NumSolveParam.N>0
-        fprintf(fid,'function EvalCompoundParam \n');
-        txt = '    ';
-    else
-        txt = '';
-    end
-    for j=1:obj.CompoundParam.N
-        fprintf(fid,'%s%s = %s;\n',txt,obj.CompoundParam.Names{j},...
-                obj.CompoundExpressions{j});
-    end
-    if obj.NumSolveParam.N>0
-        fprintf(fid,'end \n');
-    end
-end
+HERE HERE HERE
 
-% Combine NumSolve, and Compound into AuxParam
-obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
-obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
-                    obj.CompoundParam.PrettyNames];
-
-fprintf(fid,'if op.StoreParam\n');
-fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
-for j=1:obj.AuxParam.N
-    fprintf(fid,'    Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
-end
-fprintf(fid,'end\n');
-
+%% functions to evaluate ObsEq
 if obj.ObsVar.N>0
-    fprintf(fid,'\n%% Observation equations\n');
     H0 = -jacobian(ObsEq,ObsVar_t);
     H = jacobian(ObsEq,StateVar_t);
     HBar = simplify(ObsEq-H*StateVar_t.'+H0*ObsVar_t.');
-%     SymMats.ObsEq.HBar = H0\jacobian(ObsEq,one);
     SymMats.ObsEq.HBar = H0\HBar;
     SymMats.ObsEq.H = H0\H;
     idxEq = ( any(jacobian(ObsEq,StateVar_tF)~=0,2) ...
