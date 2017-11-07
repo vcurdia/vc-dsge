@@ -147,8 +147,6 @@ end
 obj.MatFcn.NumSolveEq = @(x)buildmat(ftmp,[x;obj.Mats.CompoundParam(x)],...
                       obj.NumSolveParam.N,1);
 
-HERE HERE HERE
-
 %% functions to evaluate ObsEq
 if obj.ObsVar.N>0
     H0 = -jacobian(ObsEq,ObsVar_t);
@@ -167,37 +165,16 @@ if obj.ObsVar.N>0
     end
     MatNames = fieldnames(SymMats.ObsEq);
     nCols = [1,obj.StateVar.N];
-    fprintf(fid,'if op.StoreObsEq || op.StoreKF\n');
-%     obj.ObsEqMats = struct;
     for jM=1:length(MatNames)
-%         Mj = MatNames{jM};
-%         nMj = obj.ObsVar.N*nCols(jM);
-%         fh = cell(nMj,1);
-%         for j=1:nMj
-%             fh{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),...
-%                                     'Vars',SymParamAll);
-%         end
-%         obj.ObsEqMats.(MatNames{jM}) = @(x)buildmat(fh,x,obj.ObsVar.N,nCols(jM));
-        fprintf(fid,'    ObsEq.%s = [...\n',MatNames{jM});
-        for jeq=1:obj.ObsVar.N
-            fprintf(fid,'       ');
-            for jc=1:nCols(jM)
-                fprintf(fid,' %s',...
-                        char(eval(sprintf('SymMats.ObsEq.%s(jeq,jc)',...
-                                          MatNames{jM}))));
-                if jc==nCols(jM)
-                    fprintf(fid,';\n');
-                else
-                    fprintf(fid,',');
-                end
-            end
+        Mj = MatNames{jM};
+        nMj = obj.ObsVar.N*nCols(jM);
+        fj = cell(nMj,1);
+        for j=1:nMj
+            fj{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),'Vars',symAllParam);
         end
-        fprintf(fid,'        ];\n');
+        obj.MatFcn.ObsEqMats.(MatNames{jM}) = @(x)buildmat(...
+            fj,x,obj.ObsVar.N,nCols(jM));
     end
-    fprintf(fid,'end\n');
-    fprintf(fid,'if op.StoreObsEq\n');
-    fprintf(fid,'    Mats.ObsEq = ObsEq;\n');
-    fprintf(fid,'end\n');
 end
 
 fprintf(fid,'\n%% State equation matrices\n');
