@@ -23,7 +23,7 @@ ttName = 'GenMats';
 obj.TimeTracker.start(ttName)
 
 %% checks
-if nargin==0 || isempty(matspath)
+if nargin==1 || isempty(matspath)
     matspath = '';
 else
     if ~strcmp(matspath(end),'/'), matspath = [matspath,'/']; end
