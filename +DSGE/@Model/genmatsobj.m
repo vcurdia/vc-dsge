@@ -134,7 +134,8 @@ end
 ftmp = cell(obj.CompoundParam.N,1);
 for j=1:obj.CompoundParam.N
     fj = eval(obj.CompoundExpressions{j});
-    ftmp{j} = matlabFunction(fj,'Vars',[symlist.Param,symlist.NumsolveParam]);
+    keyboard
+    ftmp{j} = matlabFunction(fj,'Vars',[symlist.Param,symlist.NumSolveParam]);
 end
 obj.MatFcn.CompoundParam = @(x)buildmat(ftmp,x,nCParam,1);
 
@@ -163,18 +164,6 @@ if obj.ObsVar.N>0
         fclose(fid);
         error('Cannot have leads, lags, or shocks in Obs equations.')
     end
-    MatNames = fieldnames(SymMats.ObsEq);
-    nCols = [1,obj.StateVar.N];
-    for jM=1:length(MatNames)
-        Mj = MatNames{jM};
-        nMj = obj.ObsVar.N*nCols(jM);
-        fj = cell(nMj,1);
-        for j=1:nMj
-            fj{j} = matlabFunction(SymMats.ObsEq.(Mj)(j),'Vars',symAllParam);
-        end
-        obj.MatFcn.ObsEqMats.(MatNames{jM}) = @(x)buildmat(...
-            fj,x,obj.ObsVar.N,nCols(jM));
-    end
 end
 
 fprintf(fid,'\n%% State equation matrices\n');
@@ -197,115 +186,6 @@ if any(idxEq)
     error('Cannot have both leads and lags in same State equation.')
 end
 
-MatNames = fieldnames(SymMats.StateEq);
-nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N,obj.ShockVar.N];
-for jM=1:length(MatNames)
-    fprintf(fid,'StateEq.%s = [...\n',MatNames{jM});
-    for jeq=1:obj.StateVar.N
-        fprintf(fid,'   ');
-        for jc=1:nCols(jM)
-            fprintf(fid,' %s',...
-                    char(eval(sprintf('SymMats.StateEq.%s(jeq,jc)',...
-                                      MatNames{jM}))));
-            if jc==nCols(jM)
-                fprintf(fid,';\n');
-            else
-                fprintf(fid,',');
-            end
-        end
-    end
-    fprintf(fid,'    ];\n\n');
-end
-fprintf(fid,'StateEq.Gamma3 = eye(%.0f);\n\n',obj.StateVar.N);
-fprintf(fid,'cv = (all(StateEq.Gamma0(1:%.0f,:)==0,2)~=0);\n',...
-        obj.StateVar.N);
-fprintf(fid,'StateEq.Gamma0(cv,:) = -StateEq.Gamma1(cv,:);\n');
-fprintf(fid,'StateEq.Gamma1(cv,:) = StateEq.Gamma4(cv,:);\n');
-fprintf(fid,'StateEq.Gamma3(:,cv) = [];\n');
-fprintf(fid,'if ~all(all(StateEq.Gamma4(~cv,:)==0,2))\n');
-fprintf(fid,'    error(''Incorrect system reduction'')\n');
-fprintf(fid,'end\n\n');
-fprintf(fid,'StateEq = rmfield(StateEq,''Gamma4'');\n');
-fprintf(fid,'if op.StoreStateEq\n');
-fprintf(fid,'    Mats.StateEq = StateEq;\n');
-fprintf(fid,'end\n');
-
-fprintf(fid,'\n%% Solve REE\n');
-fprintf(fid,'if op.SolveREE\n');
-fprintf(fid,...
-        '    [REE,fmat,fwt,ywt,gev] = solveree(StateEq,...\n');
-fprintf(fid,...
-        '        op.GensysAuthor,op.fid,op.verbose,op.gensys{:});\n');
-fprintf(fid,'    Mats.REE = REE;\n');
-fprintf(fid,'    if ~all(REE.eu==1);\n');
-fprintf(fid,'        Mats.Status = 0;\n');
-fprintf(fid,['        Mats.StatusMessage = [Mats.StatusMessage,''REE ' ...
-                 'solution not normal.''];\n']);
-fprintf(fid,'    end\n');
-fprintf(fid,'end\n');
-
-if obj.ObsVar.N>0
-    fprintf(fid,'\n%% Kalman Filter matrices\n');
-    fprintf(fid,'if op.SolveREE && op.StoreKF\n');
-    fprintf(fid,'    if all(Mats.REE.GBar(:)==0)\n');
-    fprintf(fid,'        KF.StateVarBar = zeros(%.0f,1);\n',...
-            obj.StateVar.N);
-    fprintf(fid,'    else\n');
-    fprintf(fid,...
-            '        KF.StateVarBar = (eye(%.0f)-REE.G1)\\REE.GBar;\n',...
-            obj.StateVar.N);
-    fprintf(fid,'    end\n');
-    fprintf(fid,...
-            '    KF.ObsVarBar = ObsEq.HBar + ObsEq.H*KF.StateVarBar;\n\n');
-
-    if ~isempty(obj.KFInitState)
-        fprintf(fid,'    s00 = [...\n');
-        for jeq=1:obj.StateVar.N
-            fprintf(fid,'        %.16f;\n',obj.KFInitState(jeq));
-        end
-        fprintf(fid,'        ];\n\n');
-    else
-        fprintf(fid,'    KF.s00 = zeros(%.0f,1);\n\n',obj.StateVar.N);
-    end
-
-    if ~isempty(obj.KFInitVariance)
-        fprintf(fid,'    sig00 = [...\n');
-        for jeq=1:obj.StateVar.N
-            fprintf(fid,'       ');
-            for jc=1:obj.StateVar.N
-                fprintf(fid,' %0.16f',obj.KFInitVariance(jeq,jc));
-                if jc==obj.StateVar.N
-                    fprintf(fid,';\n');
-                else
-                    fprintf(fid,',');
-                end
-            end
-        end
-        fprintf(fid,'    ];\n\n');
-        fprintf(fid,'    sig00rc = 0;\n');
-    else
-        fprintf(fid,...
-                '    [sig00,sig00rc] = lyapcsd(REE.G1,REE.G2*REE.G2'');\n');
-        fprintf(fid,...
-                '    sig00 = real(sig00); sig00 = (sig00+sig00'')/2;\n');
-        fprintf(fid,'    if sig00rc~=0\n');
-        fprintf(fid,'        Mats.Status = 0;\n');
-        txt = 'Could not find unconditional variance.';
-        fprintf(fid,...
-                '        Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
-                txt);
-        fprintf(fid,'        if op.verbose\n');
-        fprintf(fid,...
-                '            fprintf(fid,''Warning: %s\\n'');\n',txt);
-        fprintf(fid,'        end\n\n');
-        fprintf(fid,'    end\n\n');
-    end
-    fprintf(fid,'    KF.sig00 = sig00;\n');
-    fprintf(fid,'    KF.sig00rc = sig00rc;\n');
-    fprintf(fid,'    Mats.KF = KF;\n');
-    fprintf(fid,'end\n');
-end
-
 if obj.AuxVar.N>0
     fprintf(fid,'\n%% Auxiliary equations matrices\n');
     SymMats.AuxEq.PhiBar = [];
@@ -318,58 +198,39 @@ if obj.AuxVar.N>0
         - SymMats.AuxEq.Phi2*ShockVar_t.' ...
         - SymMats.AuxEq.Phi3*StateVar_tF.' ...
         - SymMats.AuxEq.Phi4*StateVar_tL.');
-    MatNames = {'PhiBar','Phi1','Phi2','Phi3','Phi4'};
-    nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
-    fprintf(fid,'if op.StoreAuxEq || op.StoreAuxREE\n');
-    for jM=1:length(MatNames)
-        Mj = MatNames{jM};
-        fprintf(fid,'    AuxEq.%s = [...\n',Mj);
-        for jeq=1:obj.AuxVar.N
-            fprintf(fid,'       ');
-            for jc=1:nCols(jM)
-                fprintf(fid,' %s',...
-                        char(eval(sprintf('SymMats.AuxEq.%s(jeq,jc)',Mj))));
-                if jc==nCols(jM)
-                    fprintf(fid,';\n');
-                else
-                    fprintf(fid,',');
-                end
-            end
-        end
-        fprintf(fid,'        ];\n\n');
-    end
-    fprintf(fid,'    if op.StoreAuxEq\n');
-    fprintf(fid,'        Mats.AuxEq = AuxEq;\n');
-    fprintf(fid,'    end\n');
-    fprintf(fid,'    if op.SolveREE && op.StoreAuxREE\n');
-    fprintf(fid,'        if ~isempty(REE.G1)\n');
-    fprintf(fid,['            AuxREE.GBar = ',...
-                     'AuxEq.PhiBar+AuxEq.Phi3*REE.GBar',...
-                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.GBar',...
-                     ';\n']);
-    fprintf(fid,['            AuxREE.G1 = AuxEq.Phi4',...
-                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.G1;\n']);
-    fprintf(fid,['            AuxREE.G2 = AuxEq.Phi2',...
-                     '+(AuxEq.Phi1+AuxEq.Phi3*REE.G1)*REE.G2;\n']);
-    fprintf(fid,'        else\n');
-    fprintf(fid,'            AuxREE.GBar = [];\n');
-    fprintf(fid,'            AuxREE.G1 = [];\n');
-    fprintf(fid,'            AuxREE.G2 = [];\n');
-    fprintf(fid,'        end\n');
-    fprintf(fid,'        Mats.AuxREE = AuxREE;\n');
-    fprintf(fid,'    end\n');
-    fprintf(fid,'end\n');
 end
 
-% close file
-fprintf(fid,'end\n');
-fclose(fid);
-
-%% Save handle to function
-obj.mats = str2func(MatsFN);
+listEq = {'ObsEq','StateEq'};
+for jEq=1:length(listEq)
+    Eqj = listEq{jEq};
+    if strcmp(Eqj,'ObsEq')
+        nRows = obj.ObsVar.N;
+        nCols = [1,obj.StateVar.N];
+    elseif strcmp(Eqj,'StateEq')
+        nRows = obj.StateVar.N;
+        nCols = [1,obj.StateVar.N,obj.StateVar.N,obj.StateVar.N, ...
+                 obj.ShockVar.N];
+    elseif strcmp(Eqj,'AuxEq')
+        nRows = obj.AuxVar.N;
+        nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N, ...
+                 obj.StateVar.N];
+    end
+    if nRows==0,continue,end
+    MatNames = fieldnames(SymMats.(Eqj));
+    for jM=1:length(MatNames)
+        Mj = MatNames{jM};
+        nMj = nRows*nCols(jM);
+        fj = cell(nMj,1);
+        for j=1:nMj
+            fj{j} = matlabFunction(SymMats.(Eqj).(Mj)(j),'Vars',symAllParam);
+        end
+        obj.MatFcn.(Eqj).(MatNames{jM}) = @(x)buildmat(...
+            fj,x,obj.(Eqj).N,nCols(jM));
+    end
+end
 
 %% Test function
-mats = obj.mats(obj.Param.Values);
+mats = obj.evalmats(obj.Param.Values);
 obj.AuxParam.Values = mats.AuxParam;
 if mats.Status==0
     fprintf('Warning: REE solution not normal for Param.Values.\n')

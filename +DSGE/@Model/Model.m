@@ -217,6 +217,7 @@ classdef Model < matlab.mixin.Copyable
         NumSolvePrecision = 1e-6;
         NumSolveMaxIterations = 500;
         TimeTracker
+        mats
         MatFcn
     end
     
