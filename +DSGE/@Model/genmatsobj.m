@@ -132,20 +132,23 @@ end
 
 %% function to evaluate compound parameters
 ftmp = cell(obj.CompoundParam.N,1);
+fj = sym(zeros(obj.CompoundParam.N,1));
 for j=1:obj.CompoundParam.N
-    fj = eval(obj.CompoundExpressions{j});
-    keyboard
-    ftmp{j} = matlabFunction(fj,'Vars',[symlist.Param,symlist.NumSolveParam]);
+    fj(j) = eval(obj.CompoundExpressions{j});
+    for jj=j-1:-1:1
+        fj(j) = subs(fj(j),symlist.CompoundParam(jj),fj(jj));
+    end
+    ftmp{j} = matlabFunction(fj(j),'Vars',[symlist.Param,symlist.NumSolveParam]);
 end
-obj.MatFcn.CompoundParam = @(x)buildmat(ftmp,x,nCParam,1);
+obj.MatFcn.CompoundParam = @(x)buildmat(ftmp,x,obj.CompoundParam.N,1);
 
 %% function to evaluate NumSolveEq
-ftmp = cell(nNSParam,1);
+ftmp = cell(obj.NumSolveParam.N,1);
 for j=1:obj.NumSolveParam.N
     fj = eval(obj.NumSolveEq{j});
     ftmp{j} = matlabFunction(fj,'Vars',symAllParam);
 end
-obj.MatFcn.NumSolveEq = @(x)buildmat(ftmp,[x;obj.Mats.CompoundParam(x)],...
+obj.MatFcn.NumSolveEq = @(x)buildmat(ftmp,[x;obj.MatFcn.CompoundParam(x)],...
                       obj.NumSolveParam.N,1);
 
 %% functions to evaluate ObsEq
@@ -166,7 +169,7 @@ if obj.ObsVar.N>0
     end
 end
 
-fprintf(fid,'\n%% State equation matrices\n');
+%% State equation matrices
 SymMats.StateEq.GammaBar = [];
 SymMats.StateEq.Gamma0 = -jacobian(StateEq,StateVar_tF);
 SymMats.StateEq.Gamma1 = jacobian(StateEq,StateVar_t);
@@ -186,8 +189,8 @@ if any(idxEq)
     error('Cannot have both leads and lags in same State equation.')
 end
 
+%% Auxiliary equations matrices
 if obj.AuxVar.N>0
-    fprintf(fid,'\n%% Auxiliary equations matrices\n');
     SymMats.AuxEq.PhiBar = [];
     SymMats.AuxEq.Phi1 = jacobian(AuxEq,StateVar_t);
     SymMats.AuxEq.Phi2 = jacobian(AuxEq,ShockVar_t);
@@ -200,7 +203,7 @@ if obj.AuxVar.N>0
         - SymMats.AuxEq.Phi4*StateVar_tL.');
 end
 
-listEq = {'ObsEq','StateEq'};
+listEq = {'ObsEq','StateEq','AuxEq'};
 for jEq=1:length(listEq)
     Eqj = listEq{jEq};
     if strcmp(Eqj,'ObsEq')
@@ -224,8 +227,7 @@ for jEq=1:length(listEq)
         for j=1:nMj
             fj{j} = matlabFunction(SymMats.(Eqj).(Mj)(j),'Vars',symAllParam);
         end
-        obj.MatFcn.(Eqj).(MatNames{jM}) = @(x)buildmat(...
-            fj,x,obj.(Eqj).N,nCols(jM));
+        obj.MatFcn.(Eqj).(MatNames{jM}) = @(x)buildmat(fj,x,nRows,nCols(jM));
     end
 end
 

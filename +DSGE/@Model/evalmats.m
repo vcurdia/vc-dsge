@@ -25,7 +25,7 @@ op.fid = 1;
 op.verbose = 0;
 op.GensysAuthor = 'CS';
 op.gensys = {};
-op.NumsolveGuess = [];
+op.NumSolveGuess = [];
 op = updateoptions(op,varargin{:});
 
 %% Initiate Status
@@ -56,7 +56,7 @@ xAll = [Mats.Param;Mats.AuxParam];
 %% Observation equations
 if op.StoreObsEq || op.StoreKF
     ObsEq.HBar = obj.MatFcn.ObsEq.HBar(xAll);
-    ObsEq.H = obj.MatFcn.ObsEq.HB(xAll);
+    ObsEq.H = obj.MatFcn.ObsEq.H(xAll);
 end
 if op.StoreObsEq
     Mats.ObsEq = ObsEq;
