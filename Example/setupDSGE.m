@@ -13,8 +13,8 @@
 %% Preamble
 clear all
 setpath
-addpath('Mats/')
-set(groot,'defaultTextInterpreter','latex');
+% addpath('Mats/')
+set(groot,'defaultTextInterpreter','latex'); % 
 set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
 tt.start('Setup')
