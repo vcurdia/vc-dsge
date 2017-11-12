@@ -1,10 +1,10 @@
-% estimateDSGE
+% estimatedsge
 %
-% This file gives an example of how to estimate a DSGE using the vcDSGE toolbox.
-% It assumes that the DSGE was previously setup by setupDSGE.
+% Example of how to estimate a DSGE using the VC-DSGE toolbox. It assumes that 
+% the DSGE was previously setup by setupDSGE.
 %
 % See also:
-% setupDSGE, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
+% setupdsge, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
 %
 % ...........................................................................
 %
@@ -24,7 +24,6 @@ tt = TimeTracker;
 %% Load DSGE
 specName = 'MyDSGE';
 specPath = specName;
-
 cd(specPath)
 load(specName)
 
