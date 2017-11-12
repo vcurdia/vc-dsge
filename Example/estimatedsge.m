@@ -16,15 +16,15 @@
 %% Preamble
 clear all
 setpath
-addpath('Mats/')
+% addpath('Mats/')
 set(groot,'defaultTextInterpreter','latex');
 set(groot,'defaultLegendInterpreter','latex');
 tt = TimeTracker;
 
 %% Load DSGE
 specName = 'MyDSGE';
-specPath = specName;
-cd(specPath)
+% specPath = specName;
+% cd(specPath)
 load(specName)
 
 %% Initiate parallel pool
@@ -56,7 +56,7 @@ end
 %% Finish up
 % delete(gcp)
 save(specName)
-cd(basePath)
+% cd(basePath)
 fprintf('\n'),tt.show
 
 % exit

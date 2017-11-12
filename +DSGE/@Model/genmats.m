@@ -135,7 +135,7 @@ end
 
 fprintf('Generating code to evaluate model Mats\n')
 
-MatsFN = sprintf('Mats%s',obj.Name);
+MatsFN = sprintf('%s_Mats',obj.Name);
 
 % Initiate file
 fid = fopen([matspath,MatsFN,'.m'],'wt');
