@@ -24,7 +24,6 @@ tt = TimeTracker;
 %% Load DSGE
 specName = 'MyDSGE';
 specPath = specName;
-
 cd(specPath)
 load(specName)
 
