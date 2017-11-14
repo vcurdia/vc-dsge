@@ -36,7 +36,7 @@ if (obj.StateVar.N==0) || isempty(obj.StateEq)
 end
 
 %% Sym Params
-list = {'','NumSolve','Compound'};
+list = {'','NumSolve','Composite'};
 % sList = struct;
 for j=1:length(list)
     jstr = [list{j},'Param'];
@@ -48,8 +48,8 @@ for j=1:length(list)
 end
 % SymParam = sList.Param;
 % SymNumsolveParam = sList.NumSolveParam;
-% SymCompoundParam = sList.CompoundParam;
-% SymParamAll = [SymParam,SymNumsolveParam,SymCompoundParam];
+% SymCompositeParam = sList.CompositeParam;
+% SymParamAll = [SymParam,SymNumsolveParam,SymCompositeParam];
 
 %% Obs Var
 ObsVar_t = sym(zeros(1,obj.ObsVar.N)); 
@@ -170,13 +170,13 @@ fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.Param = x;\n');
 fprintf(fid,'end\n');
 
-if obj.CompoundParam.N>0 || obj.NumSolveParam.N>0
-    fprintf(fid,'\n%% Initialize compound parameters\n');
+if obj.CompositeParam.N>0 || obj.NumSolveParam.N>0
+    fprintf(fid,'\n%% Initialize composite parameters\n');
     for j=1:obj.NumSolveParam.N
         fprintf(fid,'%s = [];\n',obj.NumSolveParam.Names{j});
     end
-    for j=1:obj.CompoundParam.N
-        fprintf(fid,'%s = [];\n',obj.CompoundParam.Names{j});
+    for j=1:obj.CompositeParam.N
+        fprintf(fid,'%s = [];\n',obj.CompositeParam.Names{j});
     end
 end
 
@@ -188,7 +188,7 @@ if obj.NumSolveParam.N>0
         fprintf(fid,'        %s = x(%.0f,jx);\n',...
                 obj.NumSolveParam.Names{j},j);
     end
-    fprintf(fid,'        EvalCompoundParam\n');
+    fprintf(fid,'        EvalCompositeParam\n');
     for j=1:obj.NumSolveParam.N
         fprintf(fid,'        f(%.0f,jx) = %s;\n',j,...
                 obj.NumSolveEq{j});
@@ -233,27 +233,27 @@ if obj.NumSolveParam.N>0
     end
 end
 
-if obj.CompoundParam.N>0
-    fprintf(fid,'\n%% Map compound parameters\n');
+if obj.CompositeParam.N>0
+    fprintf(fid,'\n%% Map composite parameters\n');
     if obj.NumSolveParam.N>0
-        fprintf(fid,'function EvalCompoundParam \n');
+        fprintf(fid,'function EvalCompositeParam \n');
         txt = '    ';
     else
         txt = '';
     end
-    for j=1:obj.CompoundParam.N
-        fprintf(fid,'%s%s = %s;\n',txt,obj.CompoundParam.Names{j},...
-                obj.CompoundExpressions{j});
+    for j=1:obj.CompositeParam.N
+        fprintf(fid,'%s%s = %s;\n',txt,obj.CompositeParam.Names{j},...
+                obj.CompositeExpressions{j});
     end
     if obj.NumSolveParam.N>0
         fprintf(fid,'end \n');
     end
 end
 
-% Combine NumSolve, and Compound into AuxParam
-obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompoundParam.Names];
+% Combine NumSolve, and Composite into AuxParam
+obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompositeParam.Names];
 obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
-                    obj.CompoundParam.PrettyNames];
+                    obj.CompositeParam.PrettyNames];
 
 fprintf(fid,'if op.StoreParam\n');
 fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
