@@ -58,8 +58,8 @@ classdef Model < matlab.mixin.Copyable
 % * Properties describing model parameters
 %   Param         - Set of parameters to be calibrated or estimated
 %   NumSolveParam - Parameters to be solved numberically (optional)
-%   CompoundParam - Parameters that are combinations of Param (optional)
-%   AuxParam      - combined NumSolveParam and CompoundParam (not defined by user)
+%   CompositeParam - Parameters that are combinations of Param (optional)
+%   AuxParam      - combined NumSolveParam and CompositeParam (not defined by user)
 %
 %   To define Param can proceed in one of two ways, depending on how model will
 %   be used.
@@ -111,7 +111,7 @@ classdef Model < matlab.mixin.Copyable
 % NumSolveParam - Parameters to be solved numberically (optional)
 %
 %   Parameters that need to be solved numerically, as functions of Param and 
-%   CompoundParam.
+%   CompositeParam.
 %
 %   System of nonlinear equations are set in model property NumSolveEq.
         NumSolveParam = DSGE.Param;
@@ -122,22 +122,22 @@ classdef Model < matlab.mixin.Copyable
 %   for NunmSolveParam.
         NumSolveEq
         
-% CompoundParam - Parameters that are combinations of Param (optional)
+% CompositeParam - Parameters that are combinations of Param (optional)
 %
 %   Parameters that are combinations of the main Param. Used to renormalize 
 %   parameters, de4fined ratios of parameters to use in equation expressions, 
 %   or simply reference combinations of parameters to keep track (e.g. as 
 %   checks to model behavior)
 %
-%   Their expressions are defined in model propery CompoundExpressions.
-        CompoundParam = DSGE.Param;
+%   Their expressions are defined in model propery CompositeExpressions.
+        CompositeParam = DSGE.Param;
         
-% CompoundExpressions - Definitions of CompoundParam
+% CompositeExpressions - Definitions of CompositeParam
 %
-%   Array of expressions with definitions of CompoundParam. 
-        CompoundExpressions
+%   Array of expressions with definitions of CompositeParam. 
+        CompositeExpressions
 
-% AuxParam - combined NumSolveParam and CompoundParam (not defined by user)
+% AuxParam - combined NumSolveParam and CompositeParam (not defined by user)
 %
 %   Combines all parameters set in NumSolveParam and CompounParam to be used in 
 %   simulations. This way there is only one set of auxiliary parameters to keep 
@@ -255,13 +255,13 @@ classdef Model < matlab.mixin.Copyable
             end
         end
     
-        function set.CompoundParam(obj,p)
+        function set.CompositeParam(obj,p)
             if iscell(p)
-                obj.CompoundExpressions = p(:,2);
+                obj.CompositeExpressions = p(:,2);
                 p(:,2) = {nan};
-                obj.CompoundParam = DSGE.Param(p);
+                obj.CompositeParam = DSGE.Param(p);
             else
-                obj.CompoundParam = p;
+                obj.CompositeParam = p;
             end
         end
     
