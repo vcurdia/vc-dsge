@@ -171,7 +171,7 @@ fprintf(fid,'    Mats.Param = x;\n');
 fprintf(fid,'end\n');
 
 if obj.CompositeParam.N>0 || obj.NumSolveParam.N>0
-    fprintf(fid,'\n%% Initialize compound parameters\n');
+    fprintf(fid,'\n%% Initialize composite parameters\n');
     for j=1:obj.NumSolveParam.N
         fprintf(fid,'%s = [];\n',obj.NumSolveParam.Names{j});
     end
@@ -234,7 +234,7 @@ if obj.NumSolveParam.N>0
 end
 
 if obj.CompositeParam.N>0
-    fprintf(fid,'\n%% Map compound parameters\n');
+    fprintf(fid,'\n%% Map composite parameters\n');
     if obj.NumSolveParam.N>0
         fprintf(fid,'function EvalCompositeParam \n');
         txt = '    ';
