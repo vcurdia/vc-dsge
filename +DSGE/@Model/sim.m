@@ -22,7 +22,7 @@ op.Data = [];
 op = updateoptions(op,varargin{:});
 
 %% run sim
-if ismember('IRF',op.List), obj.irf(xd,op), end
+if ismember('IRF',op.List), obj.irf(xd,op); end
 if ismember('VD',op.List), obj.vd(xd,op), end
 if ~isempty(op.Data)
     if ismember('States',op.List), obj.states(xd,op), end
