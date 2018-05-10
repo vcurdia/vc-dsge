@@ -15,11 +15,24 @@
 
 %% Preamble
 clear all
-setpath
-% addpath('Mats/')
-set(groot,'defaultTextInterpreter','latex');
+set(groot,'defaultTextInterpreter','latex'); 
 set(groot,'defaultLegendInterpreter','latex');
-tt = TimeTracker;
+
+%% Set Path
+mypath.Base = '../../../Matlab/';
+mypath.List = {...
+    'VC-DSGE',...
+    'VC-Tools',...
+    'Sims-Gensys',...
+    'Sims-KF',...
+    'Sims-Optimize',...
+    'Sims-VAR',...
+    };
+for j=1:length(mypath.List)
+    addpath([mypath.Base,mypath.List{j}])
+end
+clear mypath
+
 
 %% Load DSGE
 specName = 'MyDSGE';
