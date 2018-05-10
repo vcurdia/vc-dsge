@@ -12,20 +12,30 @@
 
 %% Preamble
 clear all
-setpath
-% addpath('Mats/')
-set(groot,'defaultTextInterpreter','latex'); % 
+set(groot,'defaultTextInterpreter','latex'); 
 set(groot,'defaultLegendInterpreter','latex');
+
+%% Set Path
+mypath.Base = '../../../Matlab/';
+mypath.List = {...
+    'VC-DSGE',...
+    'VC-Tools',...
+    'Sims-Gensys',...
+    'Sims-KF',...
+    'Sims-Optimize',...
+    'Sims-VAR',...
+    };
+for j=1:length(mypath.List)
+    addpath([mypath.Base,mypath.List{j}])
+end
+clear mypath
+
+%% Initiate time tracker
 tt = TimeTracker;
 tt.start('Setup')
 
 %% Setup the model
-specName = 'MyDSGE';
-% specPath = specName;
-% basePath = '../';
-% mkdir(specPath)
-% cd(specPath)
-model = DSGE.Model(specName);
+model = DSGE.Model('MyDSGE');
 
 % % example for calibrated model
 % model.Param = {...
@@ -178,4 +188,3 @@ model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 %% Finish up
 fprintf('\n'),tt.stop('Setup')
 save(model.Name)
-% cd(basePath)
