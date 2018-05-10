@@ -188,4 +188,3 @@ model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 %% Finish up
 fprintf('\n'),tt.stop('Setup')
 save(model.Name)
-% cd(basePath)
