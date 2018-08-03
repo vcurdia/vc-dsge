@@ -35,7 +35,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('\n*** Analyzing convergence of MCMC Sample %.0f\n',obj.MCMCStage)
+fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.MCMCStage);
 obj.TimeTracker.start(ttName)
 
@@ -139,11 +139,11 @@ if op.Draws.AuxParam
     draws.AuxParam = draws.AuxParam(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
 end
 nDrawsUsed = size(draws.LPDF,2);
-fprintf('\nBurn in for rest of convergence analysis: %.0f%%\n',...
+fprintf('Burn in for rest of convergence analysis: %.0f%%\n',...
         100*op.Draws.BurnIn)
 
 %% Plot trace
-fprintf('\nMaking trace plots\n')
+fprintf('Making trace plots\n')
 ptFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
              op.PlotDirTrace,obj.Model.Name,obj.MCMCStage);
 if op.Draws.AuxParam

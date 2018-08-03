@@ -66,7 +66,7 @@ end
 
 %% Preamble
 
-fprintf('\n*** Shock Decomposition\n')
+fprintf('Shock Decomposition\n')
 ttName = ['SD',op.FNSuffix];
 obj.TimeTracker.start(ttName)
 

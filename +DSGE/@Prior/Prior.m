@@ -30,7 +30,7 @@ classdef Prior < matlab.mixin.Copyable
     methods
         function obj = Prior(m,varargin)
             if nargin>0
-                fprintf('\n*** Preparing prior\n')
+                fprintf('Preparing prior\n')
                 obj.TimeTracker = TimeTracker;
                 obj.Model = m;
                 if m.Param.N==0

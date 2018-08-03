@@ -28,7 +28,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('\n*** Generating MCMC Draws Redux for Sample %.0f\n',obj.MCMCStage)
+fprintf('Generating MCMC Draws Redux for Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('ReduxMCMC%.0f',obj.MCMCStage);
 obj.TimeTracker.start(ttName)
 

@@ -33,7 +33,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('\n*** Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
+fprintf('Analyzing MCMC Sample %.0f\n',obj.MCMCStage)
 ttName = sprintf('AnalyzeParamMCMC%.0f',obj.MCMCStage);
 obj.TimeTracker.start(ttName)
 

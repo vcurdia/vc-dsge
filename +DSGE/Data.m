@@ -44,7 +44,7 @@ classdef Data < matlab.mixin.Copyable
     methods
         function obj = Data(fn)
             if nargin>0
-                fprintf('\n*** Loading data from:\n%s\n',fn)
+                fprintf('Loading data from:\n%s\n',fn)
                 obj.Source = fn;
                 Raw = importdata(obj.Source);
                 obj.Var = {Raw.textdata{1,2:end}};

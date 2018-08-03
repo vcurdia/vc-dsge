@@ -21,7 +21,7 @@ op.ExpandParam = 1;
 
 op = updateoptions(op,varargin{:});
 
-fprintf('\nLoading MCMC draws from sample %.0f\n',obj.MCMCStage)
+fprintf('Loading MCMC draws from sample %.0f\n',obj.MCMCStage)
 
 sample = obj.MCMCSample;
 draws.N = 0;
