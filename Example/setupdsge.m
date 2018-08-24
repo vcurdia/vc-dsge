@@ -36,6 +36,8 @@ tt.start('Setup')
 
 %% Setup the model
 model = DSGE.Model('MyDSGE');
+mkdir(model.Name)
+cd(model.Name)
 
 % % example for calibrated model
 % model.Param = {...
@@ -186,5 +188,6 @@ post = DSGE.Posterior(model,prior,data);
 model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
-fprintf('\n'),tt.stop('Setup')
+tt.stop('Setup')
 save(model.Name)
+cd ..

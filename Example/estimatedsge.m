@@ -36,6 +36,7 @@ clear mypath
 
 %% Load DSGE
 specName = 'MyDSGE';
+cd(specName)
 load(specName)
 
 %% Initiate parallel pool
@@ -67,7 +68,8 @@ end
 %% Finish up
 % delete(gcp)
 save(specName)
-fprintf('\n'),tt.show
+tt.show
+cd ..
 
 % exit
 
