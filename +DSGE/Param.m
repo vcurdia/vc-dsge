@@ -5,7 +5,7 @@ classdef Param < matlab.mixin.Copyable
 % DSGE object representing parameters, used in the Model object.
 %
 % See also:
-% DSGE.Model, DSGE.Prior
+% DSGE.Model
 %
 % Created: November 7, 2016
 % Copyright 2016-2017 Vasco Curdia
@@ -13,17 +13,13 @@ classdef Param < matlab.mixin.Copyable
     properties 
         %Names List of parameter names to be used in equations and commands.
         Names 
+        
         % PrettyNames - List of parameter names formatted for LaTeX
         %  Use this property to create LaTeX output and figures.
         PrettyNames
+        
         %Values Vector of parameter values used in calibrated simulations.
         Values
-        %PriorDist String representing prior distribution type.
-        PriorDist
-        %PriorMean Prior mean.
-        PriorMean
-        %PriorSD Prior standard deviation.
-        PriorSD
     end
     
     properties (SetAccess = protected)
@@ -37,21 +33,11 @@ classdef Param < matlab.mixin.Copyable
             if nargin>0
                 [np,nc] = size(p);
                 obj.Names = p(:,1);
-                if ismember(nc,[2,3])
+                if nc>1
                     obj.Values = [p{:,2}]';
-                elseif nc>3
-                    obj.PriorDist = p(:,2);
-                    obj.PriorMean = [p{:,3}]';
-                    for j=1:np
-                        if isempty(p{j,4})
-                            p{j,4} = 0;
-                        end
-                    end
-                    obj.PriorSD = [p{:,4}]';
-                    obj.Values = obj.PriorMean;
                 end
-                if ismember(nc,[3,5])
-                    obj.PrettyNames = p(:,nc);
+                if nc>2
+                    obj.PrettyNames = p(:,3);
                 end
             end
         end

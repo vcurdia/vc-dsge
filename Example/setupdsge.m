@@ -48,7 +48,7 @@ cd(model.Name)
 %                  };
 
 % example for model w/ prior, to be estimated
-model.Param = {...
+model.Prior = {...
     'beta', 'C', 0.99, [], '$\beta$';
     'omega', 'G', 1, 0.2, '$\omega$';
     'xi', 'G', 0.1, 0.05, '$\xi$';
@@ -68,6 +68,8 @@ model.Param = {...
     'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
     'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
                  };
+
+return
 
 % Uncomment the following lines to show how Param.NumSolve works: 
 model.NumSolveParam = {...

@@ -316,7 +316,23 @@ classdef Model < matlab.mixin.Copyable
 %             obj.StateEq = eq;
 %             checkeq(obj,'State')
 %         end
-        
+
+        function set.Prior(obj,p,varargin)
+            [np,nc] = size(p);
+            if nc>3
+                obj.Prior.Dist = p(:,2);
+                obj.Prior.Mean = [p{:,3}]';
+                for j=1:np
+                    if isempty(p{j,4})
+                        p{j,4} = 0;
+                    end
+                end
+                obj.Prior.SD = [p{:,4}]';
+                p(:,[2,4]) = [];
+            end
+            obj.Param = p;
+        end
+            
         function mats = setparamvalues(obj,p)
             np = size(p,1);
             % loop allows for duplicates so that the last within the duplicates 
