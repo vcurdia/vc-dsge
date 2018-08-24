@@ -3,7 +3,7 @@ classdef Model < matlab.mixin.Copyable
 % DSGE.Model class
 %
 % This is the main object of the DSGE. It describes all the variables,
-% equations, and parameters of the DSGE model andincludes methods to solve and
+% equations, and parameters of the DSGE model and includes methods to solve and
 % simulate the DSGE.
 %
 % Click on the links for additional information on each property or method.
@@ -85,7 +85,7 @@ classdef Model < matlab.mixin.Copyable
 %   - prior SD
 %   - LaTeX representation of parameter (optional)
 %   
-% Refer to setupDSGE in the example folder for a concrete case on how to setup
+% Refer to setupdsge in the example folder for a concrete case on how to setup
 % the model, prior and posterior.
 %
 % 
@@ -210,6 +210,15 @@ classdef Model < matlab.mixin.Copyable
 %   After solving REE and plugging into this equation we get
 %     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
         AuxEq
+        
+% structure containing Prior information, if a prior exists
+        Prior
+        
+% Data for the model
+        Data
+        
+% structure containing Posterior information, if a posterior exists
+        Posterior
         
         KFInitState
         KFInitVariance
