@@ -317,7 +317,7 @@ classdef Model < matlab.mixin.Copyable
 %             checkeq(obj,'State')
 %         end
 
-        function set.Prior(obj,p,varargin)
+        function setprior(obj,p)
             [np,nc] = size(p);
             if nc>3
                 obj.Prior.Dist = p(:,2);
@@ -331,6 +331,7 @@ classdef Model < matlab.mixin.Copyable
                 p(:,[2,4]) = [];
             end
             obj.Param = p;
+            obj.analyzepriordist
         end
             
         function mats = setparamvalues(obj,p)

@@ -48,7 +48,7 @@ cd(model.Name)
 %                  };
 
 % example for model w/ prior, to be estimated
-model.Prior = {...
+model.setprior({...
     'beta', 'C', 0.99, [], '$\beta$';
     'omega', 'G', 1, 0.2, '$\omega$';
     'xi', 'G', 0.1, 0.05, '$\xi$';
@@ -67,9 +67,7 @@ model.Prior = {...
     'sigmagamma', 'IG1', 0.5, 2, '$\sigma_\gamma$';
     'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
     'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
-                 };
-
-return
+                 });
 
 % Uncomment the following lines to show how Param.NumSolve works: 
 model.NumSolveParam = {...
@@ -159,14 +157,15 @@ model.StateEq = {...
 model.genmats
 mats = model.mats(model.Param.Values);
 
-%% Describe Prior
-prior = DSGE.Prior(model);
+%% Analyze Prior parameters
+model.analyzepriorparam
+return
 
 %% Data
 % data = DSGE.Data([basePath,'Data/Data_1987q3_2009q3.csv']);
-data = DSGE.Data('Data_1987q3_2009q3.csv');
-data.Var = model.ObsVar.Names;
-op.Sim.Data = data;
+model.Data = DSGE.Data('Data_1987q3_2009q3.csv');
+Model.Data.Var = model.ObsVar.Names;
+op.Sim.Data = model.Data;
 op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 
 %% Create posterior
