@@ -1,8 +1,8 @@
-function setupprior(obj)
+function initializeprior(obj)
 
-% setup prior
+% initializeprior
 %
-% setup the prior distribution for further
+% initialize and prepare prior distribution for further use
 %
 % See also:
 % DSGE.Model
@@ -15,7 +15,7 @@ function setupprior(obj)
 
 
 %% Preamble
-fprintf('Preparing prior\n')
+fprintf('Initializing prior\n')
 
 %% Analyze prior distributions
 np = obj.Param.N;

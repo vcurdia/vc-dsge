@@ -158,7 +158,7 @@ model.genmats
 mats = model.mats(model.Param.Values);
 
 %% Analyze Prior parameters
-model.setupprior
+model.initializeprior
 
 %% Data
 % data = DSGE.Data([basePath,'Data/Data_1987q3_2009q3.csv']);
@@ -166,13 +166,12 @@ model.Data = DSGE.Data('../Data_1987q3_2009q3.csv');
 model.Data.Var = model.ObsVar.Names;
 op.Sim.Data = model.Data;
 op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
-return
 
 %% Create posterior
-post = DSGE.Posterior(model,prior,data);
+model.initializeposterior
 
 %% Simulate model at prior
-model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
+% model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
 tt.stop('Setup')
