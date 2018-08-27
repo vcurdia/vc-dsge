@@ -131,9 +131,7 @@ for j=1:obj.StateVar.N
 end
 
 
-%% Generate matrices
-
-fprintf('Generating code to evaluate model Mats\n')
+%% Generate code to eval matrices
 
 MatsFN = sprintf('%s_Mats',obj.Name);
 
