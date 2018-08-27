@@ -220,6 +220,7 @@ classdef Model < matlab.mixin.Copyable
 % structure containing Posterior information, if a posterior exists
         Posterior
         
+% Other model prioperties and options
         KFInitState
         KFInitVariance
         GensysAuthor = 'CS';

@@ -11,18 +11,23 @@ classdef Param < matlab.mixin.Copyable
 % Copyright 2016-2017 Vasco Curdia
     
     properties 
-        %Names List of parameter names to be used in equations and commands.
+% Names List of parameter names to be used in equations and commands.
         Names 
-        % PrettyNames - List of parameter names formatted for LaTeX
-        %  Use this property to create LaTeX output and figures.
+
+% PrettyNames - List of parameter names formatted for LaTeX
+%  Use this property to create LaTeX output and figures.
         PrettyNames
-        %Values Vector of parameter values used in calibrated simulations.
+
+% Values Vector of parameter values used in calibrated simulations.
         Values
-        %PriorDist String representing prior distribution type.
+        
+% PriorDist String representing prior distribution type.
         PriorDist
-        %PriorMean Prior mean.
+        
+% PriorMean Prior mean.
         PriorMean
-        %PriorSD Prior standard deviation.
+        
+% PriorSD Prior standard deviation.
         PriorSD
     end
     
