@@ -1,8 +1,8 @@
-function analyzepriorparam(obj,varargin)
+function analyzeprior(obj,varargin)
 
-% analyzepriorparam
+% analyzeprior
 %
-% Analyzes the prior parameters
+% Analyzes the prior distribution
 %
 % See also:
 % DSGE.Model
@@ -10,13 +10,12 @@ function analyzepriorparam(obj,varargin)
 % ...........................................................................
 % 
 % Created: November 10, 2016 by Vasco Curdia
-% 
 % Copyright 2016-2018 by Vasco Curdia
 
 
 %% Preamble
-fprintf('Analyzing Prior Parameters\n')
-ttName = 'AnalyzePriorParam';
+fprintf('Analyzing Prior\n')
+ttName = 'AnalyzePrior';
 obj.TimeTracker.start(ttName)
 
 %% Options
@@ -27,8 +26,8 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin{:});
 
 %% other settings
-ReportFileName = sprintf('%s_Report_Param_Prior',obj.Name);
-ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Prior',obj.Name);
+ReportFileName = sprintf('%s_Report_Prior',obj.Name);
+ReportTitle = sprintf('%s\\\\Prior Analysis',obj.Name);
 
 %% useful variables
 np = obj.Param.N;
@@ -71,7 +70,7 @@ fprintf('\nPrior Sample:')
 fprintf('\n-------------\n\n')
 xj = zeros(np,1);
 BadDraws = false(1,op.NDraws);
-xd = obj.draw(op.NDraws);
+xd = obj.priordraw(op.NDraws);
 fh = @(x)obj.mats(x);
 AuxNames = obj.AuxParam.Names;
 nAux = obj.AuxParam.N;
@@ -88,14 +87,14 @@ end
 obj.Prior.Sample.NDraws = op.NDraws;
 obj.Prior.Sample.NBadDraws = sum(BadDraws);
 obj.Prior.Sample.FractionBadDraws = obj.Prior.Sample.NBadDraws/op.NDraws;
-obj.LPDFCorrection = -log(1-obj.Prior.Sample.FractionBadDraws);
+obj.Prior.LPDFCorrection = -log(1-obj.Prior.Sample.FractionBadDraws);
 xd(:,BadDraws) = [];
 xdAux(:,BadDraws) = [];
 obj.Prior.Sample.NDrawsUsed = size(xd,2);
 fprintf('Number of accepted draws: %.0f\n',obj.Prior.Sample.NDrawsUsed);
 fprintf('Percent of rejected draws: %.2f%%\n',...
         obj.Prior.Sample.FractionBadDraws*100);
-fprintf('log-prior correction: %.6f\n',obj.LPDFCorrection);
+fprintf('log-prior correction: %.6f\n',obj.Prior.LPDFCorrection);
 
 obj.Prior.Sample.Param = sumstats(xd,op.Percentiles);
 obj.Prior.Sample.AuxParam = sumstats(xdAux,op.Percentiles);
@@ -110,16 +109,16 @@ DispList = {'    Mean','Mean';
 nc = size(DispList,1);
 for jP=1:length(pList)
     Pj = pList{jP};
-    psj = obj.Model.(Pj);
-    namelength = [cellfun('length',obj.Model.(Pj).Names)];
+    psj = obj.(Pj);
+    namelength = [cellfun('length',obj.(Pj).Names)];
     namelengthmax = max(namelength);
     fprintf(['\n%-',int2str(namelengthmax),'s'],'');
     for jc=1:nc
         fprintf('  %-8s',DispList{jc,1});
     end
     fprintf('\n');
-    for jp=1:obj.Model.(Pj).N
-        fprintf(['%',int2str(namelengthmax),'s'],obj.Model.(Pj).Names{jp});
+    for jp=1:obj.(Pj).N
+        fprintf(['%',int2str(namelengthmax),'s'],obj.(Pj).Names{jp});
         for jc=1:nc
             fprintf('  %8.4f',obj.Prior.Sample.(Pj).(DispList{jc,2})(jp));
         end
@@ -200,7 +199,7 @@ for jBreak=1:nBreaks
     fprintf(fid,'& 5\\%% & Median & 95\\%% \n');
     fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
     for jr=idxPar
-        fprintf(fid,'%s',obj.Model.AuxParam.PrettyNames{jr});
+        fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
         fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc05(jr));
         fprintf(fid,str,obj.Prior.Sample.AuxParam.Median(jr));
         fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc95(jr));

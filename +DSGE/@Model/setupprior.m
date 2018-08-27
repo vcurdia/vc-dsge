@@ -1,8 +1,8 @@
-function analyzepriordist(obj)
+function setupprior(obj)
 
-% analyzepriordist
+% setup prior
 %
-% Analyzes prior distribution
+% setup the prior distribution for further
 %
 % See also:
 % DSGE.Model
@@ -15,10 +15,14 @@ function analyzepriordist(obj)
 
 
 %% Preamble
+fprintf('Preparing prior\n')
 
-%% Analyze Parameters
+%% Analyze prior distributions
 np = obj.Param.N;
 pNames = obj.Param.Names;
+obj.Prior.Dist = obj.Param.PriorDist;
+obj.Prior.Mean = obj.Param.PriorMean;
+obj.Prior.SD = obj.Param.PriorSD;
 obj.Prior.Mode = nan(np,1);
 obj.Prior.Median = nan(np,1);
 obj.Prior.Prc05 = nan(np,1);
@@ -141,6 +145,7 @@ for j=1:np
     end
 end
 
+obj.analyzeprior
 
 end
 

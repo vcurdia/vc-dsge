@@ -1,13 +1,13 @@
 % setupdsge
 %
-% Example of how to setup a DSGE using the vcDSGE toolbox.
+% Example of how to setup a DSGE using the VC-DSGE toolbox.
 %
 %
 % See also:
-% estimatedsge, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
+% estimatedsge, DSGE.Model, DSGE.Data
 %
 % Created: January 21, 2016 by Vasco Curdia
-% Copyright 2016-2017 Vasco Curdia
+% Copyright 2016-2018 Vasco Curdia
 
 
 %% Preamble
@@ -48,7 +48,7 @@ cd(model.Name)
 %                  };
 
 % example for model w/ prior, to be estimated
-model.setprior({...
+model.Param = {...
     'beta', 'C', 0.99, [], '$\beta$';
     'omega', 'G', 1, 0.2, '$\omega$';
     'xi', 'G', 0.1, 0.05, '$\xi$';
@@ -67,7 +67,7 @@ model.setprior({...
     'sigmagamma', 'IG1', 0.5, 2, '$\sigma_\gamma$';
     'sigmau', 'IG1', 0.5, 2, '$\sigma_u$';
     'sigmai', 'IG1', 0.5, 2, '$\sigma_i$';
-                 });
+                 };
 
 % Uncomment the following lines to show how Param.NumSolve works: 
 model.NumSolveParam = {...
@@ -158,13 +158,13 @@ model.genmats
 mats = model.mats(model.Param.Values);
 
 %% Analyze Prior parameters
-model.analyzepriorparam
+model.setupprior
 return
 
 %% Data
 % data = DSGE.Data([basePath,'Data/Data_1987q3_2009q3.csv']);
 model.Data = DSGE.Data('Data_1987q3_2009q3.csv');
-Model.Data.Var = model.ObsVar.Names;
+model.Data.Var = model.ObsVar.Names;
 op.Sim.Data = model.Data;
 op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 

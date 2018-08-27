@@ -8,7 +8,7 @@ classdef Param < matlab.mixin.Copyable
 % DSGE.Model
 %
 % Created: November 7, 2016
-% Copyright 2016-2017 Vasco Curdia
+% Copyright 2016-2018 Vasco Curdia
     
     properties 
 % Names List of parameter names to be used in equations and commands.

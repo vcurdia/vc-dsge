@@ -6,25 +6,29 @@ classdef Data < matlab.mixin.Copyable
 % DSGE model.
 %
 % See also:
-% setupMyDSGE, DSGE.Model, DSGE.Posterior, timeidx
+% setupdsge, DSGE.Model, timeidx
 %
 % Created: March 14, 2017
-% Copyright 2017 Vasco Curdia
+% Copyright 2017-2018 Vasco Curdia
     
     properties
-        %Source Location of source csv file (used to load the data)
+% Source Location of source csv file (used to load the data)
         Source
-        %Values matrix with all data values
+        
+% Values matrix with all data values
         Values
-        %TimeIdx list of dates in data sample
+
+% TimeIdx list of dates in data sample
         TimeIdx
-        %Var List of variable names
-        %  Variable names need to be matched to observable variable names in 
-        %  the DSGE model.
+
+% Var List of variable names
+%   Variable names need to be matched to observable variable names in 
+%   the DSGE model.
         Var
-        %SampleStart Date in which the likelihood starts counting
-        %  Prior periods are considered to be pre-sample to calibrate the 
-        %  Kalman Filter but not counting towards the likelihood value.
+
+% SampleStart Date in which the likelihood starts counting
+%   Prior periods are considered to be pre-sample to calibrate the 
+%   Kalman Filter but not counting towards the likelihood value.
         SampleStart
     end
 

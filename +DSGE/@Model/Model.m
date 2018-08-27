@@ -90,11 +90,10 @@ classdef Model < matlab.mixin.Copyable
 %
 % 
 % See also:
-% setupMyDSGE, DSGE.Var, DSGE.Param, DSGE.Prior, DSGE.Posterior, 
-% solveree, gensysvb
+% ../Example/setupdsge, DSGE.Var, DSGE.Param, solveree, gensysvb
 %
 % Created: November 7, 2016
-% Copyright 2016-2017 Vasco Curdia
+% Copyright 2016-2018 Vasco Curdia
     
     properties
 % Name of the model specification
@@ -318,23 +317,6 @@ classdef Model < matlab.mixin.Copyable
 %             checkeq(obj,'State')
 %         end
 
-        function setprior(obj,p)
-            [np,nc] = size(p);
-            if nc>3
-                obj.Prior.Dist = p(:,2);
-                obj.Prior.Mean = [p{:,3}]';
-                for j=1:np
-                    if isempty(p{j,4})
-                        p{j,4} = 0;
-                    end
-                end
-                obj.Prior.SD = [p{:,4}]';
-                p(:,[2,4]) = [];
-            end
-            obj.Param = p;
-            obj.analyzepriordist
-        end
-            
         function mats = setparamvalues(obj,p)
             np = size(p,1);
             % loop allows for duplicates so that the last within the duplicates 
