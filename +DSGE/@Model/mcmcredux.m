@@ -10,12 +10,12 @@ function mcmcredux(obj,varargin)
 %   draw.AuxParam (if op.Draws.AuxParam=1, matrix with draws for AuxParam)
 %
 % see also:
-% DSGE.Posterior
+% DSGE.Model
 %
 % ............................................................................
 %
 % Created: April 3, 2017
-% Copyright (C) 2017 Vasco Curdia
+% Copyright (C) 2017-2018 Vasco Curdia
 
 %% Options
 op.Draws.BurnIn = 0.25;
@@ -28,11 +28,11 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Generating MCMC Draws Redux for Sample %.0f\n',obj.MCMCStage)
-ttName = sprintf('ReduxMCMC%.0f',obj.MCMCStage);
+fprintf('Generating MCMC Draws Redux for Sample %.0f\n',obj.Post.MCMCStage)
+ttName = sprintf('ReduxMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
-sample = obj.MCMCSample;
+sample = obj.Post.MCMCSample;
 
 nDrawsAvailable = floor(sample.NDraws*(1-op.Draws.BurnIn))*sample.NChains;
 nDraws = min(op.NDraws,nDrawsAvailable);
@@ -40,11 +40,11 @@ nDraws = min(op.NDraws,nDrawsAvailable);
 %% load the mcmc draws
 op.Draws.Thinning = max(1,...
     floor(sample.NDraws*sample.NChains*(1-op.Draws.BurnIn)/nDraws));
-draws = obj.loaddraws(op.Draws);
+draws = obj.loadmcmcdraws(op.Draws);
 
 %% Save MCMC draws Redux
-fn = sprintf('%s_MCMC_%.0f_Redux',obj.Model.Name,obj.MCMCStage);
-obj.MCMCSample.FileNameRedux = fn;
+fn = sprintf('%s_MCMC_%.0f_Redux',obj.Name,obj.Post.MCMCStage);
+obj.Post.MCMCSample.FileNameRedux = fn;
 save(fn,'-struct','draws')
 fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
 
