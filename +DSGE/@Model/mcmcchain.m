@@ -5,18 +5,18 @@ function nRejections = mcmcchain(obj,varargin)
 % Generate MCMC chain
 %
 % see also:
-% DSGE.Posterior
+% DSGE.Model
 %
 % ............................................................................
 %
 % Created: March 28, 2017
-% Copyright (C) 2017 Vasco Curdia
+% Copyright (C) 2017-2018 Vasco Curdia
 
 %% map object related variables
-np = obj.NEstimate;
-xMode = obj.Mode(obj.EstimateIdx);
-Var = obj.Var(obj.EstimateIdx,obj.EstimateIdx);
-lpdfMode = obj.LPDFMode;
+np = obj.Post.NEstimate;
+xMode = obj.Post.Mode(obj.Post.EstimateIdx);
+Var = obj.Post.Var(obj.Post.EstimateIdx,obj.Post.EstimateIdx);
+lpdfMode = obj.Post.ModeLPDF;
 
 %% Options
 op.verbose = 1;
@@ -40,7 +40,7 @@ op = updateoptions(op,varargin{:});
 
 %% chain related variables
 fid = fopen([op.fn,'.log'],'wt');
-lpdf = @(x)obj.lpdf(x,struct('verbose',op.verbose,'fid',fid));
+lpdf = @(x)obj.postlpdf(x,struct('verbose',op.verbose,'fid',fid));
 
 %% generate initial draw
 x0 = op.x0;
