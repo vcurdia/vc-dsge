@@ -16,7 +16,7 @@ function sd(obj,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
-op.Data = obj.Data.Values;
+op.Data = obj.Data;
 op.DrawStates = [];
 op.ShowOther = 1;
 op.Time2Show = [];

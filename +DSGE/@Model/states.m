@@ -16,7 +16,7 @@ function states(obj,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
-op.Data = obj.Data.Values;
+op.Data = obj.Data;
 op.DrawStates = [];
 op.Time2Show = [];
 op.Tick.Labels = obj.Data.TickLabels;
