@@ -29,23 +29,23 @@ load(specName)
 
 
 %% MaxPost
-op.MaxPost.NMax = 4; %10
-op.MaxPost.Min.nit = 1; %1000;
-op.MaxPost.Min.Ritmax = 1; %20;
+op.MaxPost.NMax = 4=10; %10
+op.MaxPost.Min.nit = 1000; %1000;
+op.MaxPost.Min.Ritmax = 20; %20;
 op.MaxPost.Min.Ritmin = 5;
 model.maxpost(op.MaxPost)
 save([specName,'_MaxPost'])
-model.sim(model.Post.Mode,op.Sim,'FNSuffix','_PostMode')
+model.sim('Dist','PostMode')
 
 
 %% MCMC
-op.MCMC.NDraws = 100;%50000;
-op.MCMC.NDrawsCalibrate = 100;
+op.MCMC.NDraws = 50000;
+op.MCMC.NDrawsCalibrate = 1000;
 for s=1
     model.Post.MCMCStage = s;
     model.mcmc(op.MCMC)
     save([specName,'_MCMC_',int2str(s)])
-    model.sim(model.postdraw(1000),op.Sim,'FNSuffix','_PostDraws')
+    model.sim('Dist','PostDraws')
     save(specName)
 end
 

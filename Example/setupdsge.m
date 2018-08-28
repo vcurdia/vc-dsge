@@ -170,7 +170,8 @@ model.Data.TickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 model.initializepost
 
 %% Simulate model at prior
-model.sim(model.priordraw(1000),'FNSuffix','_PriorDraws')
+model.sim('Dist','PriorDraws')
+
 
 %% Finish up
 tt.stop('Setup')
