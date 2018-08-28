@@ -143,7 +143,7 @@ else
 end
 
 %% save workspace
-save(sprintf('_%s_MCMC_%.0f_Calibration',obj.Name,obj.Post.MCMCStage))
+save(sprintf('%s_MCMC_%.0f_Calibration',obj.Name,obj.Post.MCMCStage))
 
 %% Clean up
 if ~op.KeepFilesCalibrate

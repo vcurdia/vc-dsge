@@ -89,7 +89,7 @@ if lpdfNewMode>obj.Post.ModeLPDF
     fprintf(['%',int2str(namelengthmax),'s %-7s %-7s\n'],'','Old','New')
     for jp=1:np
         fprintf(['%',int2str(namelengthmax),'s %7.4f %7.4f\n'],...
-                pNames{jp},obj.Post.Mode(jp),xd(jp,idxMax))
+                pNames{jp},obj.Post.Mode(jp),draws.Param(jp,idxMax))
     end
     obj.Post.ModeLPDF = lpdfNewMode;
     obj.Post.Mode = draws.Param(:,idxMax);
@@ -151,7 +151,7 @@ for jtau=1:ntau
     pwj = pwj(~isnan(pwj));
     LogMgLikelihood(jtau) = lpdfMean-log(mean(pwj,2));
 end
-obj.LogMgLikelihood = LogMgLikelihood(tau==0.5);
+obj.Post.LogMgLikelihood = LogMgLikelihood(tau==0.5);
 % obj.LogMgLikelihood = mean(LogMgLikelihood);
 for jt = 1:ntau
     obj.Post.MCMCSample.LogMgLikelihood(jt).Tau = tau(jt);
@@ -269,7 +269,7 @@ fprintf('Making Prior-Posterior Plots...\n')
 fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Name,obj.Post.MCMCStage);
 nPlots = prod([op.Fig.Shape{:}]);
-drawsPrior.Param = obj.Prior.draw(op.NDrawsPrior);
+drawsPrior.Param = obj.priordraw(op.NDrawsPrior);
 fh = @(x)obj.mats(x,'SolveREE',0);
 dAux = zeros(nAux,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
@@ -288,7 +288,7 @@ for jP=1:2
     xj.Prior = drawsPrior.(Pj);
     xBounds = [min(obj.Prior.Sample.(Pj).Prc01,obj.Post.MCMCSample.(Pj).Prc01),...
                max(obj.Prior.Sample.(Pj).Prc99,obj.Post.MCMCSample.(Pj).Prc99)];
-    np = obj.Model.(Pj).N;
+    np = obj.(Pj).N;
     nFig(jP) = ceil(np/nPlots);
     for jF=1:nFig(jP)
         hfig = figure('Visible',op.Fig.Visible);
@@ -332,7 +332,7 @@ for jP=1:2
                 hl.Position = legPos;
                 dLeg = legPos(4);
             end
-            title(obj.Model.(Pj).PrettyNames{jp})
+            title(obj.(Pj).PrettyNames{jp})
         end
         hfig.PaperSize = op.PaperSize;
         hfig.PaperPosition = op.PaperPosition;

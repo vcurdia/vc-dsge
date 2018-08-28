@@ -20,8 +20,8 @@ op.JumpScale = 2.4;
 op.Augment = 0;
 op.NDraws = 50000;
 op.CalibrateMCMC = [];
-op.AnalyzeParam = 1;
-op.AnalyzeConvergence = 1;
+op.AnalyzePost = 1;
+op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
 
 
@@ -91,7 +91,7 @@ end
 fprintf('\n')
 
 %% save workspace
-save(sprintf('_%s_MCMC_%.0f',obj.Name,obj.Post.MCMCStage))
+save(sprintf('%s_MCMC_%.0f',obj.Name,obj.Post.MCMCStage))
 
 %% Clean up
 if ~op.KeepLogs
@@ -104,8 +104,8 @@ end
 obj.TimeTracker.stop(ttName)
 
 %% Run MCMC analysis
-if op.AnalyzeParam, obj.analyzepost, end
-if op.AnalyzeConvergence, obj.mcmcconvergence, end
+if op.AnalyzePost, obj.analyzepost, end
+if op.MCMCConvergence, obj.mcmcconvergence, end
 if op.MCMCRedux, obj.mcmcredux, end
 
 

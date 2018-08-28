@@ -14,4 +14,4 @@ function xx = expandparam(obj,x)
 
 
 xx = repmat(obj.Param.Values,1,size(x,2),size(x,3));
-xx(obj.Posterior.EstimateIdx,:,:) = x;
+xx(obj.Post.EstimateIdx,:,:) = x;

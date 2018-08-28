@@ -171,7 +171,7 @@ op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 model.initializepost
 
 %% Simulate model at prior
-% model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
+% model.sim(model.priordraw(1000),op.Sim,'FNSuffix','_PriorDraws')
 
 %% Finish up
 tt.stop('Setup')
