@@ -1,16 +1,16 @@
-function analyzeconvergence(obj,varargin)
+function mcmcconvergence(obj,varargin)
 
-% analyzeconvergence
+% mcmcconvergence
 % 
 % Analyze convergence of MCMC sample
 %
 % see also:
-% DSGE.Posterior
+% DSGE.Model
 %
 % ............................................................................
 %
 % Created: April 8, 2017
-% Copyright (C) 2017 Vasco Curdia
+% Copyright (C) 2017-2018 Vasco Curdia
 
 %% Options
 op.Draws.BurnIn = 0.25;
@@ -35,21 +35,21 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.MCMCStage)
-ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.MCMCStage);
+fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
+ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDirDraws),mkdir(op.PlotDirDraws),end
 if ~isdir(op.PlotDirTrace),mkdir(op.PlotDirTrace),end
-ReportFileName = sprintf('%s_Report_Conv_MCMC_%.0f',obj.Model.Name,...
-                         obj.MCMCStage);
+ReportFileName = sprintf('%s_Report_Conv_MCMC_%.0f',obj.Name,...
+                         obj.Post.MCMCStage);
 ReportTitle = sprintf('%s\\\\Convergence Analysis\\\\MCMC Stage %.0f',...
-                      obj.Model.Name,obj.MCMCStage);
+                      obj.Name,obj.Post.MCMCStage);
 
-sample = obj.MCMCSample;
+sample = obj.Post.MCMCSample;
 
 %% load the mcmc draws
-draws = obj.loaddraws(op.Draws,'BurnIn',0,'CombineChains',0,'ExpandParam',0);
+draws = obj.loadmcmcdraws(op.Draws,'BurnIn',0,'CombineChains',0,'ExpandParam',0);
 nDrawsUsed = size(draws.LPDF,2);
 
 if isempty(op.NBin), op.NBin = round(2*nDrawsUsed^(1/3)); end
@@ -58,11 +58,11 @@ p.LPDF.Title = 'Log-PDF';
 p.LPDF.Names = {'LPDF'};
 p.LPDF.PrettyNames = {p.LPDF.Title};
 p.Param.Title = 'Parameters';
-p.Param.Names = obj.Model.Param.Names(obj.EstimateIdx);
-p.Param.PrettyNames = obj.Model.Param.PrettyNames(obj.EstimateIdx);
+p.Param.Names = obj.Param.Names(obj.Post.EstimateIdx);
+p.Param.PrettyNames = obj.Param.PrettyNames(obj.Post.EstimateIdx);
 p.AuxParam.Title = 'Auxiliary Parameters';
-p.AuxParam.Names = obj.Model.AuxParam.Names;
-p.AuxParam.PrettyNames = obj.Model.AuxParam.PrettyNames;
+p.AuxParam.Names = obj.AuxParam.Names;
+p.AuxParam.PrettyNames = obj.AuxParam.PrettyNames;
 pList = fieldnames(p);
 nList = length(pList);
 for jL=1:nList
@@ -80,7 +80,7 @@ end
 %% Plot draws
 fprintf('Making plots of MCMC draws\n')
 pdFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
-             op.PlotDirDraws,obj.Model.Name,obj.MCMCStage);
+             op.PlotDirDraws,obj.Name,obj.Post.MCMCStage);
 if op.Draws.AuxParam
     pdList = {'LPDF','Param','AuxParam'};
 else
@@ -145,7 +145,7 @@ fprintf('Burn in for rest of convergence analysis: %.0f%%\n',...
 %% Plot trace
 fprintf('Making trace plots\n')
 ptFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
-             op.PlotDirTrace,obj.Model.Name,obj.MCMCStage);
+             op.PlotDirTrace,obj.Name,obj.Post.MCMCStage);
 if op.Draws.AuxParam
     ptList = {'Param','AuxParam'};
 else
@@ -330,7 +330,7 @@ for jL=1:length(cList)
     fprintf('\n')
 end
 
-obj.MCMCSample.Convergence = conv;
+obj.Post.MCMCSample.Convergence = conv;
 
 %% create report
 fprintf('Making report: %s\n',ReportFileName);
@@ -344,7 +344,7 @@ fprintf(fid,'burn in used: & %.0f (%.0f\\%%)\\\\\n',...
         op.Draws.BurnIn*sample.NDraws,op.Draws.BurnIn*100);
 fprintf(fid,'thinning used: & %.0f\\\\\n',op.Draws.Thinning);
 fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',draws.N);
-fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.LogMgLikelihood);
+fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.Post.LogMgLikelihood);
 fprintf(fid,'\\end{tabular}\n');
 fprintf(fid,'\\end{equation*}\n');
 fprintf(fid,'\\newpage\n');
