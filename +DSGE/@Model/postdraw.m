@@ -16,8 +16,8 @@ function xd = postdraw(obj,nDraws)
 if nargin<2 || isempty(nDraws)
     nDraws = 1; 
 end
-if isempty(obj.Posterior.MCMCSample.FileNameRedux)
+if isempty(obj.Post.MCMCSample.FileNameRedux)
     obj.mcmcredux
 end
-draws = load(obj.Posterior.MCMCSample.FileNameRedux);
+draws = load(obj.Post.MCMCSample.FileNameRedux);
 xd = obj.expandparam(draws.Param(:,randi(draws.N,1,nDraws)));
