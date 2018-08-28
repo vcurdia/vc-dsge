@@ -30,6 +30,9 @@ classdef Data < matlab.mixin.Copyable
 %   Prior periods are considered to be pre-sample to calibrate the 
 %   Kalman Filter but not counting towards the likelihood value.
         SampleStart
+        
+% TickLabels (optional) array of ticks to show in plots
+        TickLabels
     end
 
     properties (SetAccess=protected)
@@ -94,6 +97,10 @@ classdef Data < matlab.mixin.Copyable
             end
             obj.SampleStart = t;
             obj.NPreSample = find(ismember(obj.TimeIdx,obj.SampleStart))-1;
+        end
+        
+        function set.TickLabels(obj,tList)
+            obj.TickLabels = tList(ismember(tList,obj.TimeIdx));
         end
         
     end %methods

@@ -14,7 +14,7 @@ function analyzeprior(obj,varargin)
 
 
 %% Preamble
-fprintf('Analyzing Prior\n')
+fprintf('Analyzing Prior parameters\n')
 ttName = 'AnalyzePrior';
 obj.TimeTracker.start(ttName)
 
@@ -26,8 +26,8 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin{:});
 
 %% other settings
-ReportFileName = sprintf('%s_Report_Prior',obj.Name);
-ReportTitle = sprintf('%s\\\\Prior Analysis',obj.Name);
+ReportFileName = sprintf('%s_Report_Param_Prior',obj.Name);
+ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Prior',obj.Name);
 
 %% useful variables
 np = obj.Param.N;

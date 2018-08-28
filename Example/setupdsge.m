@@ -164,14 +164,13 @@ model.initializeprior
 % data = DSGE.Data([basePath,'Data/Data_1987q3_2009q3.csv']);
 model.Data = DSGE.Data('../Data_1987q3_2009q3.csv');
 model.Data.Var = model.ObsVar.Names;
-op.Sim.Data = model.Data;
-op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
+model.Data.TickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 
 %% Create posterior
 model.initializepost
 
 %% Simulate model at prior
-% model.sim(model.priordraw(1000),op.Sim,'FNSuffix','_PriorDraws')
+model.sim(model.priordraw(1000),'FNSuffix','_PriorDraws')
 
 %% Finish up
 tt.stop('Setup')

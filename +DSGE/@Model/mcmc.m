@@ -33,7 +33,6 @@ if isempty(op.CalibrateMCMC)
 end
 if op.CalibrateMCMC
     op.JumpScale = obj.calibratemcmc(op);
-    save(sprintf('_%s_MCMC_%.0f_CalibrateJump',obj.Name,obj.Post.MCMCStage))
 end
 
 %% Preparations

@@ -16,10 +16,10 @@ function states(obj,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
-op.Data = [];
+op.Data = obj.Data.Values;
 op.DrawStates = [];
 op.Time2Show = [];
-op.Tick.Labels = [];
+op.Tick.Labels = obj.Data.TickLabels;
 op.Fig.Visible = 'off';
 % op.Fig.YMinScale = 0.01;
 op.Fig.Plot.LineWidth = 1.5;
@@ -32,7 +32,8 @@ op = updateoptions(op,varargin{:});
 if ~isempty(op.Data)
     data = op.Data;
 else
-    error('Data is empty. Cannot simulate states.')
+    fprintf('Data is empty. Cannot simulate states.\n')
+    return
 end
 if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
 
