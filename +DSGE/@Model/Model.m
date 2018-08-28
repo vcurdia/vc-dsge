@@ -3,7 +3,7 @@ classdef Model < matlab.mixin.Copyable
 % DSGE.Model class
 %
 % This is the main object of the DSGE. It describes all the variables,
-% equations, and parameters of the DSGE model andincludes methods to solve and
+% equations, and parameters of the DSGE model and includes methods to solve and
 % simulate the DSGE.
 %
 % Click on the links for additional information on each property or method.
@@ -85,16 +85,15 @@ classdef Model < matlab.mixin.Copyable
 %   - prior SD
 %   - LaTeX representation of parameter (optional)
 %   
-% Refer to setupDSGE in the example folder for a concrete case on how to setup
+% Refer to setupdsge in the example folder for a concrete case on how to setup
 % the model, prior and posterior.
 %
 % 
 % See also:
-% setupMyDSGE, DSGE.Var, DSGE.Param, DSGE.Prior, DSGE.Posterior, 
-% solveree, gensysvb
+% ../Example/setupdsge, DSGE.Var, DSGE.Param, solveree, gensysvb
 %
 % Created: November 7, 2016
-% Copyright 2016-2017 Vasco Curdia
+% Copyright 2016-2018 Vasco Curdia
     
     properties
 % Name of the model specification
@@ -211,6 +210,16 @@ classdef Model < matlab.mixin.Copyable
 %     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
         AuxEq
         
+% structure containing Prior information, if a prior exists
+        Prior
+        
+% Data for the model
+        Data
+        
+% structure containing Posterior information, if a posterior exists
+        Post
+        
+% Other model prioperties and options
         KFInitState
         KFInitVariance
         GensysAuthor = 'CS';
@@ -307,7 +316,7 @@ classdef Model < matlab.mixin.Copyable
 %             obj.StateEq = eq;
 %             checkeq(obj,'State')
 %         end
-        
+
         function mats = setparamvalues(obj,p)
             np = size(p,1);
             % loop allows for duplicates so that the last within the duplicates 

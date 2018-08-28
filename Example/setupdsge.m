@@ -1,34 +1,20 @@
 % setupdsge
 %
-% Example of how to setup a DSGE using the vcDSGE toolbox.
+% Example of how to setup a DSGE using the VC-DSGE toolbox.
 %
 %
 % See also:
-% estimatedsge, DSGE.Model, DSGE.Prior, DSGE.Posterior, DSGE.Data
+% estimatedsge, DSGE.Model, DSGE.Data
 %
 % Created: January 21, 2016 by Vasco Curdia
-% Copyright 2016-2017 Vasco Curdia
+% Copyright 2016-2018 Vasco Curdia
 
 
 %% Preamble
 clear all
 set(groot,'defaultTextInterpreter','latex'); 
 set(groot,'defaultLegendInterpreter','latex');
-
-%% Set Path
-mypath.Base = '../../../Matlab/';
-mypath.Folders = {...
-    'VC-DSGE',...
-    'VC-Tools',...
-    'Sims-Gensys',...
-    'Sims-KF',...
-    'Sims-Optimize',...
-    'Sims-VAR',...
-    };
-for j=1:length(mypath.Folders)
-    addpath([mypath.Base,mypath.Folders{j}])
-end
-clear mypath
+setpath
 
 %% Initiate time tracker
 tt = TimeTracker;
@@ -171,21 +157,21 @@ model.StateEq = {...
 model.genmats
 mats = model.mats(model.Param.Values);
 
-%% Describe Prior
-prior = DSGE.Prior(model);
+%% Analyze Prior parameters
+model.initializeprior
 
 %% Data
 % data = DSGE.Data([basePath,'Data/Data_1987q3_2009q3.csv']);
-data = DSGE.Data('Data_1987q3_2009q3.csv');
-data.Var = model.ObsVar.Names;
-op.Sim.Data = data;
-op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
+model.Data = DSGE.Data('../Data_1987q3_2009q3.csv');
+model.Data.Var = model.ObsVar.Names;
+model.Data.TickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 
 %% Create posterior
-post = DSGE.Posterior(model,prior,data);
+model.initializepost
 
 %% Simulate model at prior
-model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
+model.sim('Dist','PriorDraws')
+
 
 %% Finish up
 tt.stop('Setup')

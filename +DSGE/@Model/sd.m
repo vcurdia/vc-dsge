@@ -16,11 +16,11 @@ function sd(obj,xd,varargin)
 
 %% Options
 op.FNSuffix = '';
-op.Data = [];
+op.Data = obj.Data;
 op.DrawStates = [];
 op.ShowOther = 1;
 op.Time2Show = [];
-op.Tick.Labels = [];
+op.Tick.Labels = obj.Data.TickLabels;
 op.Fig.Visible = 'off';
 op.Fig.Color = [];
 % op.Fig.YMinScale = 0.01;
@@ -41,7 +41,8 @@ op = updateoptions(op,varargin{:});
 if ~isempty(op.Data)
     data = op.Data;
 else
-    error('Data is empty. Cannot generate shock decomposition.')
+    fprintf('Data is empty. Cannot generate shock decomposition.\n')
+    return
 end
 if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
 
