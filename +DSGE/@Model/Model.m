@@ -217,7 +217,7 @@ classdef Model < matlab.mixin.Copyable
         Data
         
 % structure containing Posterior information, if a posterior exists
-        Posterior
+        Post
         
 % Other model prioperties and options
         KFInitState

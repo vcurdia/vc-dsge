@@ -168,7 +168,7 @@ op.Sim.Data = model.Data;
 op.Sim.Tick.Labels = {'1990q1','1995q1','2000q1','2005q1'};
 
 %% Create posterior
-model.initializeposterior
+model.initializepost
 
 %% Simulate model at prior
 % model.sim(prior.draw(1000),op.Sim,'FNSuffix','_PriorDraws')
