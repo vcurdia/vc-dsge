@@ -15,6 +15,8 @@ function p = postlpdf(obj,x,varargin)
 %% Options
 op.fid = 1;
 op.verbose = 0;
+op.StoreAuxEq = 0;
+op.StoreAuxREE = 0;
 op = updateoptions(op,varargin{:});
 
 %% convert param vector
