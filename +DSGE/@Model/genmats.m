@@ -288,9 +288,8 @@ if obj.ObsVar.N>0
                 end
             end
         end
-        fprintf(fid,'        ];\n');
+        fprintf(fid,'    ];\n');
     end
-    fprintf(fid,'end\n');
     fprintf(fid,'Mats.ObsEq = ObsEq;\n');
 end
 
