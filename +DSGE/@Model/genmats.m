@@ -140,20 +140,9 @@ fid = fopen([matspath,MatsFN,'.m'],'wt');
 fprintf(fid,'function Mats = %s(x,varargin)\n\n',MatsFN);
 fprintf(fid,'%% Created: %.0f/%.0f/%.0f %.0f:%.0f:%.0fs\n',clock);
 
-fprintf(fid,'\n%% Default options\n');
-fprintf(fid,'op.StoreParam = 1;\n');
-fprintf(fid,'op.StoreStateEq = 1;\n');
-fprintf(fid,'op.StoreObsEq = 1;\n');
-fprintf(fid,'op.StoreKF = 1;\n');
-fprintf(fid,'op.StoreAuxEq = 1;\n');
-fprintf(fid,'op.StoreAuxREE = 1;\n');
-fprintf(fid,'op.SolveREE = 1;\n');
-fprintf(fid,'op.fid = 1;\n');
-fprintf(fid,'op.verbose = 0;\n');
-fprintf(fid,'op.GensysAuthor = ''%s'';\n',obj.GensysAuthor);
-fprintf(fid,'op.gensys = {};\n');
-
-fprintf(fid,'\n%% Update options\n');
+fprintf(fid,'\n%% options\n');
+fprintf(fid,'op.FID = 1;\n');
+fprintf(fid,'op.Verbose = 0;\n');
 fprintf(fid,'op = updateoptions(op,varargin{:});\n');
 
 fprintf(fid,'\n%% Initiate Status\n');
@@ -164,9 +153,7 @@ fprintf(fid,'\n%% Map parameters\n');
 for j=1:obj.Param.N
     fprintf(fid,'%s = x(%.0f);\n',obj.Param.Names{j},j);
 end
-fprintf(fid,'if op.StoreParam\n');
-fprintf(fid,'    Mats.Param = x;\n');
-fprintf(fid,'end\n');
+fprintf(fid,'Mats.Param = x;\n');
 
 if obj.CompositeParam.N>0 || obj.NumSolveParam.N>0
     fprintf(fid,'\n%% Initialize composite parameters\n');
@@ -221,7 +208,7 @@ if obj.NumSolveParam.N>0
     txt = 'NumSolveParam solution not normal.';
     fprintf(fid,'    Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
             txt);
-    fprintf(fid,'    if op.verbose\n');
+    fprintf(fid,'    if op.Verbose\n');
     fprintf(fid,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
     fprintf(fid,'    end\n');
     fprintf(fid,'end\n');
@@ -253,12 +240,10 @@ obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompositeParam.Names];
 obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
                     obj.CompositeParam.PrettyNames];
 
-fprintf(fid,'if op.StoreParam\n');
-fprintf(fid,'    Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
+fprintf(fid,'Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
 for j=1:obj.AuxParam.N
-    fprintf(fid,'    Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
+    fprintf(fid,'Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
 end
-fprintf(fid,'end\n');
 
 if obj.ObsVar.N>0
     fprintf(fid,'\n%% Observation equations\n');
@@ -279,6 +264,10 @@ if obj.ObsVar.N>0
     end
     MatNames = fieldnames(SymMats.ObsEq);
     nCols = [1,obj.StateVar.N];
+    
+    HERE HERE HERE HERE HERE HERE HERE 
+    
+    
     fprintf(fid,'if op.StoreObsEq || op.StoreKF\n');
 %     obj.ObsEqMats = struct;
     for jM=1:length(MatNames)
