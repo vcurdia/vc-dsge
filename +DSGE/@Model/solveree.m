@@ -33,11 +33,11 @@ op.RealSmall = [];
 op.UsePinv = 0;
 
 % Update options with model defaults and additional user specifications
-op = updateoptions(op,obj.Gensys,varargin{:});
+op = updateoptions(op,obj.GensysOptions,varargin{:});
 
 
 %% evaluate model mats
-Mats = obj.mats(x);
+Mats = obj.mats(x,op);
 
 %% Run Gensys
 REE.GBar = [];
@@ -73,19 +73,27 @@ if obj.ObsVar.N>0
     end
     KF.ObsVarBar = Mats.ObsEq.HBar + Mats.ObsEq.H*KF.StateVarBar;
 
-    KF.s00 = zeros(obj.StateVar.N,1);
+    if ~isempty(obj.KFInitState)
+        s00 = obj.KFInitState;
+    else
+        KF.s00 = zeros(obj.StateVar.N,1);
+    end
 
-    [sig00,sig00rc] = lyapcsd(REE.G1,REE.G2*REE.G2');
-    sig00 = real(sig00); 
-    sig00 = (sig00+sig00')/2;
-    if sig00rc~=0
-        Mats.Status = 0;
-        Mats.StatusMessage = [Mats.StatusMessage,...
-                            'Could not find unconditional variance.'];
-        if op.Verbose
-            fprintf(fid,'Warning: Could not find unconditional variance.\n');
+    if ~isempty(obj.KFInitVariance)
+        sig00 = obj.KFInitVariance;
+        sig00rc = 0;
+    else
+        [sig00,sig00rc] = lyapcsd(REE.G1,REE.G2*REE.G2');
+        sig00 = real(sig00); 
+        sig00 = (sig00+sig00')/2;
+        if sig00rc~=0
+            Mats.Status = 0;
+            Mats.StatusMessage = [Mats.StatusMessage,...
+                                'Could not find unconditional variance.'];
+            if op.Verbose
+                fprintf(fid,'Warning: Could not find unconditional variance.\n');
+            end
         end
-
     end
 
     KF.sig00 = sig00;

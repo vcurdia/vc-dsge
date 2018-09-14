@@ -219,14 +219,19 @@ classdef Model < matlab.mixin.Copyable
 % structure containing Posterior information, if a posterior exists
         Post
         
-% Other model prioperties and options
+% Other model properties and options
         KFInitState
         KFInitVariance
-        GensysAuthor = 'CS';
-        NumSolvePrecision = 1e-6;
-        NumSolveMaxIterations = 500;
+        GensysOptions
+%         NumSolvePrecision = 1e-6;
+%         NumSolveMaxIterations = 500;
+
+% time tracker for methods operations
         TimeTracker
+
+% handle to the mats evaluation function
         mats
+        
     end
     
     methods
