@@ -386,11 +386,8 @@ fclose(fid);
 obj.mats = str2func(MatsFN);
 
 %% Test function
-mats = obj.solveree(obj.Param.Values);
+mats = obj.solveree(obj.Param.Values,'Verbose',1);
 obj.AuxParam.Values = mats.AuxParam;
-if mats.Status==0
-    fprintf('Warning: REE solution not normal for Param.Values.\n')
-end
 
 %% Save timer
 obj.TimeTracker.stop(ttName)

@@ -168,7 +168,7 @@ model.Data.TickLabels = {'1990q1','1995q1','2000q1','2005q1'};
 model.initializepost
 
 %% Simulate model at prior
-% model.sim('Dist','PriorDraws')
+model.sim('Dist','PriorDraws')
 
 
 %% Finish up

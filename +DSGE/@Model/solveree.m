@@ -62,6 +62,9 @@ Mats.REE = REE;
 if ~all(REE.eu==1);
     Mats.Status = 0;
     Mats.StatusMessage = [Mats.StatusMessage,'REE solution not normal.'];
+    if op.Verbose
+        fprintf(fid,'Warning: REE solution not normal.\n');
+    end
 end
 
 %% Kalman Filter matrices

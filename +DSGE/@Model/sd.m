@@ -102,8 +102,8 @@ end
 SD = nan(nStateVar+nObsVar+nAuxVar,data.T,nGroups+op.ShowOther,nDraws);
 simCheck = ones(1,nDraws);
 parfor jd=1:nDraws
-    mats = obj.mats(xd(:,jd));
-    checkj = all(mats.REE.eu==1);
+    mats = obj.solveree(xd(:,jd));
+    checkj = mats.Status;
     if ~checkj
         simCheck(jd) = 0;
         continue

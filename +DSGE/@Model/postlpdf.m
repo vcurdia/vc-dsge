@@ -13,10 +13,8 @@ function p = postlpdf(obj,x,varargin)
 % Copyright (C) 2017 Vasco Curdia
 
 %% Options
-op.fid = 1;
-op.verbose = 0;
-op.StoreAuxEq = 0;
-op.StoreAuxREE = 0;
+op.FID = 1;
+op.Verbose = 0;
 op = updateoptions(op,varargin{:});
 
 %% convert param vector
@@ -29,8 +27,8 @@ p = obj.priorlpdf(x);
 if p==-inf, return, end
 
 %% Get Mats
-Mats = obj.mats(x,op);
-if ~all(Mats.REE.eu==1) || Mats.KF.sig00rc~=0
+Mats = obj.solveree(x,op);
+if ~Mats.Status
     p = -inf;
     return
 end
