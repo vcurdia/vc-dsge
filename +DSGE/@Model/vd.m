@@ -20,7 +20,7 @@ op.NSteps = 25;
 op.TickStep = 4;
 op.FigPanels = obj.figpanels;
 op.VDHorizons = [1:34,inf];
-op.Silent = 1;
+op.Verbose = 0;
 op.VDPrctiles = [50]; % can create many at the same time
 op.Table = DSGE.Options.Table;
 op.Fig.Visible = 'off';
@@ -94,7 +94,7 @@ VDCheck = ones(1,nDraws);
 idxMat = eye(nShockVar);
 VD = nan(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons,nDraws);
 VDCheck = zeros(1,nDraws);
-isSilent = op.Silent;
+verbose = op.Verbose;
 parfor jd=1:nDraws
 %     matj = fnmats(xd(:,jd));
     matj = obj.solveree(xd(:,jd));
@@ -119,7 +119,7 @@ parfor jd=1:nDraws
             end
             if isInfHorizon
                 V(:,:,nHorizons) = real(...
-                    lyapcsdsilent(matj.REE.G1,V(:,:,1),isSilent));
+                    lyapcsdvb(matj.REE.G1,V(:,:,1),verbose));
                 VAux(:,:,nHorizons) = VAux(:,:,1) + ...
                         matj.AuxREE.G1*V(:,:,nHorizons)*matj.AuxREE.G1';
             end

@@ -86,7 +86,7 @@ if obj.ObsVar.N>0
         sig00 = obj.KFInitVariance;
         sig00rc = 0;
     else
-        [sig00,sig00rc] = lyapcsd(REE.G1,REE.G2*REE.G2');
+        [sig00,sig00rc] = lyapcsdvb(REE.G1,REE.G2*REE.G2',op.Verbose);
         sig00 = real(sig00); 
         sig00 = (sig00+sig00')/2;
         if sig00rc~=0
