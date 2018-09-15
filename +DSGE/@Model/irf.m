@@ -58,8 +58,7 @@ end
 nDraws = size(xd,2);
 
 %% Generate IRF
-fnmats = @(x)obj.mats(x,...
-               'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
+% fnmats = @(x)obj.solveree(x);
 nSteps = op.NSteps;
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
@@ -72,8 +71,9 @@ end
 IRF = nan(nStateVar+nObsVar+nAuxVar,nSteps,nShocks2Show,nDraws);
 IRFCheck = ones(1,nDraws);
 parfor jd=1:nDraws
-    matj = fnmats(xd(:,jd));
-    checkj = all(matj.REE.eu==1);
+%     matj = fnmats(xd(:,jd));
+    matj = obj.solveree(xd(:,jd));
+    checkj = matj.Status;
     if ~checkj
         IRFCheck(jd) = 0;
         continue

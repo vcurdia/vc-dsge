@@ -71,7 +71,7 @@ fprintf('\n-------------\n\n')
 xj = zeros(np,1);
 BadDraws = false(1,op.NDraws);
 xd = obj.priordraw(op.NDraws);
-fh = @(x)obj.mats(x);
+% fh = @(x)obj.solveree(x);
 AuxNames = obj.AuxParam.Names;
 nAux = obj.AuxParam.N;
 xdAux = zeros(nAux,op.NDraws);
@@ -79,8 +79,9 @@ xdAux = zeros(nAux,op.NDraws);
 parfor jd=1:op.NDraws
 %     jd
 %     xd(:,jd)
-    Matsj = fh(xd(:,jd));
-    BadDraws(jd) = ~Matsj.Status==1;
+%     Matsj = fh(xd(:,jd));
+    Matsj = obj.solveree(xd(:,jd));
+    BadDraws(jd) = ~Matsj.Status;
     xdAux(:,jd) = Matsj.AuxParam;
 %     Matsd{jd} = Matsj;
 end

@@ -15,8 +15,6 @@
 
 %% Preamble
 clear all
-set(groot,'defaultTextInterpreter','latex'); 
-set(groot,'defaultLegendInterpreter','latex');
 setpath
 
 %% Load DSGE

@@ -88,16 +88,17 @@ end
 nDraws = size(xd,2);
 
 %% Generate VD
-fnmats = @(x)obj.mats(x,...
-               'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
+% fnmats = @(x)obj.mats(x,...
+%                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 VDCheck = ones(1,nDraws);
 idxMat = eye(nShockVar);
 VD = nan(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons,nDraws);
 VDCheck = zeros(1,nDraws);
 isSilent = op.Silent;
 parfor jd=1:nDraws
-    matj = fnmats(xd(:,jd));
-    checkj = all(matj.REE.eu==1);
+%     matj = fnmats(xd(:,jd));
+    matj = obj.solveree(xd(:,jd));
+    checkj = matj.Status;
     if checkj
         Vj = zeros(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons);
         for jS=1:nShockVar
