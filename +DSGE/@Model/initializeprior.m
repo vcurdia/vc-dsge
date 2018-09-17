@@ -1,4 +1,4 @@
-function initializeprior(obj)
+function initializeprior(obj,varargin)
 
 % initializeprior
 %
@@ -145,7 +145,7 @@ for j=1:np
     end
 end
 
-obj.analyzeprior
+obj.analyzeprior(varargin{:})
 
 end
 
