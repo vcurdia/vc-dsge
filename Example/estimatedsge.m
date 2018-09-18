@@ -27,7 +27,7 @@ load(specName)
 
 
 %% MaxPost
-op.MaxPost.NMax = 4=10; %10
+op.MaxPost.NMax = 10; %10
 op.MaxPost.Min.nit = 1000; %1000;
 op.MaxPost.Min.Ritmax = 20; %20;
 op.MaxPost.Min.Ritmin = 5;

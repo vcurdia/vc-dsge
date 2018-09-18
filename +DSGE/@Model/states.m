@@ -38,13 +38,14 @@ end
 if isempty(op.Time2Show), op.Time2Show = data.TimeIdx([1,end]); end
 
 if ~isfield(op,'FigPanels')
-    if obj.AuxVar.N>0
-        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
-                                     'PanelList',{'StateVar','AuxVar'});
-    else
-        op.FigPanels = obj.figpanels(op.FigPanelsOptions,...
-                                     'PanelList',{'StateVar'});
+    panelList = {'StateVar'};
+    if obj.ObsVar.N>0
+        panelList = [{'ObsVar'},panelList];
     end
+    if obj.AuxVar.N>0
+        panelList = [panelList,{'AuxVar'}];
+    end
+    op.FigPanels = obj.figpanels(op.FigPanelsOptions,'PanelList',panelList);
 end
 
 
