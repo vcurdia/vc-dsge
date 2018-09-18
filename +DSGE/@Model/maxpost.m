@@ -64,7 +64,7 @@ for jm=1:nMax
     else
         for jg=1:op.GuessMaxDraws
             if jm<nx0+nDrawPrior
-                x0g = obj.Prior.draw(1);
+                x0g = obj.priordraw(1);
                 x0(:,jm) = x0g(pIdx);
             else
                 for jp=1:np
