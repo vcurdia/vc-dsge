@@ -108,11 +108,11 @@ DispList = {'    Mean','Mean';
             '     95%','Prc95';
            };
 nc = size(DispList,1);
+namelengthmax = max([cellfun('length',{obj.Param.Names{:}, ...
+                    obj.AuxParam.Names{:}})]);
 for jP=1:length(pList)
     Pj = pList{jP};
     psj = obj.(Pj);
-    namelength = [cellfun('length',obj.(Pj).Names)];
-    namelengthmax = max(namelength);
     fprintf(['\n%-',int2str(namelengthmax),'s'],'');
     for jc=1:nc
         fprintf('  %-8s',DispList{jc,1});

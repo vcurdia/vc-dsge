@@ -31,10 +31,7 @@ op.FastGensys = 0;
 op.Div = [];
 op.RealSmall = [];
 op.UsePinv = 0;
-
-% Update options with model defaults and additional user specifications
 op = updateoptions(op,obj.GensysOptions,varargin{:});
-
 
 %% evaluate model mats
 Mats = obj.mats(x,op);
