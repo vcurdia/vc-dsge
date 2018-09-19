@@ -39,11 +39,11 @@ else
     if strcmp(op.Dist,'PriorDraws')
         xd = obj.priordraw(op.NDraws);
     elseif ismember(op.Dist,{'PriorMean','PriorMode','PriorMedian'})
-        xd = repmat(obj.Prior.(obj.Dist{6:end}),1,op.NDraws);
+        xd = repmat(obj.Prior.(op.Dist(6:end)),1,op.NDraws);
     elseif strcmp(op.Dist,'PostDraws')
         xd = obj.postdraw(op.NDraws);
     elseif ismember(op.Dist,{'PostMean','PostMode','PostMedian'})
-        xd = repmat(obj.Post.(obj.Dist{5:end}),1,op.NDraws);
+        xd = repmat(obj.Post.(op.Dist(5:end)),1,op.NDraws);
     else
         isValues = 1;
         xd = repmat(obj.Param.Values,1,op.NDraws);
