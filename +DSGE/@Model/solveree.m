@@ -35,6 +35,18 @@ op = updateoptions(op,obj.GensysOptions,varargin{:});
 
 %% evaluate model mats
 Mats = obj.mats(x,op);
+gsInput = [Mats.StateEq.Gamma0(:);Mats.StateEq.Gamma1(:);...
+           Mats.StateEq.GammaBar(:);Mats.StateEq.Gamma2(:);...
+                           Mats.StateEq.Gamma3(:)];
+if any(isnan(gsInput)) || any(isinf(gsInput))
+    Mats.Status = 0;
+    Mats.StatusMessage = 'Model equations contain NAN or INF elements.';
+    if op.Verbose
+        fprintf(fid,'Warning: %s\n',Mats.StatusMessage);
+    end
+    return
+end
+
 
 %% Run Gensys
 REE.GBar = [];
@@ -58,10 +70,11 @@ end
 Mats.REE = REE;
 if ~all(REE.eu==1);
     Mats.Status = 0;
-    Mats.StatusMessage = [Mats.StatusMessage,'REE solution not normal.'];
+    Mats.StatusMessage = 'REE solution not normal.';
     if op.Verbose
-        fprintf(fid,'Warning: REE solution not normal.\n');
+        fprintf(fid,'Warning: %s\n',Mats.StatusMessage);
     end
+    return
 end
 
 %% Kalman Filter matrices
@@ -88,14 +101,12 @@ if obj.ObsVar.N>0
         sig00 = (sig00+sig00')/2;
         if sig00rc~=0
             Mats.Status = 0;
-            Mats.StatusMessage = [Mats.StatusMessage,...
-                                'Could not find unconditional variance.'];
+            Mats.StatusMessage = 'Could not find unconditional variance.';
             if op.Verbose
-                fprintf(fid,'Warning: Could not find unconditional variance.\n');
+                fprintf(fid,'Warning: %s\n',Mats.StatusMessage);
             end
         end
     end
-
     KF.sig00 = sig00;
     KF.sig00rc = sig00rc;
     Mats.KF = KF;
