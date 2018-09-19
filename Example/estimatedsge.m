@@ -17,14 +17,20 @@
 clear all
 setpath
 
+% Spec
+specName = 'LM';
+
+% keep log
+diary(sprintf('%s_%.0f-%02.0f-%02.0f-%02.0f%02.0f%02.0f_Estimation.log', ...
+              specName,clock))
+diary on
+
+% Initiate parallel pool
+%parpool('local',20)
+
 %% Load DSGE
-specName = 'MyDSGE';
 cd(specName)
 load(specName)
-
-%% Initiate parallel pool
-% parpool(2)
-
 
 %% MaxPost
 op.MaxPost.NMax = 10; %10
@@ -52,6 +58,7 @@ end
 % delete(gcp)
 save(specName)
 tt.show
+diary off
 cd ..
 
 % exit

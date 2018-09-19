@@ -14,14 +14,24 @@
 clear all
 setpath
 
-%% Initiate time tracker
+% Spec 
+specName = 'LM';
+mkdir(model.Name)
+cd(model.Name)
+
+% keep log
+diary(sprintf('%s_%.0f-%02.0f-%02.0f-%02.0f%02.0f%02.0f_Setup.log', ...
+              specName,clock))
+diary on
+
+% track time
 tt = TimeTracker;
 tt.start('Setup')
 
+% parpool(20)
+
 %% Setup the model
-model = DSGE.Model('MyDSGE');
-mkdir(model.Name)
-cd(model.Name)
+model = DSGE.Model(specName);
 
 % % example for calibrated model
 % model.Param = {...
@@ -174,4 +184,8 @@ model.sim('Dist','PriorDraws')
 %% Finish up
 tt.stop('Setup')
 save(model.Name)
+% delete(gcp)
+diary off
 cd ..
+
+% exit
