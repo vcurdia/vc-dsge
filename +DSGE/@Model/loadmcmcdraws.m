@@ -37,7 +37,7 @@ nDraws = size(draws.LPDF,2);
 if op.AuxParam
     fprintf('Generating AuxParam draws\n')
     dAux = zeros(obj.AuxParam.N,nDraws,sample.NChains);
-    fh = @(x)obj.mats(obj.expandparam(x),'SolveREE',0);
+    fh = @(x)obj.mats(obj.expandparam(x));
     for jC=1:sample.NChains
         parfor jd=1:nDraws
             Matsj = fh(draws.Param(:,jd,jC));
