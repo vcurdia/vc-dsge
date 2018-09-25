@@ -270,12 +270,15 @@ fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Name,obj.Post.MCMCStage);
 nPlots = prod([op.Fig.Shape{:}]);
 drawsPrior.Param = obj.priordraw(op.NDrawsPrior);
-fh = @(x)obj.mats(x,'SolveREE',0);
-dAux = zeros(nAux,op.NDrawsPrior);
+fh = @(x)obj.mats(x);
+dAux = nan(nAux,op.NDrawsPrior);
+badDraws = false(1,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
-    Matsj = fh(drawsPrior.Param(:,jd));
+    Matsj = obj.solveree(drawsPrior.Param(:,jd));
     dAux(:,jd) = Matsj.AuxParam;
+    badDraws(jd) = ~Matsj.Status;
 end
+dAux(:,badDraws) = [];
 drawsPrior.AuxParam = dAux;
 drawsPrior.N = size(drawsPrior.Param,2);
 pList = {'Param','AuxParam'};

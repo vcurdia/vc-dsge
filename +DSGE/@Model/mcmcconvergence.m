@@ -103,7 +103,9 @@ for jL=1:length(pdList)
             jh = jh+1;
             h(jh) = subplot(sample.NChains,nc,jh);
             plot(xd(1,:,jChain),'LineWidth',1)
-            ylim([pMin pMax])
+            if pMax>pMin
+                ylim([pMin pMax])
+            end
             h(jh).XTick = [op.Draws.BurnIn,1]*nDrawsUsed;
             h(jh).XGrid = 'on';
             h(jh).FontSize = op.Fig.FontSize;
@@ -113,7 +115,9 @@ for jL=1:length(pdList)
                 histogram(xd(1,op.Draws.BurnIn*nDrawsUsed+1:end,jChain),...
                           op.NBin,'Normalization','probability',...
                           'FaceColor',op.Fig.Color(1,:),'FaceAlpha',1)
-                xlim([pMin pMax])
+                if pMax>pMin
+                    xlim([pMin pMax])
+                end
                 h(jh).FontSize = op.Fig.FontSize;
             end
         end
@@ -187,7 +191,9 @@ for jL=1:length(ptList)
                  'Color',op.Fig.Color(2,:))
             plot(SampleID,RollingMean(:,jChain),'-','Color',op.Fig.Color(1,:),...
                  'LineWidth',2)
-            ylim(MeanBounds)
+            if MeanBounds(2)>MeanBounds(1)
+                ylim(MeanBounds)
+            end
             xlim(SampleID([1,end]))
             h(jh).FontSize = op.Fig.FontSize;
             jh = jh+1;
@@ -197,12 +203,14 @@ for jL=1:length(ptList)
             hold on
             plot(SampleID,RollingSD(:,jChain),'-','Color',op.Fig.Color(1,:),...
                  'LineWidth',2)
-            ylim(SDBounds)
+            if SDBounds(2)>SDBounds(1)
+                ylim(SDBounds)
+            end
             xlim(SampleID([1,end]))
             h(jh).FontSize = op.Fig.FontSize;
         end
         title(h(1),sprintf('Rolling Mean of %s',p.(Lj).PrettyNames{jF}))
-        title(h(1),sprintf('Rolling SD of %s',p.(Lj).PrettyNames{jF}))
+        title(h(2),sprintf('Rolling SD of %s',p.(Lj).PrettyNames{jF}))
         hf.PaperSize = op.PaperSize;
         hf.PaperPosition = op.PaperPosition;
         if op.TightFig
