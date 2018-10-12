@@ -35,6 +35,13 @@ op = updateoptions(op,obj.GensysOptions,varargin{:});
 
 %% evaluate model mats
 Mats = obj.mats(x,op);
+if ~Mats.Status
+    if op.Verbose
+        fprintf(fid,'Warning: %s\n',Mats.StatusMessage);
+    end
+    return
+end
+    
 gsInput = [Mats.StateEq.Gamma0(:);Mats.StateEq.Gamma1(:);...
            Mats.StateEq.GammaBar(:);Mats.StateEq.Gamma2(:);...
                            Mats.StateEq.Gamma3(:)];
