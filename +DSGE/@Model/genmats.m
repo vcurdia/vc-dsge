@@ -244,11 +244,11 @@ fprintf(fid,'Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
 for j=1:obj.AuxParam.N
     fprintf(fid,'Mats.AuxParam(%.0f) = %s;\n',j,obj.AuxParam.Names{j});
 end
-fprintf(fid,'if ~all(isreal(Mats.AuxParam))\n';
-fprintf(fid,'    Mats.Status = 0;\n';
-fprintf(fid,'    Mats.StatusMessage = ''Auxiliary parameters with no-real values.'';\n';
-fprintf(fid,'    return\n';
-fprintf(fid,'end\n\n';
+fprintf(fid,'if ~all(isreal(Mats.AuxParam))\n');
+fprintf(fid,'    Mats.Status = 0;\n');
+fprintf(fid,'    Mats.StatusMessage = ''Auxiliary parameters with no-real values.'';\n');
+fprintf(fid,'    return\n');
+fprintf(fid,'end\n\n');
 
 if obj.ObsVar.N>0
     fprintf(fid,'\n%% Observation equations\n');
