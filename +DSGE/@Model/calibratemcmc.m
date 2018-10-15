@@ -99,7 +99,7 @@ while jConfirm<=op.NConfirm
             nRevertDirection = 0;
         end
         if jIncrement>length(op.ScaleIncrements)
-            jConfirm = jConfirm+1;
+            jConfirm = jConfirm + 1;
             if jConfirm>op.NConfirm
                 fprintf('Results confirmed!\n')
             else
@@ -113,10 +113,11 @@ while jConfirm<=op.NConfirm
                 jumpScale = op.MinSearchScale;
                 fprintf(['Minimum jump scale breached. Setting it to minimum ' ...
                          'level: %.2f\n'],jumpScale)
+                jConfirm = jConfirm + 1;
             else
                 fprintf('Scale changed to %.2f\n',jumpScale)
+                jConfirm = (jumpScaleOld==jumpScale);
             end
-            jConfirm = (jumpScaleOld==jumpScale);
         end            
     end
 end
