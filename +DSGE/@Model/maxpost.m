@@ -13,7 +13,7 @@ function maxpost(obj,varargin)
 % Copyright (C) 2017-2018 Vasco Curdia
 
 %% Preamble
-fprintf('\n*** Maximizing posterior log-pdf\n')
+fprintf('\n*** Searching for Posterior Mode\n')
 ttName = 'MaxPost';
 obj.TimeTracker.start(ttName)
 
@@ -26,7 +26,7 @@ np = obj.Post.NEstimate;
 pIdx = obj.Post.EstimateIdx;
 
 %% Options
-op.NMax = 20;
+op.NMax = 10;
 op.ShowRobustness = 1;
 op.DrawAll = 0;
 op.Min.verbose = 1;
