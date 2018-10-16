@@ -339,7 +339,7 @@ classdef Model < matlab.mixin.Copyable
 %             if ~all(tf)
 %                 fprintf('Invalid parameter name ignored: %s\n',p{~tf,1})
 %             end
-            mats = obj.mats(obj.Param.Values);
+            mats = obj.solveree(obj.Param.Values);
             obj.AuxParam.Values = mats.AuxParam;
         end
 
