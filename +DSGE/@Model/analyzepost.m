@@ -327,10 +327,7 @@ for jP=1:2
             if jf==nPlots || jp==np
                 hl = legend(dList,'Orientation','horizontal');
                 legPos = hl.Position;
-                xIdx = (max(1,op.Fig.Shape{1}-1))*op.Fig.Shape{2};
-                xR = hf(xIdx).Position;
-                xL = hf(min(jf,xIdx+1)).Position;
-                legPos(1) = xL(1)+(xR(1)-xL(1))/2+(xL(3)-legPos(3))/2;
+                legPos(1) = 0.5 - legPos(3)/2;
                 legPos(2) = 0;
                 hl.Position = legPos;
                 dLeg = legPos(4);
