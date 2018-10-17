@@ -15,6 +15,7 @@ function mcmc(obj,varargin)
 %% Options
 op.KeepLogs = 1;
 op.x0 = [];
+op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
 op.Augment = 0;
@@ -61,7 +62,7 @@ obj.Post.MCMCSample.FileNameRedux = [];
 
 %% create MCMC chains
 [npx0,nx0] = size(op.x0);
-x0 = cell(1,4);
+x0 = cell(1,op.NChains);
 if nx0>0
     if npx0==obj.Param.N
         op.x0 = op.x0(obj.Post.EstimateIdx,:); 
@@ -70,6 +71,13 @@ if nx0>0
         x0{j} = op.x0(:,j);
     end
 end
+if op.UsePostDraw && obj.Post.MCMCStage>1
+    x0d = obj.postdraw(op.NChains-nx0);
+    for j=(nx0+1):op.NChains
+        x0{j} = x0d(obj.Post.EstimateIdx,j-nx0);
+    end
+end
+
 opChain.Augment = op.Augment;
 opChain.NDraws = op.NDraws;
 opChain.JumpVar = obj.Post.MCMCSample.JumpVar;

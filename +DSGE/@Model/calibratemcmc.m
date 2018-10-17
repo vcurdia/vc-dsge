@@ -13,6 +13,8 @@ function jumpScale = calibratemcmc(obj,varargin)
 % Copyright (C) 2017-2018 Vasco Curdia
 
 %% Options
+op.x0 = [];
+op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
 op.NDrawsCalibrate = 1000;
@@ -39,7 +41,23 @@ jumpScale = op.JumpScale;
 
 opChain.Augment = 0;
 opChain.NDraws = op.NDrawsCalibrate;
-opChain.x0 = [];
+
+[npx0,nx0] = size(op.x0);
+x0 = cell(1,op.NChains);
+if nx0>0
+    if npx0==obj.Param.N
+        op.x0 = op.x0(obj.Post.EstimateIdx,:); 
+    end
+    for j=1:nx0
+        x0{j} = op.x0(:,j);
+    end
+end
+if op.UsePostDraw && obj.Post.MCMCStage>1
+    x0d = obj.postdraw(op.NChains-nx0);
+    for j=(nx0+1):op.NChains
+        x0{j} = x0d(obj.Post.EstimateIdx,j-nx0);
+    end
+end
 
 fn = cell(op.NChains,1);
 for jChain=1:op.NChains
@@ -61,6 +79,7 @@ while jConfirm<=op.NConfirm
     parfor jChain=1:op.NChains
         opj = opChain;
         opj.fn = fn{jChain};
+        opj.x0 = x0{jChain};
         nRejections = obj.mcmcchain(opj);
         RejectionRates(nBlocks,jChain) = nRejections/opj.NDraws;
     end
