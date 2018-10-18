@@ -15,7 +15,7 @@ function mcmcconvergence(obj,varargin)
 %% Options
 op.Draws.BurnIn = 0.25;
 op.Draws.Thinning = 1;
-op.Draws.AuxParam = 1;
+op.Draws.AuxParam = 0;
 op.NMeansSPM = 4;
 op.DrawsFraction = 0.04;
 op.Table = DSGE.Options.Table;
