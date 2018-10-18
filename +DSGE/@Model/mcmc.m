@@ -45,22 +45,6 @@ obj.TimeTracker.start(ttName)
 
 pIdx = obj.Post.EstimateIdx;
 
-obj.Post.MCMCSample.NChains = op.NChains;
-obj.Post.MCMCSample.NDraws = op.NDraws;
-if ~op.Augment
-    obj.Post.MCMCSample.JumpScale = op.JumpScale;
-    obj.Post.MCMCSample.JumpVar = op.JumpScale^2/obj.Post.NEstimate*obj.Post.Var(pIdx,pIdx);
-    obj.Post.MCMCSample.NRejections = zeros(1,op.NChains);
-end
-obj.Post.MCMCSample.FileNameDraws = cell(op.NChains,1);
-for jChain=1:op.NChains
-    obj.Post.MCMCSample.FileNameDraws{jChain} = sprintf(...
-        '%s_MCMC_%.0f_Chain_%.0f',obj.Name,obj.Post.MCMCStage,jChain);
-end
-obj.Post.MCMCSample.FileNameRedux = [];
-
-
-%% create MCMC chains
 [npx0,nx0] = size(op.x0);
 x0 = cell(1,op.NChains);
 if nx0>0
@@ -78,6 +62,21 @@ if op.UsePostDraw && obj.Post.MCMCStage>1
     end
 end
 
+obj.Post.MCMCSample.NChains = op.NChains;
+obj.Post.MCMCSample.NDraws = op.NDraws;
+if ~op.Augment
+    obj.Post.MCMCSample.JumpScale = op.JumpScale;
+    obj.Post.MCMCSample.JumpVar = op.JumpScale^2/obj.Post.NEstimate*obj.Post.Var(pIdx,pIdx);
+    obj.Post.MCMCSample.NRejections = zeros(1,op.NChains);
+end
+obj.Post.MCMCSample.FileNameDraws = cell(op.NChains,1);
+for jChain=1:op.NChains
+    obj.Post.MCMCSample.FileNameDraws{jChain} = sprintf(...
+        '%s_MCMC_%.0f_Chain_%.0f',obj.Name,obj.Post.MCMCStage,jChain);
+end
+obj.Post.MCMCSample.FileNameRedux = [];
+
+%% create MCMC chains
 opChain.Augment = op.Augment;
 opChain.NDraws = op.NDraws;
 opChain.JumpVar = obj.Post.MCMCSample.JumpVar;
