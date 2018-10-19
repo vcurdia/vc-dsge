@@ -127,7 +127,7 @@ if ~op.Augment
     nDraws = op.NDraws;
 else
     fprintf(fid,'Loading existing chain...\n');
-    load(op.fn)
+    draws = load(op.fn);
     nDraws = op.NDraws - draws.N;
     x0 = draws.Param(:,end);
 end
