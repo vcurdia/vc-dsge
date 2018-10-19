@@ -16,7 +16,7 @@ function xd = priordraw(obj,nDraws)
 if nargin<2 || isempty(nDraws)
     nDraws = 1; 
 end
-if isempty(obj.Param.Sample.FileName)
+if isempty(obj.Prior.Sample.FileName)
     obj.makepriorsample
 end
 draws = load(obj.Prior.Sample.FileName);
