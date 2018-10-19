@@ -18,7 +18,7 @@ function genmats(obj,matspath)
 
 
 %% Preamble
-fprintf('Generating DSGE mats\n')
+fprintf('\nGenerating DSGE mats\n')
 ttName = 'GenMats';
 obj.TimeTracker.start(ttName)
 

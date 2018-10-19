@@ -15,7 +15,7 @@ function initializeprior(obj,varargin)
 
 
 %% Preamble
-fprintf('Initializing prior\n')
+fprintf('\nInitializing prior\n')
 
 %% Analyze prior distributions
 np = obj.Param.N;

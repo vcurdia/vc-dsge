@@ -182,7 +182,7 @@ model.sim('Dist','PriorDraws')
 
 
 %% Finish up
-tt.stop('Setup')
+fprintf('\n'),tt.stop('Setup'),fprintf('\n')
 save(model.Name)
 % delete(gcp)
 diary off

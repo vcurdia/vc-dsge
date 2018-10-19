@@ -42,7 +42,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preamble
 
-fprintf('Making VD\n')
+fprintf('\nMaking VD\n')
 ttName = ['VD',op.FNSuffix];
 obj.TimeTracker.start(ttName)
 
