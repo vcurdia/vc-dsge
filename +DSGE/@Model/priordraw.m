@@ -17,7 +17,7 @@ if nargin<2 || isempty(nDraws)
     nDraws = 1; 
 end
 if isempty(obj.Param.Sample.FileName)
-    obj.analyzeprior
+    obj.makepriorsample
 end
 draws = load(obj.Prior.Sample.FileName);
 xd = draws.Param(:,randi(draws.N,1,nDraws));
