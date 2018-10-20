@@ -17,6 +17,7 @@ op.x0 = [];
 op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
+op.JumpNewVarWeight = 1;
 op.NDrawsCalibrate = 1000;
 op.KeepFilesCalibrate = 0; 
 op.ScaleIncrements = 0.1; %[0.2,0.05,0.01];
@@ -38,6 +39,12 @@ obj.TimeTracker.start(ttName)
 
 pIdx = obj.Post.EstimateIdx;
 jumpScale = op.JumpScale;
+jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
+if obj.Post.MCMCStage>1
+    jumpVarRaw = op.JumpNewVarWeight^2*jumpVarRaw + ...
+        (1-op.JumpNewVarWeight)^2*obj.Post.MCMCSample.JumpVar/...
+        obj.Post.MCMCSample.JumpScale^2;
+end
 
 opChain.Augment = 0;
 opChain.NDraws = op.NDrawsCalibrate;
@@ -74,7 +81,7 @@ nBlocks = 0;
 RejectionRates = zeros(1,op.NChains);
 while jConfirm<=op.NConfirm 
     nBlocks = nBlocks+1;
-    opChain.JumpVar = jumpScale^2/obj.Post.NEstimate*obj.Post.Var(pIdx,pIdx);
+    opChain.JumpVar = jumpScale^2*jumpVarRaw;
     RejectionRates(nBlocks,:) = zeros(1,op.NChains);
     parfor jChain=1:op.NChains
         opj = opChain;

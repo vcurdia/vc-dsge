@@ -18,6 +18,7 @@ op.x0 = [];
 op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
+op.JumpNewVarWeight = 1;
 op.Augment = 0;
 op.NDraws = 50000;
 op.CalibrateMCMC = [];
@@ -62,11 +63,17 @@ if op.UsePostDraw && obj.Post.MCMCStage>1
     end
 end
 
+jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
+if obj.Post.MCMCStage>1
+    jumpVarRaw = op.JumpNewVarWeight^2*jumpVarRaw + ...
+        (1-op.JumpNewVarWeight)^2*obj.Post.MCMCSample.JumpVar/...
+        obj.Post.MCMCSample.JumpScale^2;
+end
 obj.Post.MCMCSample.NChains = op.NChains;
 obj.Post.MCMCSample.NDraws = op.NDraws;
 if ~op.Augment
     obj.Post.MCMCSample.JumpScale = op.JumpScale;
-    obj.Post.MCMCSample.JumpVar = op.JumpScale^2/obj.Post.NEstimate*obj.Post.Var(pIdx,pIdx);
+    obj.Post.MCMCSample.JumpVar = op.JumpScale^2*jumpVarRaw;
     obj.Post.MCMCSample.NRejections = zeros(1,op.NChains);
 end
 obj.Post.MCMCSample.FileNameDraws = cell(op.NChains,1);
