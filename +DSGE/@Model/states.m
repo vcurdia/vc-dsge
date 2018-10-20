@@ -51,7 +51,7 @@ end
 
 %% Preamble
 
-fprintf('Simulating States\n')
+fprintf('\nSimulating States\n')
 ttName = ['States',op.FNSuffix];
 obj.TimeTracker.start(ttName)
 

@@ -18,14 +18,13 @@ op.x0 = [];
 op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
+op.JumpNewVarWeight = 1;
 op.Augment = 0;
 op.NDraws = 50000;
 op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
-
-
 op = updateoptions(op,varargin{:});
 
 %% MCMC calibration
@@ -42,6 +41,8 @@ if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\n*** Generating MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
+tmpFN = sprintf('_tmp_%s_%s',obj.Name,ttName);
+save(tmpFN)
 
 pIdx = obj.Post.EstimateIdx;
 
@@ -62,11 +63,17 @@ if op.UsePostDraw && obj.Post.MCMCStage>1
     end
 end
 
+jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
+if op.JumpNewVarWeight<1 && obj.Post.MCMCStage>1
+    jumpVarRaw = op.JumpNewVarWeight^2*jumpVarRaw + ...
+        (1-op.JumpNewVarWeight)^2*obj.Post.MCMCSample.JumpVar/...
+        obj.Post.MCMCSample.JumpScale^2;
+end
 obj.Post.MCMCSample.NChains = op.NChains;
 obj.Post.MCMCSample.NDraws = op.NDraws;
 if ~op.Augment
     obj.Post.MCMCSample.JumpScale = op.JumpScale;
-    obj.Post.MCMCSample.JumpVar = op.JumpScale^2/obj.Post.NEstimate*obj.Post.Var(pIdx,pIdx);
+    obj.Post.MCMCSample.JumpVar = op.JumpScale^2*jumpVarRaw;
     obj.Post.MCMCSample.NRejections = zeros(1,op.NChains);
 end
 obj.Post.MCMCSample.FileNameDraws = cell(op.NChains,1);
@@ -75,6 +82,7 @@ for jChain=1:op.NChains
         '%s_MCMC_%.0f_Chain_%.0f',obj.Name,obj.Post.MCMCStage,jChain);
 end
 obj.Post.MCMCSample.FileNameRedux = [];
+save(tmpFN)
 
 %% create MCMC chains
 opChain.Augment = op.Augment;
@@ -96,9 +104,6 @@ for jChain=1:op.NChains
 end
 fprintf('\n')
 
-%% save workspace
-save(sprintf('%s_MCMC_%.0f',obj.Name,obj.Post.MCMCStage))
-
 %% Clean up
 if ~op.KeepLogs
     for jChain=1:op.NChains
@@ -108,11 +113,12 @@ end
 
 %% Finish up MCMC
 obj.TimeTracker.stop(ttName)
+save(tmpFN)
 
 %% Run MCMC analysis
-if op.AnalyzePost, obj.analyzepost, end
-if op.MCMCConvergence, obj.mcmcconvergence, end
-if op.MCMCRedux, obj.mcmcredux, end
+if op.AnalyzePost, obj.analyzepost, save(tmpFN), end
+if op.MCMCConvergence, obj.mcmcconvergence, save(tmpFN), end
+if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
 
 
 

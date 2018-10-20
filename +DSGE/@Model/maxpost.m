@@ -16,6 +16,8 @@ function maxpost(obj,varargin)
 fprintf('\n*** Searching for Posterior Mode\n')
 ttName = 'MaxPost';
 obj.TimeTracker.start(ttName)
+tmpFN = sprintf('_tmp_%s_%s',obj.Name,ttName);
+save(tmpFN)
 
 
 %% settings
@@ -92,6 +94,7 @@ for jm=1:nMax
 %         end
     end
 end
+save(tmpFN)
 
 %% Run minimizations
 MaxPostOut = cell(1,nMax);
@@ -107,6 +110,7 @@ parfor jm=1:nMax
 end
 MaxPostOut = [MaxPostOut{:}];
 nMax = length(MaxPostOut);
+save(tmpFN)
 
 %% extract the best one
 [LPDFMode, idxMax] = min([MaxPostOut(:).f]);
@@ -374,5 +378,6 @@ end
 
 %% Finish up
 obj.TimeTracker.stop(ttName)
+save(tmpFN)
 end
 

@@ -35,7 +35,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('\nAnalyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 

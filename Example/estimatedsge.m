@@ -31,6 +31,7 @@ diary on
 %% Load DSGE
 cd(specName)
 load(specName)
+fptintf('\n*** Model: %s\n\n',model.Name)
 
 %% MaxPost
 op.MaxPost.NMax = 10; %10
@@ -56,8 +57,8 @@ end
 
 %% Finish up
 % delete(gcp)
+fprintf('\n'),tt.show,fprintf('\n')
 save(specName)
-tt.show
 diary off
 cd ..
 

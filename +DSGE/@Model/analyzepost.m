@@ -34,7 +34,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Analyzing MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('\nAnalyzing MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('AnalyzePostMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
@@ -270,17 +270,13 @@ fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
              op.PlotDir,obj.Name,obj.Post.MCMCStage);
 nPlots = prod([op.Fig.Shape{:}]);
 drawsPrior.Param = obj.priordraw(op.NDrawsPrior);
-fh = @(x)obj.mats(x);
 dAux = nan(nAux,op.NDrawsPrior);
-badDraws = false(1,op.NDrawsPrior);
 parfor jd=1:op.NDrawsPrior
-    Matsj = obj.solveree(drawsPrior.Param(:,jd));
+    Matsj = obj.mats(drawsPrior.Param(:,jd));
     dAux(:,jd) = Matsj.AuxParam;
-    badDraws(jd) = ~Matsj.Status;
 end
-dAux(:,badDraws) = [];
 drawsPrior.AuxParam = dAux;
-drawsPrior.N = size(drawsPrior.Param,2);
+drawsPrior.N = size(dAux,2);
 pList = {'Param','AuxParam'};
 pListPretty = {'Parameters','Auxiliary Parameters'};
 dList = {'Prior','Post'};

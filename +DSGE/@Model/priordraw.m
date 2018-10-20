@@ -2,7 +2,7 @@ function xd = priordraw(obj,nDraws)
 
 % drawprior
 %
-% draw random parameter vector(s) from the prior distribution 
+% Pick parameters from the prior distribution sample 
 %
 % See also:
 % DSGE.Model
@@ -16,7 +16,8 @@ function xd = priordraw(obj,nDraws)
 if nargin<2 || isempty(nDraws)
     nDraws = 1; 
 end
-xd = nan(obj.Param.N,nDraws);
-for j=1:obj.Param.N
-    xd(j,:) = obj.Prior.RndCmd{j}(nDraws);
+if isempty(obj.Prior.Sample.FileName)
+    obj.makepriorsample
 end
+draws = load(obj.Prior.Sample.FileName);
+xd = draws.Param(:,randi(draws.N,1,nDraws));
