@@ -25,8 +25,6 @@ op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
-
-
 op = updateoptions(op,varargin{:});
 
 %% MCMC calibration
@@ -43,6 +41,8 @@ if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\n*** Generating MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
+tmpFN = sprintf('_tmp_%s_%s',obj.Name,ttName);
+save(tmpFN)
 
 pIdx = obj.Post.EstimateIdx;
 
@@ -82,6 +82,7 @@ for jChain=1:op.NChains
         '%s_MCMC_%.0f_Chain_%.0f',obj.Name,obj.Post.MCMCStage,jChain);
 end
 obj.Post.MCMCSample.FileNameRedux = [];
+save(tmpFN)
 
 %% create MCMC chains
 opChain.Augment = op.Augment;
@@ -103,9 +104,6 @@ for jChain=1:op.NChains
 end
 fprintf('\n')
 
-%% save workspace
-save(sprintf('%s_MCMC_%.0f',obj.Name,obj.Post.MCMCStage))
-
 %% Clean up
 if ~op.KeepLogs
     for jChain=1:op.NChains
@@ -115,11 +113,12 @@ end
 
 %% Finish up MCMC
 obj.TimeTracker.stop(ttName)
+save(tmpFN)
 
 %% Run MCMC analysis
-if op.AnalyzePost, obj.analyzepost, end
-if op.MCMCConvergence, obj.mcmcconvergence, end
-if op.MCMCRedux, obj.mcmcredux, end
+if op.AnalyzePost, obj.analyzepost, save(tmpFN), end
+if op.MCMCConvergence, obj.mcmcconvergence, save(tmpFN), end
+if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
 
 
 
