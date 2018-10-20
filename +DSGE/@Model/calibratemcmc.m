@@ -40,7 +40,7 @@ obj.TimeTracker.start(ttName)
 pIdx = obj.Post.EstimateIdx;
 jumpScale = op.JumpScale;
 jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
-if obj.Post.MCMCStage>1
+if op.JumpNewVarWeight<1 && obj.Post.MCMCStage>1
     jumpVarRaw = op.JumpNewVarWeight^2*jumpVarRaw + ...
         (1-op.JumpNewVarWeight)^2*obj.Post.MCMCSample.JumpVar/...
         obj.Post.MCMCSample.JumpScale^2;
