@@ -29,9 +29,10 @@ op.ExplosionProb = [.3,.6,.8,1];
 op.NChangedNIRS = 2;
 op.InitDrawTStudent = 1;
 op.InitDrawItMax = 1000;
-op.InitDrawTol = 20;
+op.InitDrawTol = 50;
 op.InitDrawVarFactor = 1;
 op.InitDrawDF = 6;
+op.InitDrawScale = [1,0.5,0.1];
 op.JumpVar = 2.4^2/np*Var;
 op.fn = 'MCMC_Chain';
 op.x0 = [];
@@ -49,16 +50,19 @@ if ~op.Augment && isempty(x0)
     if op.InitDrawTStudent
         InitDrawVarChol = chol(op.InitDrawVarFactor^2*Var)';
         InitDrawCorr = eye(np);
-        for jd=1:op.InitDrawItMax
-            x0 = xMode + InitDrawVarChol*mvtrnd(InitDrawCorr,op.InitDrawDF)';
-            lpdf0 = lpdf(x0);
-            if lpdf0>lpdfMode-op.InitDrawTol
-                break
+        isBad = 1;
+        for jScale=1:length(op.InitDrawScale)
+            for jd=1:op.InitDrawItMax
+                x0 = xMode + op.InitDrawScale(jScale)*InitDrawVarChol*...
+                     mvtrnd(InitDrawCorr,op.InitDrawDF)';
+                lpdf0 = lpdf(x0);
+                isGood = (lpdf0>lpdfMode-op.InitDrawTol);
+                if isGood, break, end
             end
+            if isGood, break, end
         end
-        if lpdf0<lpdfMode-op.InitDrawTol
-            fprintf(fid,...
-                    'Warning: Initial draw has low posterior density.\n');
+        if ~isGood
+            fprintf(fid,'Warning: Initial draw has low posterior density\n');
         end
     else
         nExplosion = length(op.ExplosionScale);
@@ -125,17 +129,25 @@ if ~op.Augment
     draws.LPDF = [];
     draws.NRejections = 0;
     nDraws = op.NDraws;
+    lpdf0 = lpdf(x0);
+    pNames = obj.Param.Names(obj.Post.EstimateIdx);
+    fprintf(fid,'Initial draw:\n');
+    nameLength = max([cellfun('length',pNames)]);
+    for jp=1:np
+        fprintf(fid,['%',int2str(nameLength),'s %7.4f\n'],pNames{jp},x0(jp));
+    end
+    fprintf(fid,'\nInitial posterior level: %.8f\n\n',lpdf0);
 else
     fprintf(fid,'Loading existing chain...\n');
     draws = load(op.fn);
     nDraws = op.NDraws - draws.N;
     x0 = draws.Param(:,end);
+    lpdf0 = lpdf(x0);
 end
 nRejections = draws.NRejections;
 nDrawsBlock = ceil(nDraws/op.NBlocks);
 
 %% MCMC
-lpdf0 = lpdf(x0);
 for jB=1:op.NBlocks
     fprintf(fid,'Generating set %2.0f out of %.0f...\n',jB,op.NBlocks);
     nB = min(nDrawsBlock,nDraws-(jB-1)*nDrawsBlock);
