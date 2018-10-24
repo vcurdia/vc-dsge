@@ -130,13 +130,13 @@ if ~op.Augment
     draws.NRejections = 0;
     nDraws = op.NDraws;
     lpdf0 = lpdf(x0);
+    pNames = obj.Param.Names(obj.Post.EstimateIdx);
     fprintf(fid,'Initial draw:\n');
-    namelengthmax = max([cellfun('length',obj.Param.Names)]);
+    nameLength = max([cellfun('length',pNames)]);
     for jp=1:np
-        fprintf(fid,['%',int2str(namelengthmax),'s %7.4f\n'],...
-                obj.Param.Names{jp},x0(jp));
+        fprintf(fid,['%',int2str(nameLength),'s %7.4f\n\n'],pNames{jp},x0(jp));
     end
-    fprintf(fid,'Initial posterior level: %.8f\n',lpdf0);
+    fprintf(fid,'Initial posterior level: %.8f\n\n',lpdf0);
 else
     fprintf(fid,'Loading existing chain...\n');
     draws = load(op.fn);
