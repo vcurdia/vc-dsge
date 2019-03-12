@@ -21,8 +21,13 @@ classdef Var < matlab.mixin.Copyable
 % These are expressions that will represent the variables when plotting or 
 % creating LaTeX output.
 % 
-% In not explicitly specified, then Names is used.
+% If not explicitly specified, then Names is used.
         PrettyNames 
+        
+% PlotScale
+% 
+% scale for plotting. Default is 1 for every variable.
+        PlotScale
     end
     
     properties (SetAccess = protected)
@@ -50,6 +55,7 @@ classdef Var < matlab.mixin.Copyable
             if length(obj.PrettyNames)~=obj.N
                 obj.PrettyNames = names;
             end
+            obj.PlotScale = ones(obj.N,1);
         end
         
         function set.PrettyNames(obj,prettynames)
@@ -64,13 +70,20 @@ classdef Var < matlab.mixin.Copyable
             if ~iscell(v)
                 error('Variables to add need to be in cell array.')
             end
-            nc = size(v,2);
+            [nv,nc] = size(v);
             names = [obj.Names;v(:,1)];
             prettynames = [obj.PrettyNames;v(:,nc)];
+            plotscale = [obj.PlotScale;ones(1,nv)];
             obj.Names = names;
             obj.PrettyNames = prettynames;
+            obj.PlotScale = plotscale;
         end
-        
+
+        function setplotscale(obj,v)
+            [tf,idx] = ismember(v(:,1),obj.Names);
+            obj.PlotScale(idx) = [v{:,2}];
+        end
+
         function v1 = merge(obj,varargin)
             v1 = copy(obj);
             isDuplicates = false;
@@ -90,8 +103,10 @@ classdef Var < matlab.mixin.Copyable
                 if ~all(tf)
                     names = [v1.Names;v.Names(~tf)];
                     prettynames = [v1.PrettyNames;v.PrettyNames(~tf)];
+                    plotscale = [v1.PlotScale;v.PlotScale(~tf)];
                     v1.Names = names;
                     v1.PrettyNames = prettynames;
+                    v1.PlotScale = plotscale;
                 end
             end
             if isDuplicates
@@ -103,6 +118,7 @@ classdef Var < matlab.mixin.Copyable
         function v1 = subset(obj,names)
             [tf,idx] = ismember(names,obj.Names);
             v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
+            v1.PlotScale = obj.PlotScale(idx);
         end
         
         function prettynames=findprettynames(obj,names)
