@@ -116,6 +116,7 @@ classdef Var < matlab.mixin.Copyable
         end
         
         function v1 = subset(obj,names)
+            if isa(names,'DSGE.Var'), names = names.Names; end
             [tf,idx] = ismember(names,obj.Names);
             v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
             v1.PlotScale = obj.PlotScale(idx);
