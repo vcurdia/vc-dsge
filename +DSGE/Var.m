@@ -24,10 +24,10 @@ classdef Var < matlab.mixin.Copyable
 % If not explicitly specified, then Names is used.
         PrettyNames 
         
-% PlotScale
+% Scale
 % 
 % scale for plotting. Default is 1 for every variable.
-        PlotScale
+        Scale
     end
     
     properties (SetAccess = protected)
@@ -55,7 +55,7 @@ classdef Var < matlab.mixin.Copyable
             if length(obj.PrettyNames)~=obj.N
                 obj.PrettyNames = names;
             end
-            obj.PlotScale = ones(obj.N,1);
+            obj.Scale = ones(obj.N,1);
         end
         
         function set.PrettyNames(obj,prettynames)
@@ -73,15 +73,15 @@ classdef Var < matlab.mixin.Copyable
             [nv,nc] = size(v);
             names = [obj.Names;v(:,1)];
             prettynames = [obj.PrettyNames;v(:,nc)];
-            plotscale = [obj.PlotScale;ones(1,nv)];
+            scale = [obj.Scale;ones(1,nv)];
             obj.Names = names;
             obj.PrettyNames = prettynames;
-            obj.PlotScale = plotscale;
+            obj.Scale = scale;
         end
 
-        function setplotscale(obj,v)
+        function setscale(obj,v)
             [tf,idx] = ismember(v(:,1),obj.Names);
-            obj.PlotScale(idx) = [v{:,2}];
+            obj.Scale(idx) = [v{:,2}];
         end
 
         function v1 = merge(obj,varargin)
@@ -103,23 +103,27 @@ classdef Var < matlab.mixin.Copyable
                 if ~all(tf)
                     names = [v1.Names;v.Names(~tf)];
                     prettynames = [v1.PrettyNames;v.PrettyNames(~tf)];
-                    plotscale = [v1.PlotScale;v.PlotScale(~tf)];
+                    scale = [v1.Scale;v.Scale(~tf)];
                     v1.Names = names;
                     v1.PrettyNames = prettynames;
-                    v1.PlotScale = plotscale;
+                    v1.Scale = scale;
                 end
             end
             if isDuplicates
-                fprintf(['Found duplicate variable names. Only merged ' ...
-                         'unique.\n'])
+                fprintf('Duplicate variable names found.\n')
             end
         end
         
-        function v1 = subset(obj,names)
+        function [v1,idx] = subset(obj,names,varargin)
+            [tf,idx] = obj.ismember(names);
+            idx = idx(tf);
+            v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
+            v1.Scale = obj.Scale(idx);
+        end
+        
+        function [tf,idx] = ismember(obj,names)
             if isa(names,'DSGE.Var'), names = names.Names; end
             [tf,idx] = ismember(names,obj.Names);
-            v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
-            v1.PlotScale = obj.PlotScale(idx);
         end
         
         function prettynames=findprettynames(obj,names)
