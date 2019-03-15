@@ -109,9 +109,9 @@ classdef Var < matlab.mixin.Copyable
                     v1.Scale = scale;
                 end
             end
-            if isDuplicates
-                fprintf('Duplicate variable names found.\n')
-            end
+%             if isDuplicates
+%                 fprintf('Duplicate variable names found.\n')
+%             end
         end
         
         function [v1,idx] = subset(obj,names,varargin)
