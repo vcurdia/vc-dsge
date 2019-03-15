@@ -15,7 +15,7 @@ clear all
 setpath
 
 % Spec 
-specName = 'LM';
+specName = 'MyDSGE';
 mkdir(model.Name)
 cd(model.Name)
 
