@@ -114,7 +114,7 @@ classdef Var < matlab.mixin.Copyable
 %             end
         end
         
-        function [v1,idx] = subset(obj,names,varargin)
+        function [v1,idx] = subset(obj,names)
             [tf,idx] = obj.ismember(names);
             idx = idx(tf);
             v1 = DSGE.Var([obj.Names(idx),obj.PrettyNames(idx)]);
