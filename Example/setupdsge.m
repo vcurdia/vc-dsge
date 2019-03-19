@@ -16,8 +16,8 @@ setpath
 
 % Spec 
 specName = 'MyDSGE';
-mkdir(model.Name)
-cd(model.Name)
+mkdir(specName)
+cd(specName)
 
 % keep log
 diary(sprintf('%s_%.0f-%02.0f-%02.0f-%02.0f%02.0f%02.0f_Setup.log', ...
