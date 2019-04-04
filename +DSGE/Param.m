@@ -34,6 +34,9 @@ classdef Param < matlab.mixin.Copyable
     properties (SetAccess = protected)
         %N Number of parameters in instance
         N = 0;
+        
+        %NameLength maximum length of Names
+        NameLength = 0;
     end
     
     methods
@@ -64,6 +67,7 @@ classdef Param < matlab.mixin.Copyable
         function obj = set.Names(obj,names)
             obj.Names = names;
             obj.N = length(names);
+            obj.NameLength = max([cellfun('length',obj.Names)]);
             if length(obj.PrettyNames)~=obj.N
                 obj.PrettyNames = names;
             end
@@ -86,17 +90,22 @@ classdef Param < matlab.mixin.Copyable
             else
                 error('Length of Values must match number of parameters.')
             end
-        end            
+        end      
         
         function showvalues(obj,x)
             if nargin<2
                 x = obj.Values;
             end
-            v = struct;
-            for j=1:obj.N
-                v.(obj.Names{j}) = x(j);
+%             v = struct;
+%             for j=1:obj.N
+%                 v.(obj.Names{j}) = x(j);
+%             end
+%             disp(v)
+            for jP=1:obj.N
+                fprintf(['%',int2str(obj.NameLength),'s'],obj.Names{jP});
+                fprintf('  %8.4f',x(jP,:));
+                fprintf('\n');
             end
-            disp(v)
         end
     
     end %methods
