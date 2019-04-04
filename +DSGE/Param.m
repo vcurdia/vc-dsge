@@ -96,16 +96,12 @@ classdef Param < matlab.mixin.Copyable
             if nargin<2
                 x = obj.Values;
             end
-%             v = struct;
-%             for j=1:obj.N
-%                 v.(obj.Names{j}) = x(j);
-%             end
-%             disp(v)
             for jP=1:obj.N
                 fprintf(['%',int2str(obj.NameLength),'s'],obj.Names{jP});
                 fprintf('  %8.4f',x(jP,:));
                 fprintf('\n');
             end
+            fprintf('\n');
         end
     
     end %methods
