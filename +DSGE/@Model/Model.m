@@ -238,7 +238,7 @@ classdef Model < matlab.mixin.Copyable
         function obj = Model(name)
             obj.TimeTracker = TimeTracker;
             if nargin>0
-                fprintf('\n*** Model %s\n',name)
+                fprintf('Model: %s\n',name)
                 obj.Name = name;
             end
         end
