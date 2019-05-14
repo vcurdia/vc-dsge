@@ -33,6 +33,9 @@ op.RealSmall = [];
 op.UsePinv = 0;
 op = updateoptions(op,obj.GensysOptions,varargin{:});
 
+%% set fid
+fid = op.FID;
+
 %% evaluate model mats
 Mats = obj.mats(x,op);
 if ~Mats.Status
