@@ -71,9 +71,6 @@ classdef Param < matlab.mixin.Copyable
             if length(obj.PrettyNames)~=obj.N
                 obj.PrettyNames = names;
             end
-            if length(obj.Values)~=obj.N
-                obj.Values = nan(obj.N,1);
-            end
         end
         
         function obj = set.PrettyNames(obj,prettynames)
@@ -92,6 +89,35 @@ classdef Param < matlab.mixin.Copyable
             end
         end      
         
+        function add(obj,p)
+            if ~iscell(p)
+                error('Parameters to add need to be in cell array.')
+            end
+            [np,nc] = size(p);
+            names = [obj.Names;p(:,1)];
+            if ismember(nc,[3,5])
+                prettynames = [obj.PrettyNames;p(:,nc)];
+            else
+                prettynames = [obj.PrettyNames;p(:,1)];
+            end
+            values = obj.Values;
+            obj.Names = names;
+            obj.PrettyNames = prettynames;
+            if ismember(nc,[2,3])
+                obj.Values = [obj.Values;[p{:,2}]'];
+            elseif nc>3
+                obj.Values = [obj.Values;[p{:,3}]'];
+                obj.PriorDist = [obj.PriorDist;p(:,2)];
+                obj.PriorMean = [obj.PriorMean;[p{:,3}]'];
+                for j=1:np
+                    if isempty(p{j,4})
+                        p{j,4} = 0;
+                    end
+                end
+                obj.PriorSD = [obj.PriorSD;[p{:,4}]'];
+            end
+        end
+
         function showvalues(obj,x)
             if nargin<2
                 x = obj.Values;

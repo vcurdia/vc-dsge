@@ -18,9 +18,9 @@ function genmats(obj,matspath)
 
 
 %% Preamble
-fprintf('\nGenerating DSGE mats\n')
-ttName = 'GenMats';
-obj.TimeTracker.start(ttName)
+fprintf('Generating DSGE mats\n')
+% ttName = 'GenMats';
+% obj.TimeTracker.start(ttName)
 
 %% checks
 if nargin==1|| isempty(matspath)
@@ -395,4 +395,4 @@ mats = obj.solveree(obj.Param.Values,'Verbose',1);
 obj.AuxParam.Values = mats.AuxParam;
 
 %% Save timer
-obj.TimeTracker.stop(ttName)
+% obj.TimeTracker.stop(ttName)
