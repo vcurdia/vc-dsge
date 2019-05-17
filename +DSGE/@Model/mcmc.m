@@ -119,6 +119,7 @@ save(tmpFN)
 if op.AnalyzePost, obj.analyzepost, save(tmpFN), end
 if op.MCMCConvergence, obj.mcmcconvergence, save(tmpFN), end
 if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
+delete(tmpFN)
 
 
 

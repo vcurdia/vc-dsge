@@ -378,6 +378,6 @@ end
 
 %% Finish up
 obj.TimeTracker.stop(ttName)
-save(tmpFN)
+delete(tmpFN)
 end
 
