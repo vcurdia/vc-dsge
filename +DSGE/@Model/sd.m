@@ -110,6 +110,9 @@ parfor jd=1:nDraws
     end
     dj = dksmoother(mats,data.Values,op.DrawStates);
     sdj = nan(nStateVar+nObsVar+nAuxVar,data.T,nGroups);
+    addstates = eye(nStateVar);
+    if nObsVar>0, addstates = [addstates;mats.ObsEq.H]; end
+    if nAuxVar>0, addstates = [addstates;mats.AuxEq.Phi]; end
     for jG=1:nGroups
         ej = dj.ShockVar(shockIdx(jG,:),:);
         G2j = mats.REE.G2(:,shockIdx(jG,:));
@@ -118,11 +121,10 @@ parfor jd=1:nDraws
         for t=2:data.T
             sj(:,t) = mats.REE.G1*sj(:,t-1) + G2j*ej(:,t);
         end
-        sdj(:,:,jG) = [eye(nStateVar); mats.ObsEq.H; mats.AuxEq.Phi]*sj;
+        sdj(:,:,jG) = addstates*sj;
     end
     if op.ShowOther
-        sj = [eye(nStateVar;mats.ObsEq.H;mats.AuxEq.Phi]*dj.StateVar;
-        sdj(:,:,nGroups+1) = sj-sum(sdj,3);
+        sdj(:,:,nGroups+1) = addstates*dj.StateVar-sum(sdj,3);
     end
     SD(:,:,:,jd) = sdj;
 end
