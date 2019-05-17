@@ -88,8 +88,10 @@ parfor jd=1:nDraws
         continue
     end
     dj = dksmoother(mats,data.Values,op.DrawStates);
+    dj.StateVar = mats.KF.StateVarBar + dj.StateVar;
+    dj.StateVar0 = mats.KF.StateVarBar + dj.StateVar0;
     sj = [dj.StateVar;
-          mats.KF.ObsVarBar+mats.ObsEq.H*dj.StateVar];
+          mats.ObsEq.HBar+mats.ObsEq.H*dj.StateVar];
     if nAuxVar>0
         sj = [sj;
               mats.AuxEq.PhiBar ...
