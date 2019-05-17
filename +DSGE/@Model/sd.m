@@ -121,8 +121,9 @@ parfor jd=1:nDraws
         sdjg = [sj; mats.ObsEq.H*sj];
         if nAuxVar>0
             sdjg = [sdjg;
-                    mats.AuxREE.G1*[zeros(nStateVar,1),sj(:,1:data.T-1)] ...
-                    + mats.AuxREE.G2(:,shockIdx(jG,:))*ej;
+                    mats.AuxEq.Phi1*sj ...
+                    + mats.AuxEq.Phi3*[zeros(nStateVar,1),sj(:,1:data.T-1)] ...
+                    + mats.AuxEq.Phi2(:,shockIdx(jG,:))*ej;
                    ];
         end
         sdj(:,:,jG) = sdjg;
@@ -131,8 +132,9 @@ parfor jd=1:nDraws
         sj = [dj.StateVar;mats.ObsEq.H*dj.StateVar];
         if nAuxVar>0
             sj = [sj;
-                  mats.AuxREE.G1*[dj.StateVar0,dj.StateVar(:,1:data.T-1)] ...
-                  + mats.AuxREE.G2*dj.ShockVar;
+                  mats.AuxEq.Phi1*dj.StateVar ...
+                  + mats.AuxEq.Phi3*[dj.StateVar0,dj.StateVar(:,1:data.T-1)] ...
+                  + mats.AuxEq.Phi2*dj.ShockVar;
                  ];
         end
         sdj(:,:,nGroups+1) = sj-sum(sdj,3);
