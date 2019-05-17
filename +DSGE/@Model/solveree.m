@@ -121,20 +121,3 @@ if obj.ObsVar.N>0
     KF.sig00rc = sig00rc;
     Mats.KF = KF;
 end
-
-%% Auxiliary equations
-if obj.AuxVar.N>0
-    if ~isempty(REE.G1)
-        AuxREE.GBar = Mats.AuxEq.PhiBar + Mats.AuxEq.Phi3*REE.GBar + ...
-            (Mats.AuxEq.Phi1+Mats.AuxEq.Phi3*REE.G1)*REE.GBar;
-        AuxREE.G1 = Mats.AuxEq.Phi4 + ...
-            (Mats.AuxEq.Phi1+Mats.AuxEq.Phi3*REE.G1)*REE.G1;
-        AuxREE.G2 = Mats.AuxEq.Phi2 + ...
-            (Mats.AuxEq.Phi1+Mats.AuxEq.Phi3*REE.G1)*REE.G2;
-    else
-        AuxREE.GBar = [];
-        AuxREE.G1 = [];
-        AuxREE.G2 = [];
-    end
-    Mats.AuxREE = AuxREE;
-end
