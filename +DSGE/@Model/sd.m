@@ -118,25 +118,10 @@ parfor jd=1:nDraws
         for t=2:data.T
             sj(:,t) = mats.REE.G1*sj(:,t-1) + G2j*ej(:,t);
         end
-        sdjg = [sj; mats.ObsEq.H*sj];
-        if nAuxVar>0
-            sdjg = [sdjg;
-                    mats.AuxEq.Phi1*sj ...
-                    + mats.AuxEq.Phi3*[zeros(nStateVar,1),sj(:,1:data.T-1)] ...
-                    + mats.AuxEq.Phi2(:,shockIdx(jG,:))*ej;
-                   ];
-        end
-        sdj(:,:,jG) = sdjg;
+        sdj(:,:,jG) = [eye(nStateVar); mats.ObsEq.H; mats.AuxEq.Phi]*sj;
     end
     if op.ShowOther
-        sj = [dj.StateVar;mats.ObsEq.H*dj.StateVar];
-        if nAuxVar>0
-            sj = [sj;
-                  mats.AuxEq.Phi1*dj.StateVar ...
-                  + mats.AuxEq.Phi3*[dj.StateVar0,dj.StateVar(:,1:data.T-1)] ...
-                  + mats.AuxEq.Phi2*dj.ShockVar;
-                 ];
-        end
+        sj = [eye(nStateVar;mats.ObsEq.H;mats.AuxEq.Phi]*dj.StateVar;
         sdj(:,:,nGroups+1) = sj-sum(sdj,3);
     end
     SD(:,:,:,jd) = sdj;
