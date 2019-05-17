@@ -36,7 +36,7 @@ classdef Model < matlab.mixin.Copyable
 %     0 = GammaBar + Gamma1*StateVar_t + Gamma2*ShockVar_t + Gamma4*StateVar_tL
 %         - Gamma0*StateVar_tF
 %
-%     AuxVar_t = PhiBar + Phi1*StateVar_t
+%     AuxVar_t = PhiBar + Phi*StateVar_t
 %  
 %   Note: cannot include both leads and lags in the same equation. If the model 
 %         specification has equations with both leads and lags, then need to 
@@ -49,9 +49,9 @@ classdef Model < matlab.mixin.Copyable
 %         - Gamma0*StateVar_t
 %
 %   Model solution:
-%     StateVar_t = REE.GBar     + REE.G1*StateVar_tL    + REE.G2*ShockVar_t
+%     StateVar_t = REE.GBar     + REE.G1*StateVar_tL   + REE.G2*ShockVar_t
 %     ObsVar_t   = ObsEq.HBar   + ObsEq.H*StateVar_t
-%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi1*StateVar_t
+%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi*StateVar_t
 %
 %
 % * Properties describing model parameters
@@ -202,7 +202,7 @@ classdef Model < matlab.mixin.Copyable
 %   StateVar and ShockVar.
 %
 %   Assumed structure:
-%     AuxVar_t = PhiBar + Phi1*StateVar_t
+%     AuxVar_t = PhiBar + Phi*StateVar_t
 %   rules:
 %     - no leads or lags for any variables
 %     - no ShockVar_t

@@ -340,9 +340,9 @@ fprintf(fid,'Mats.StateEq = StateEq;\n');
 if obj.AuxVar.N>0
     fprintf(fid,'\n%% Auxiliary equations matrices\n');
     SymMats.AuxEq.PhiBar = [];
-    SymMats.AuxEq.Phi1 = jacobian(AuxEq,StateVar_t);
-    SymMats.AuxEq.PhiBar = simplify(AuxEq - SymMats.AuxEq.Phi1*StateVar_t.');
-    MatNames = {'PhiBar','Phi1'};
+    SymMats.AuxEq.Phi = jacobian(AuxEq,StateVar_t);
+    SymMats.AuxEq.PhiBar = simplify(AuxEq - SymMats.AuxEq.Phi*StateVar_t.');
+    MatNames = {'PhiBar','Phi'};
     nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
     for jM=1:length(MatNames)
         Mj = MatNames{jM};

@@ -94,7 +94,7 @@ parfor jd=1:nDraws
     if nAuxVar>0
         irfAux = zeros(nAuxVar,nShocks2Show,nSteps);
         for t=1:nSteps
-            irfAux(:,:,t) = matj.AuxEq.Phi1*irf(:,:,t);
+            irfAux(:,:,t) = matj.AuxEq.Phi*irf(:,:,t);
         end
         IRFj = [IRFj;irfAux];
     end
