@@ -354,14 +354,12 @@ if obj.AuxVar.N>0
     SymMats.AuxEq.PhiBar = [];
     SymMats.AuxEq.Phi1 = jacobian(AuxEq,StateVar_t);
     SymMats.AuxEq.Phi2 = jacobian(AuxEq,ShockVar_t);
-    SymMats.AuxEq.Phi3 = jacobian(AuxEq,StateVar_tF);
-    SymMats.AuxEq.Phi4 = jacobian(AuxEq,StateVar_tL);
+    SymMats.AuxEq.Phi3 = jacobian(AuxEq,StateVar_tL);
     SymMats.AuxEq.PhiBar = simplify(AuxEq ...
         - SymMats.AuxEq.Phi1*StateVar_t.' ...
         - SymMats.AuxEq.Phi2*ShockVar_t.' ...
-        - SymMats.AuxEq.Phi3*StateVar_tF.' ...
-        - SymMats.AuxEq.Phi4*StateVar_tL.');
-    MatNames = {'PhiBar','Phi1','Phi2','Phi3','Phi4'};
+        - SymMats.AuxEq.Phi3*StateVar_tL.');
+    MatNames = {'PhiBar','Phi1','Phi2','Phi3'};
     nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
     for jM=1:length(MatNames)
         Mj = MatNames{jM};
