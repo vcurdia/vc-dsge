@@ -127,7 +127,7 @@ model.ShockVar = {...
     'ei', '$\varepsilon_i$';
                   }; 
 
-model.AuxVar = {'r','ir_t-pi_tF','$r$'};
+model.AuxVar = {'irlevel','(ra+pistar)/400 + ir_t','$i_t+i_{ss}$'};
 
 model.ObsEq = {...
     'gammaa+400*(YA_t-YAL_t+gamma_t) - DGDP_t';
