@@ -109,19 +109,20 @@ parfor jd=1:nDraws
             for jH=2:MaxHorizon
                 V(:,:,jH) = V(:,:,1) + matj.REE.G1*V(:,:,jH-1)*matj.REE.G1';
             end
-            if nAuxVar>0
-                VAux(:,:,1) = ...
-                    matj.AuxREE.G2*idxMat(:,jS)*idxMat(jS,:)*matj.AuxREE.G2';
-                for jH=2:MaxHorizon
-                    VAux(:,:,jH) = VAux(:,:,1) + ...
-                        matj.AuxREE.G1*V(:,:,jH-1)*matj.AuxREE.G1';
-                end
-            end
             if isInfHorizon
                 V(:,:,nHorizons) = real(...
                     lyapcsdvb(matj.REE.G1,V(:,:,1),verbose));
-                VAux(:,:,nHorizons) = VAux(:,:,1) + ...
-                        matj.AuxREE.G1*V(:,:,nHorizons)*matj.AuxREE.G1';
+            end
+            if nAuxVar>0
+                G1 = matj.AuxEq.Phi1 + matj.AuxEq.Phi3*matj.REE.G1;
+                G2 = matj.AuxEq.Phi2 + matj.AuxEq.Phi3*matj.REE.G2;
+                VAux(:,:,1) = G2*idxMat(:,jS)*idxMat(jS,:)*G2';
+                for jH=2:MaxHorizon
+                    VAux(:,:,jH) = VAux(:,:,1) + G1*V(:,:,jH-1)*G1';
+                end
+                if isInfHorizon
+                    VAux(:,:,nHorizons) = VAux(:,:,1) + G1*V(:,:,nHorizons)*G1';
+                end
             end
             if nObsVar>0
                 for jH=1:nHorizons
