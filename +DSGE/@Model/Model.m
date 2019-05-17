@@ -36,7 +36,7 @@ classdef Model < matlab.mixin.Copyable
 %     0 = GammaBar + Gamma1*StateVar_t + Gamma2*ShockVar_t + Gamma4*StateVar_tL
 %         - Gamma0*StateVar_tF
 %
-%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t + Phi3*StateVar_tL
+%     AuxVar_t = PhiBar + Phi*StateVar_t
 %  
 %   Note: cannot include both leads and lags in the same equation. If the model 
 %         specification has equations with both leads and lags, then need to 
@@ -49,17 +49,17 @@ classdef Model < matlab.mixin.Copyable
 %         - Gamma0*StateVar_t
 %
 %   Model solution:
-%     StateVar_t = REE.GBar    + REE.G1*StateVar_tL    + REE.G2*ShockVar_t
-%     ObsVar_t   = ObsEq.HBar  + ObsEq.H*StateVar_t
-%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi1*StateVar_t + AuxEq.Phi2*ShockVar_t
-%                  + AuxEq.Phi3*StateVar_tL
+%     StateVar_t = REE.GBar     + REE.G1*StateVar_tL   + REE.G2*ShockVar_t
+%     ObsVar_t   = ObsEq.HBar   + ObsEq.H*StateVar_t
+%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi*StateVar_t
 %
 %
 % * Properties describing model parameters
-%   Param         - Set of parameters to be calibrated or estimated
-%   NumSolveParam - Parameters to be solved numberically (optional)
+%   Param          - Set of parameters to be calibrated or estimated
+%   NumSolveParam  - Parameters to be solved numberically (optional)
 %   CompositeParam - Parameters that are combinations of Param (optional)
-%   AuxParam      - combined NumSolveParam and CompositeParam (not defined by user)
+%   AuxParam       - combined NumSolveParam and CompositeParam (not defined by 
+%                    user)
 %
 %   To define Param can proceed in one of two ways, depending on how model will
 %   be used.
@@ -162,9 +162,8 @@ classdef Model < matlab.mixin.Copyable
         
 % AuxVar - Auxiliary Variables (optional) 
 %   Variables not needed to solve REE but which are useful to track for later 
-%   simulations. Any variable that is not strictly needed for REE solution 
-%   should be included in this object, so that the state space is kept as 
-%   small as possible to improve performance.
+%   simulations. Restriction is that only depends on current period states and
+%   a constant.
         AuxVar = DSGE.Var;
 
 % ObsEq - Observation equations (optional)
@@ -172,7 +171,7 @@ classdef Model < matlab.mixin.Copyable
 %   Array with expressions for the equations linking ObsVar to StateVar:
 %     0 = HBar + H*StateVar_t - H0*ObsVar_t
 %   rules:
-%     - no leads or lags fo any variables
+%     - no leads or lags for any variables
 %     - no ShockVar_t or AuxVar_t
         ObsEq
 
@@ -203,8 +202,10 @@ classdef Model < matlab.mixin.Copyable
 %   StateVar and ShockVar.
 %
 %   Assumed structure:
-%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t + Phi3*StateVar_tL
-%
+%     AuxVar_t = PhiBar + Phi*StateVar_t
+%   rules:
+%     - no leads or lags for any variables
+%     - no ShockVar_t
         AuxEq
         
 % structure containing Prior information, if a prior exists

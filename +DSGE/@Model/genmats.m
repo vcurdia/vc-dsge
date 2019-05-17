@@ -91,18 +91,6 @@ if obj.AuxVar.N>0
         vj = [obj.AuxVar.Names{j},'_t'];
         eval([vj,' = ',obj.AuxEq{j},';'])
         AuxEq(j) = eval(vj);
-% If the expression has no leads then can define a lead for it
-        if all(jacobian(AuxEq(j),StateVar_tF)==0)
-            eval([vj,'F = subs(',vj,',[StateVar_t,StateVar_tL],',...
-                  '[StateVar_tF,StateVar_t]);'])
-% If expression has no leads or lags then can define lag for it. 
-% Notice that it does not make sense to define a lag if there are leads in it,
-% and that's why the check for lags is inside the check for leads
-            if all(jacobian(AuxEq(j),StateVar_tL)==0)
-                eval([vj,'L = subs(',vj,',[StateVar_tF,StateVar_t],',...
-                      '[StateVar_t,StateVar_tL]);'])
-            end
-        end
     end
 end
 
@@ -352,14 +340,9 @@ fprintf(fid,'Mats.StateEq = StateEq;\n');
 if obj.AuxVar.N>0
     fprintf(fid,'\n%% Auxiliary equations matrices\n');
     SymMats.AuxEq.PhiBar = [];
-    SymMats.AuxEq.Phi1 = jacobian(AuxEq,StateVar_t);
-    SymMats.AuxEq.Phi2 = jacobian(AuxEq,ShockVar_t);
-    SymMats.AuxEq.Phi3 = jacobian(AuxEq,StateVar_tL);
-    SymMats.AuxEq.PhiBar = simplify(AuxEq ...
-        - SymMats.AuxEq.Phi1*StateVar_t.' ...
-        - SymMats.AuxEq.Phi2*ShockVar_t.' ...
-        - SymMats.AuxEq.Phi3*StateVar_tL.');
-    MatNames = {'PhiBar','Phi1','Phi2','Phi3'};
+    SymMats.AuxEq.Phi = jacobian(AuxEq,StateVar_t);
+    SymMats.AuxEq.PhiBar = simplify(AuxEq - SymMats.AuxEq.Phi*StateVar_t.');
+    MatNames = {'PhiBar','Phi'};
     nCols = [1,obj.StateVar.N,obj.ShockVar.N,obj.StateVar.N,obj.StateVar.N];
     for jM=1:length(MatNames)
         Mj = MatNames{jM};
