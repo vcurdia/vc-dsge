@@ -36,8 +36,7 @@ classdef Model < matlab.mixin.Copyable
 %     0 = GammaBar + Gamma1*StateVar_t + Gamma2*ShockVar_t + Gamma4*StateVar_tL
 %         - Gamma0*StateVar_tF
 %
-%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t 
-%                + Phi3*StateVar_tF + Phi4*StateVar_tL
+%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t + Phi3*StateVar_tL
 %  
 %   Note: cannot include both leads and lags in the same equation. If the model 
 %         specification has equations with both leads and lags, then need to 
@@ -52,7 +51,8 @@ classdef Model < matlab.mixin.Copyable
 %   Model solution:
 %     StateVar_t = REE.GBar    + REE.G1*StateVar_tL    + REE.G2*ShockVar_t
 %     ObsVar_t   = ObsEq.HBar  + ObsEq.H*StateVar_t
-%     AuxVar_t   = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
+%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi1*StateVar_t + AuxEq.Phi2*ShockVar_t
+%                  + AuxEq.Phi3*StateVar_tL
 %
 %
 % * Properties describing model parameters
@@ -203,11 +203,8 @@ classdef Model < matlab.mixin.Copyable
 %   StateVar and ShockVar.
 %
 %   Assumed structure:
-%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t 
-%                + Phi3*StateVar_tF + Phi4*StateVar_tL
+%     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t + Phi3*StateVar_tL
 %
-%   After solving REE and plugging into this equation we get
-%     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
         AuxEq
         
 % structure containing Prior information, if a prior exists
