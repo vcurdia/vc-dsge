@@ -90,15 +90,9 @@ parfor jd=1:nDraws
     dj = dksmoother(mats,data.Values,op.DrawStates);
     dj.StateVar = mats.KF.StateVarBar + dj.StateVar;
     dj.StateVar0 = mats.KF.StateVarBar + dj.StateVar0;
-    sj = [dj.StateVar;
-          mats.ObsEq.HBar+mats.ObsEq.H*dj.StateVar];
+    sj = [dj.StateVar; mats.ObsEq.HBar+mats.ObsEq.H*dj.StateVar];
     if nAuxVar>0
-        sj = [sj;
-              mats.AuxEq.PhiBar ...
-              + mats.AuxEq.Phi1*dj.StateVar ...
-              + mats.AuxEq.Phi3*[dj.StateVar0,dj.StateVar(:,1:data.T-1)] ...
-              + mats.AuxEq.Phi2*dj.ShockVar;
-             ];
+        sj = [sj; mats.AuxEq.PhiBar + mats.AuxEq.Phi*dj.StateVar];
     end
     States(:,:,jd) = sj;
 end
