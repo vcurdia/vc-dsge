@@ -130,7 +130,7 @@ classdef Param < matlab.mixin.Copyable
             fprintf('\n');
         end
     
-        function p = getvalue(obj,pname,x)
+        function p = get(obj,pname,x)
             if nargin<3, x = obj.Values; end
             p = x(ismember(obj.Names,pname),:);
         end
