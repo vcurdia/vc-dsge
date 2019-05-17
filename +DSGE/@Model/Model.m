@@ -51,7 +51,8 @@ classdef Model < matlab.mixin.Copyable
 %   Model solution:
 %     StateVar_t = REE.GBar    + REE.G1*StateVar_tL    + REE.G2*ShockVar_t
 %     ObsVar_t   = ObsEq.HBar  + ObsEq.H*StateVar_t
-%     AuxVar_t   = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
+%     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi1*StateVar_t + AuxEq.Phi2*ShockVar_t
+%                  + AuxEq.Phi3*StateVar_tL
 %
 %
 % * Properties describing model parameters
@@ -203,8 +204,7 @@ classdef Model < matlab.mixin.Copyable
 %
 %   Assumed structure:
 %     AuxVar_t = PhiBar + Phi1*StateVar_t + Phi2*ShockVar_t + Phi3*StateVar_tL
-%   After solving REE it becomes
-%     AuxVar_t = AuxREE.GBar + AuxREE.G1*StateVar_tL + AuxREE.G2*ShockVar_t
+%
         AuxEq
         
 % structure containing Prior information, if a prior exists
