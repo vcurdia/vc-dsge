@@ -129,12 +129,29 @@ classdef Param < matlab.mixin.Copyable
             end
             fprintf('\n');
         end
-    
-        function p = get(obj,pname,x)
+        
+        function x = get(obj,pname,x)
             if nargin<3, x = obj.Values; end
-            p = x(ismember(obj.Names,pname),:);
+            x = x(ismember(obj.Names,pname),:);
+        end
+
+        function x = getvalues(obj,p)
+        % loop allows for duplicates so that the last within the duplicates is
+        % the one that remains.
+        % invlaid param names ignored
+            x = obj.Values;
+            if nargin>1
+                np = size(p,1);
+                for jp=1:np
+                    idx = ismember(obj.Names,p(jp,1));
+                    if any(idx)
+                        x(idx) = p{jp,2};
+                    end
+                end
+            end
         end
     
+
     end %methods
     
 end %class
