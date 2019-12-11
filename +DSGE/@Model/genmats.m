@@ -197,7 +197,7 @@ if obj.NumSolveParam.N>0
     fprintf(fid,'    Mats.StatusMessage = [Mats.StatusMessage,''%s''];\n',...
             txt);
     fprintf(fid,'    if op.Verbose\n');
-    fprintf(fid,'        fprintf(fid,''Warning: %s\\n'');\n',txt);
+    fprintf(fid,'        fprintf(op.FID,''Warning: %s\\n'');\n',txt);
     fprintf(fid,'    end\n');
     fprintf(fid,'end\n');
     for j=1:obj.NumSolveParam.N
