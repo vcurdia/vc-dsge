@@ -73,7 +73,7 @@ classdef Var < matlab.mixin.Copyable
             [nv,nc] = size(v);
             names = [obj.Names;v(:,1)];
             prettynames = [obj.PrettyNames;v(:,nc)];
-            scale = [obj.Scale;ones(1,nv)];
+            scale = [obj.Scale;ones(nv,1)];
             obj.Names = names;
             obj.PrettyNames = prettynames;
             obj.Scale = scale;
