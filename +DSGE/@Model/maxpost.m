@@ -16,12 +16,12 @@ function maxpost(obj,varargin)
 fprintf('\n*** Searching for Posterior Mode\n')
 ttName = 'MaxPost';
 obj.TimeTracker.start(ttName)
-tmpFN = sprintf('_tmp_%s_%s',obj.Name,ttName);
+tmpFN = sprintf('-tmp-%s-%s',obj.Name,ttName);
 save(tmpFN)
 
 
 %% settings
-ReportFileName = sprintf('%s_Report_Param_PostMode',obj.Name);
+ReportFileName = sprintf('report-%s-param-postmode',obj.Name);
 ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Posterior Mode',obj.Name);
 
 np = obj.Post.NEstimate;
@@ -100,9 +100,9 @@ save(tmpFN)
 MaxPostOut = cell(1,nMax);
 x0j = op.GuessMean;
 parfor jm=1:nMax
-    fid = fopen(sprintf('%s_MaxPost_%03.0f.log',obj.Name,jm),'wt');
+    fid = fopen(sprintf('%s-maxpost-%03.0f.log',obj.Name,jm),'wt');
     opj = op.Min;
-    opj.MatFn = sprintf('%s_MaxPost_%03.0f',obj.Name,jm);
+    opj.MatFn = sprintf('%s-maxpost-%03.0f',obj.Name,jm);
     opj.LogFn = fid;
     opj.varargin = {struct('verbose',op.Min.verbose,'fid',fid)};
     MaxPostOut{jm} = robustmin(lpdfneg,x0(:,jm),opj);
@@ -368,10 +368,10 @@ pdflatex(ReportFileName)
 
 for jm=1:nMax
     if ~op.KeepLogs
-        delete(sprintf('%s_MaxPost_%03.0f.log',obj.Name,jm))
+        delete(sprintf('%s-maxpost-%03.0f.log',obj.Name,jm))
     end
     if ~op.KeepMats
-        delete(sprintf('%s_MaxPost_%03.0f.mat',obj.Name,jm))
+        delete(sprintf('%s-maxpost-%03.0f.mat',obj.Name,jm))
     end
 end
 
