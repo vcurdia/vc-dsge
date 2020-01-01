@@ -65,12 +65,12 @@ for jL=1:nList
     for j=1:nPj
         jP = jP+1;
         if nMaxVar==1
-            FigPanels(jP).Title = sprintf('%s_%s',Lj,obj.(Lj).Names{j});
+            FigPanels(jP).Title = sprintf('%s-%s',Lj,obj.(Lj).Names{j});
             FigPanels(jP).Names = obj.(Lj).Names(j);
             FigPanels(jP).PrettyNames = obj.(Lj).PrettyNames(j);
         else
             if nPj>1
-                FigPanels(jP).Title = sprintf('%s_%.0f',Lj,j);
+                FigPanels(jP).Title = sprintf('%s-%.0f',Lj,j);
             else
                 FigPanels(jP).Title = sprintf('%s',Lj);
             end
