@@ -28,7 +28,7 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0. 0, 6.5, 6.5];
-op.PlotDir = 'Plots_PriorPost/';
+op.PlotDir = 'plots-priorpost/';
 
 op = updateoptions(op,varargin{:});
 
@@ -335,7 +335,7 @@ for jP=1:2
         if op.TightFig
             tightfig(hfig,op.Fig.Shape,hf,op.TightFigOptions)
         end
-        print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
+        print('-dpdf',sprintf('%s-%s-%.0f',fn,Pj,jF))
     end
 end
 close all
@@ -458,10 +458,10 @@ for jP=1:2
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s-%s-%.0f.pdf}\n',...
                 fn,pList{jP},jF);
 %         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                      '130 230 490 540]{%s_%s_%.0f.pdf}\n'],fn,pList{jP},jF);
+%                      '130 230 490 540]{%s-%s-%.0f.pdf}\n'],fn,pList{jP},jF);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end
