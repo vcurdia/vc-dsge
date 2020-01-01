@@ -72,7 +72,7 @@ fprintf('\nShock Decomposition\n')
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-sd%s',obj.Name,op.FNSuffix); 
 ReportFileName = sprintf('report-%s-sd%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('Shock Decomposition\\\\%s\\\\%s',obj.Name,...
+ReportTitle = sprintf('%s\\\\Shock Decomposition\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'-',''));
 
 if nargin<2 || isempty(data)
