@@ -23,7 +23,7 @@ op.Shocks2Show = obj.ShockVar.Names;
 op.ShockSize = [];
 op.Fig.Visible = 'off';
 op.Fig.Plot.LineWidth = 1.5;
-op.PlotDir = 'Plots_IRF/';
+op.PlotDir = 'plots-irf/';
 op.MakePlots = 1;
 
 %% Update options
@@ -38,13 +38,11 @@ if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 %% Preamble
 
 fprintf('\nMaking IRF\n')
-ttName = ['IRF',op.FNSuffix];
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_IRF%s',obj.Name,op.FNSuffix); 
-ReportFileName = [obj.Name,'_Report_IRF',op.FNSuffix];
-ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,strrep(op.FNSuffix,'_',''));
+PlotFileName = sprintf('%s-irf%s',obj.Name,op.FNSuffix); 
+ReportFileName = ['report-',obj.Name,'-irf',op.FNSuffix];
+ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,op.FNSuffix);
 
 out = struct;
 out.Var = merge(obj.StateVar,obj.ObsVar,obj.AuxVar);
@@ -149,7 +147,7 @@ if op.MakePlots
                 h = vcfigureupdate(h,PlotData(:,:,:,jS));
             end
             print('-dpdf',[op.PlotDir,PlotFileName,...
-                           '_',Pj.Title,'_',op.Shocks2Show{jS}])
+                           '-',Pj.Title,'-',op.Shocks2Show{jS}])
         end
     end
 end
@@ -167,7 +165,7 @@ if op.MakePlots
             fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
             fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
             fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
-            fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s_%s.pdf}\n',...
+            fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s-%s-%s.pdf}\n',...
                     op.PlotDir,PlotFileName,Pj,Sj);
             fprintf(fid,'\\end{figure}\n');
             fprintf(fid,'\\newpage \n');
@@ -180,4 +178,3 @@ end
 
 %% Finish up
 close all
-obj.TimeTracker.stop(ttName)

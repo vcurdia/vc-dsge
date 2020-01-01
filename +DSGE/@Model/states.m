@@ -23,7 +23,7 @@ op.Tick.Labels = obj.Data.TickLabels;
 op.Fig.Visible = 'off';
 % op.Fig.YMinScale = 0.01;
 op.Fig.Plot.LineWidth = 1.5;
-op.PlotDir = 'Plots_States/';
+op.PlotDir = 'plots-states/';
 op.FigPanelsOptions = struct;
 op.FigPanelsOptions.Shape = {3,1};
 
@@ -52,14 +52,11 @@ end
 %% Preamble
 
 fprintf('\nSimulating States\n')
-ttName = ['States',op.FNSuffix];
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s_States%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('%s_Report_States%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\States\\\\%s',obj.Name,...
-                      strrep(op.FNSuffix,'_',''));
+ReportFileName = sprintf('report-%s-states%s',obj.Name,op.FNSuffix);
+ReportTitle = sprintf('%s\\\\States\\\\%s',obj.Name,op.FNSuffix);
 
 if nargin<2 || isempty(data)
     error('Cannot simulate states without data')
@@ -133,7 +130,7 @@ for jP = 1:nPanels
         end
     end
     h = vcfigure(PlotData,Figj);
-    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.PlotDir,PlotFileName,'-',Pj.Title])
 end
 
 %% Make report 
@@ -145,7 +142,7 @@ for jP = 1:nPanels
     fprintf(fid,'\\section{%s}\n',strrep(Pj,'_',': '));
     fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
     fprintf(fid,'\\label{States_%s}\n',Pj);
-    fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n'],...
+    fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s-%s.pdf}\n'],...
             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');
@@ -156,4 +153,3 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeTracker.stop(ttName)

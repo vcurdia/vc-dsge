@@ -49,7 +49,7 @@ else
         xd = repmat(obj.Param.Values,1,op.NDraws);
     end
     if isempty(op.FNSuffix) && ~isValues
-        op.FNSuffix = ['_',op.Dist];
+        op.FNSuffix = ['-',lower(op.Dist)];
     end
 end
 

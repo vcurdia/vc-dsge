@@ -35,7 +35,7 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
-op.PlotDir = 'Plots_VD/';
+op.PlotDir = 'plots-vd/';
 
 op = updateoptions(op,varargin{:});
 
@@ -43,14 +43,11 @@ op = updateoptions(op,varargin{:});
 %% Preamble
 
 fprintf('\nMaking VD\n')
-ttName = ['VD',op.FNSuffix];
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_VD%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('%s_Report_VD%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\VD\\\\%s',obj.Name,...
-                      strrep(op.FNSuffix,'_',''));
+PlotFileName = sprintf('%s-vd%s',obj.Name,op.FNSuffix); 
+ReportFileName = sprintf('report-%s-vd%s',obj.Name,op.FNSuffix);
+ReportTitle = sprintf('%s\\\\VD\\\\%s',obj.Name,op.FNSuffix);
 
 nStateVar = obj.StateVar.N;
 nObsVar = obj.ObsVar.N;
@@ -226,7 +223,7 @@ for jP=1:length(op.FigPanels)
     if op.TightFig
         tightfig(hf,Figj.Shape,ha,op.TightFigOptions)
     end
-    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.PlotDir,PlotFileName,'-',Pj.Title])
 end
 
 
@@ -289,7 +286,7 @@ for jP=1:length(op.FigPanels)
     fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
     fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
     fprintf(fid,'\\label{VD_%s}\n',Pj);
-    fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n',...
+    fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s-%s.pdf}\n',...
             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');
@@ -303,4 +300,3 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeTracker.stop(ttName)
