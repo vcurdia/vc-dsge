@@ -51,7 +51,7 @@ obj.Prior.Sample.Param = sumstats(xd,op.Percentiles);
 obj.Prior.Sample.AuxParam = sumstats(xdAux,op.Percentiles);
 
 % Save prior sample
-fn = sprintf('%s_PriorSample',obj.Name);
+fn = sprintf('%s-priorsample',obj.Name);
 obj.Prior.Sample.FileName = fn;
 draws.N = obj.Prior.Sample.NDrawsUsed;
 draws.Param = xd;
