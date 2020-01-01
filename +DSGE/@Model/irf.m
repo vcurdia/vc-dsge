@@ -42,7 +42,8 @@ fprintf('\nMaking IRF\n')
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-irf%s',obj.Name,op.FNSuffix); 
 ReportFileName = ['report-',obj.Name,'-irf',op.FNSuffix];
-ReportTitle = sprintf('%s\\\\IRF\\\\%s',obj.Name,op.FNSuffix);
+ReportTitle = sprintf('IRF\\\\%s\\\\%s',obj.Name,...
+                      strrep(op.FNSuffix,'-',''));
 
 out = struct;
 out.Var = merge(obj.StateVar,obj.ObsVar,obj.AuxVar);
@@ -162,9 +163,9 @@ if op.MakePlots
         fprintf(fid,'\\section{Shock: %s}\n',strrep(Sj,'_',''));
         for jP = 1:nPanels
             Pj = op.FigPanels(jP).Title;
-            fprintf(fid,'\\subsection{%s}\n',strrep(Pj,'_',': '));
+            fprintf(fid,'\\subsection{%s}\n',Pj);
             fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
-            fprintf(fid,'\\label{IRF_%s_%s}\n',Pj,Sj);
+            fprintf(fid,'\\label{irf-%s-%s}\n',Pj,Sj);
             fprintf(fid,'\\includegraphics[width=\\textwidth]{%s%s-%s-%s.pdf}\n',...
                     op.PlotDir,PlotFileName,Pj,Sj);
             fprintf(fid,'\\end{figure}\n');
