@@ -54,9 +54,10 @@ end
 fprintf('\nSimulating States\n')
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_States%s',obj.Name,op.FNSuffix); 
+PlotFileName = sprintf('%s-states%s',obj.Name,op.FNSuffix); 
 ReportFileName = sprintf('report-%s-states%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\States\\\\%s',obj.Name,op.FNSuffix);
+ReportTitle = sprintf('States\\\\%s\\\\%s',obj.Name,...
+                      strrep(op.FNSuffix,'-',''));
 
 if nargin<2 || isempty(data)
     error('Cannot simulate states without data')
