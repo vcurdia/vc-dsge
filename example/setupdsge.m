@@ -15,9 +15,9 @@ clear all
 setpath
 
 % Spec 
-specName = 'mydsge';
-mkdir(specName)
-cd(specName)
+specname = 'mydsge';
+mkdir(specname)
+cd(specname)
 
 % track time
 tt = TimeTracker;
@@ -26,7 +26,7 @@ tt.start('Setup')
 % parpool(20)
 
 %% Setup the model
-model = DSGE.Model(specName);
+model = DSGE.Model(specname);
 
 % % example for calibrated model
 % model.Param = {...

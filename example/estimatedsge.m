@@ -13,53 +13,45 @@
 % Copyright (C) 2016-2017 Vasco Curdia
 
 
-%% Preamble
+ %% Preamble
 clear all
 setpath
 
 % Spec
-specName = 'LM';
-
-% keep log
-diary(sprintf('%s_%.0f-%02.0f-%02.0f-%02.0f%02.0f%02.0f_Estimation.log', ...
-              specName,clock))
-diary on
+specname = 'mydsge';
 
 % Initiate parallel pool
 %parpool('local',20)
 
 %% Load DSGE
-cd(specName)
-load(specName)
-fptintf('\n*** Model: %s\n\n',model.Name)
+cd(specname)
+load(specname)
+fprintf('\n*** Model: %s\n\n',model.Name)
 
 %% MaxPost
 op.MaxPost.NMax = 10; %10
-op.MaxPost.Min.nit = 1000; %1000;
-op.MaxPost.Min.Ritmax = 20; %20;
-op.MaxPost.Min.Ritmin = 5;
+op.MaxPost.Min.nit = 1; %1000;
 model.maxpost(op.MaxPost)
-save([specName,'_MaxPost'])
+save([specname,'-maxpost'])
 model.sim('Dist','PostMode')
 
 
-%% MCMC
-op.MCMC.NDraws = 50000;
-op.MCMC.NDrawsCalibrate = 1000;
-for s=1
-    model.Post.MCMCStage = s;
-    model.mcmc(op.MCMC)
-    save([specName,'_MCMC_',int2str(s)])
-    model.sim('Dist','PostDraws')
-    save(specName)
-end
+% %% MCMC
+% op.MCMC.NDraws = 50000;
+% op.MCMC.NDrawsCalibrate = 1000;
+% for s=1
+%     model.Post.MCMCStage = s;
+%     model.mcmc(op.MCMC)
+%     save([specname,'-mcmc-',int2str(s)])
+%     model.sim('Dist','PostDraws')
+%     save(specname)
+% end
 
 
 %% Finish up
 % delete(gcp)
 fprintf('\n'),tt.show,fprintf('\n')
-save(specName)
-diary off
+save(specname)
 cd ..
 
 % exit
