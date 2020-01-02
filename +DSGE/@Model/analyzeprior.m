@@ -26,7 +26,7 @@ op = updateoptions(op,varargin{:});
 
 %% other settings
 ReportFileName = sprintf('report-%s-param-prior',obj.Name);
-ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Prior',obj.Name);
+ReportTitle = sprintf('%s\\\\[30pt]Parameter Analysis\\\\Prior',obj.Name);
 
 %% useful variables
 np = obj.Param.N;
