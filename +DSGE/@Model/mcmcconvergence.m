@@ -28,8 +28,8 @@ op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0. 0, 6.5, 6.5];
 op.TightFig = 1;
 op.TightFigOptions = struct;
-op.PlotDirDraws = 'Plots_Draws/';
-op.PlotDirTrace = 'Plots_Trace/';
+op.PlotDirDraws = 'plots-draws/';
+op.PlotDirTrace = 'plots-trace/';
 
 op = updateoptions(op,varargin{:});
 
@@ -41,9 +41,9 @@ obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDirDraws),mkdir(op.PlotDirDraws),end
 if ~isdir(op.PlotDirTrace),mkdir(op.PlotDirTrace),end
-ReportFileName = sprintf('%s_Report_Conv_MCMC_%.0f',obj.Name,...
+ReportFileName = sprintf('report-%s-mcmc-conv-%.0f',obj.Name,...
                          obj.Post.MCMCStage);
-ReportTitle = sprintf('%s\\\\Convergence Analysis\\\\MCMC Stage %.0f',...
+ReportTitle = sprintf('%s\\\\[30pt]Convergence Analysis\\\\MCMC Stage %.0f',...
                       obj.Name,obj.Post.MCMCStage);
 
 sample = obj.Post.MCMCSample;
@@ -79,7 +79,7 @@ end
 
 %% Plot draws
 fprintf('Making plots of MCMC draws\n')
-pdFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
+pdFN = sprintf('%s%s-plots-mcmc-%.0f-draws',...
              op.PlotDirDraws,obj.Name,obj.Post.MCMCStage);
 if op.Draws.AuxParam
     pdList = {'LPDF','Param','AuxParam'};
@@ -131,7 +131,7 @@ for jL=1:length(pdList)
         if op.TightFig
             tightfig(hf,{sample.NChains,nc},h,op.TightFigOptions)
         end
-        print('-dpdf',sprintf('%s_%s.pdf',pdFN,p.(Lj).Names{jF}))
+        print('-dpdf',sprintf('%s-%s.pdf',pdFN,p.(Lj).Names{jF}))
     end
 end
 close all
@@ -148,7 +148,7 @@ fprintf('Burn in for rest of convergence analysis: %.0f%%\n',...
 
 %% Plot trace
 fprintf('Making trace plots\n')
-ptFN = sprintf('%s%s_Plots_MCMC_%.0f_Draws',...
+ptFN = sprintf('%s%s-plots-mcmc-%.0f-trace',...
              op.PlotDirTrace,obj.Name,obj.Post.MCMCStage);
 if op.Draws.AuxParam
     ptList = {'Param','AuxParam'};
@@ -216,7 +216,7 @@ for jL=1:length(ptList)
         if op.TightFig
             tightfig(hf,{sample.NChains,2},h,op.TightFigOptions)
         end
-        print('-dpdf',sprintf('%s_%s.pdf',ptFN,p.(Lj).Names{jF}))
+        print('-dpdf',sprintf('%s-%s.pdf',ptFN,p.(Lj).Names{jF}))
     end
 end
 close all
@@ -465,7 +465,7 @@ for jL=1:length(pdList)
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s-%s.pdf}\n',...
                 pdFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
@@ -482,7 +482,7 @@ for jL=1:length(ptList)
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s}\n',p.(Lj).Names{jF});
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s.pdf}\n',...
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s-%s.pdf}\n',...
                 ptFN,p.(Lj).Names{jF});
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');

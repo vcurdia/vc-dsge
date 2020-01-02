@@ -28,7 +28,7 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0. 0, 6.5, 6.5];
-op.PlotDir = 'Plots_PriorPost/';
+op.PlotDir = 'plots-priorpost/';
 
 op = updateoptions(op,varargin{:});
 
@@ -39,9 +39,9 @@ ttName = sprintf('AnalyzePostMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-ReportFileName = sprintf('%s_Report_Param_PostMCMC_%.0f',obj.Name,...
+ReportFileName = sprintf('report-%s-param-post-mcmc-%.0f',obj.Name,...
                          obj.Post.MCMCStage);
-ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Posterior MCMC Stage %.0f',...
+ReportTitle = sprintf('%s\\\\[30pt]Parameter Analysis\\\\Posterior MCMC Stage %.0f',...
                       obj.Name,obj.Post.MCMCStage);
 
 sample = obj.Post.MCMCSample;
@@ -266,7 +266,7 @@ disp(' ')
 
 %% Make Prior Post Plots
 fprintf('Making Prior-Posterior Plots...\n')
-fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
+fn = sprintf('%s%s-plots-mcmc-%.0f-priorpost',...
              op.PlotDir,obj.Name,obj.Post.MCMCStage);
 nPlots = prod([op.Fig.Shape{:}]);
 drawsPrior.Param = obj.priordraw(op.NDrawsPrior);
@@ -335,7 +335,7 @@ for jP=1:2
         if op.TightFig
             tightfig(hfig,op.Fig.Shape,hf,op.TightFigOptions)
         end
-        print('-dpdf',sprintf('%s_%s_%.0f',fn,Pj,jF))
+        print('-dpdf',sprintf('%s-%s-%.0f',fn,lower(Pj),jF))
     end
 end
 close all
@@ -458,10 +458,10 @@ for jP=1:2
         end
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
-        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s_%s_%.0f.pdf}\n',...
-                fn,pList{jP},jF);
+        fprintf(fid,'\\includegraphics[width=\\textwidth]{%s-%s-%.0f.pdf}\n',...
+                fn,lower(pList{jP}),jF);
 %         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
-%                      '130 230 490 540]{%s_%s_%.0f.pdf}\n'],fn,pList{jP},jF);
+%                      '130 230 490 540]{%s-%s-%.0f.pdf}\n'],fn,pList{jP},jF);
         fprintf(fid,'\\end{figure}\n');
         fprintf(fid,'\\clearpage \n');
     end

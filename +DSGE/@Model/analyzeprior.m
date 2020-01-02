@@ -25,8 +25,8 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin{:});
 
 %% other settings
-ReportFileName = sprintf('%s_Report_Param_Prior',obj.Name);
-ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Prior',obj.Name);
+ReportFileName = sprintf('report-%s-param-prior',obj.Name);
+ReportTitle = sprintf('%s\\\\[30pt]Parameter Analysis\\\\Prior',obj.Name);
 
 %% useful variables
 np = obj.Param.N;

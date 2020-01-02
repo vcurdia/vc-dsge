@@ -68,7 +68,7 @@ end
 
 fn = cell(op.NChains,1);
 for jChain=1:op.NChains
-    fn{jChain} = sprintf('%s_MCMC_%.0f_Chain_%.0f_CalibrateJump',...
+    fn{jChain} = sprintf('%s-mcmc-%.0f-chain-%.0f-calibratejump',...
                          obj.Name,obj.Post.MCMCStage,jChain);
 end
 
@@ -170,7 +170,7 @@ else
 end
 
 %% save workspace
-save(sprintf('%s_MCMC_%.0f_Calibration',obj.Name,obj.Post.MCMCStage))
+save(sprintf('%s-mcmc-%.0f-calibration',obj.Name,obj.Post.MCMCStage))
 
 %% Clean up
 if ~op.KeepFilesCalibrate

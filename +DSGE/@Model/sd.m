@@ -32,7 +32,7 @@ op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
-op.PlotDir = 'Plots_SD/';
+op.PlotDir = 'plots-sd/';
 op.FigPanelsOptions = struct;
 op.FigPanelsOptions.Shape = {3,1};
 
@@ -68,14 +68,12 @@ end
 %% Preamble
 
 fprintf('\nShock Decomposition\n')
-ttName = ['SD',op.FNSuffix];
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
-PlotFileName = sprintf('%s_SD%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('%s_Report_SD%s',obj.Name,op.FNSuffix);
-ReportTitle = sprintf('%s\\\\Shock Decomposition\\\\%s',obj.Name,...
-                      strrep(op.FNSuffix,'_',''));
+PlotFileName = sprintf('%s-sd%s',obj.Name,op.FNSuffix); 
+ReportFileName = sprintf('report-%s-sd%s',obj.Name,op.FNSuffix);
+ReportTitle = sprintf('%s\\\\[30pt]Shock Decomposition\\\\%s',obj.Name,...
+                      strrep(op.FNSuffix,'-',''));
 
 if nargin<2 || isempty(data)
     error('Cannot perform shock decomposition without data')
@@ -196,7 +194,7 @@ for jP = 1:nPanels
     if op.TightFig
         tightfig(hf,Figj.Shape,ha,op.TightFigOptions)
     end
-    print('-dpdf',[op.PlotDir,PlotFileName,'_',Pj.Title])
+    print('-dpdf',[op.PlotDir,PlotFileName,'-',Pj.Title])
 end
 
 %% Make report 
@@ -208,7 +206,7 @@ for jP = 1:nPanels
     fprintf(fid,'\\section{%s}\n',strrep(Pj,'_',': '));
     fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
     fprintf(fid,'\\label{States_%s}\n',Pj);
-    fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s_%s.pdf}\n'],...
+    fprintf(fid,['\\includegraphics[width=\\textwidth]{%s%s-%s.pdf}\n'],...
             op.PlotDir,PlotFileName,Pj);
     fprintf(fid,'\\end{figure}\n');
     fprintf(fid,'\\newpage \n');
@@ -220,4 +218,3 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
-obj.TimeTracker.stop(ttName)

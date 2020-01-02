@@ -43,7 +43,7 @@ op.Draws.Thinning = max(1,...
 draws = obj.loadmcmcdraws(op.Draws);
 
 %% Save MCMC draws Redux
-fn = sprintf('%s_MCMC_%.0f_Redux',obj.Name,obj.Post.MCMCStage);
+fn = sprintf('%s-mcmc-%.0f-redux',obj.Name,obj.Post.MCMCStage);
 obj.Post.MCMCSample.FileNameRedux = fn;
 save(fn,'-struct','draws')
 fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
