@@ -28,17 +28,17 @@ cd(specname)
 load(specname)
 fprintf('Model: %s\n\n',model.Name)
 
-% %% MaxPost
-% op.MaxPost.NMax = 10; %10
-% op.MaxPost.Min.nit = 1; %1000;
-% model.maxpost(op.MaxPost)
-% save([specname,'-maxpost'])
-% model.sim('Dist','PostMode')
+%% MaxPost
+op.MaxPost.NMax = 10;
+% op.MaxPost.Min.nit = 10; %1000;
+model.maxpost(op.MaxPost)
+save([specname,'-maxpost'])
+model.sim('Dist','PostMode')
 
 
 %% MCMC
-op.MCMC.NDraws = 100; %50000
-op.MCMC.NDrawsCalibrate = 100; %1000
+op.MCMC.NDraws = 50000; %50000
+op.MCMC.NDrawsCalibrate = 1000; %1000
 for s=1
     model.Post.MCMCStage = s;
     model.mcmc(op.MCMC)
