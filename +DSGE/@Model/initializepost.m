@@ -13,7 +13,7 @@ function initializepost(obj)
 % Copyright 2018 by Vasco Curdia
 
 
-fprintf('\nInitializing posterior\n')
+fprintf('Initializing posterior\n')
 
 obj.Post.EstimateIdx = ~ismember(obj.Prior.Dist,{'C'});
 obj.Post.NEstimate = sum(obj.Post.EstimateIdx);
