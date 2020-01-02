@@ -38,10 +38,10 @@ end
 %% Preparations
 
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
-fprintf('\n*** Generating MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('Generating MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
-tmpFN = sprintf('_tmp_%s_%s',obj.Name,ttName);
+tmpFN = sprintf('.tmp-%s-%s',obj.Name,ttName);
 save(tmpFN)
 
 pIdx = obj.Post.EstimateIdx;
@@ -79,7 +79,7 @@ end
 obj.Post.MCMCSample.FileNameDraws = cell(op.NChains,1);
 for jChain=1:op.NChains
     obj.Post.MCMCSample.FileNameDraws{jChain} = sprintf(...
-        '%s_MCMC_%.0f_Chain_%.0f',obj.Name,obj.Post.MCMCStage,jChain);
+        '%s-mcmc-%.0f-chain-%.0f',obj.Name,obj.Post.MCMCStage,jChain);
 end
 obj.Post.MCMCSample.FileNameRedux = [];
 save(tmpFN)
