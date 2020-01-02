@@ -22,7 +22,8 @@ save(tmpFN)
 
 %% settings
 ReportFileName = sprintf('report-%s-param-postmode',obj.Name);
-ReportTitle = sprintf('%s\\\\Parameter Analysis\\\\Posterior Mode',obj.Name);
+ReportTitle = sprintf('%s\\\\[30pt]Parameter Analysis\\\\Posterior Mode',...
+                      obj.Name);
 
 np = obj.Post.NEstimate;
 pIdx = obj.Post.EstimateIdx;
