@@ -14,9 +14,9 @@ function maxpost(obj,varargin)
 
 %% Preamble
 fprintf('\n*** Searching for Posterior Mode\n')
-ttName = 'MaxPost';
+ttName = 'maxpost';
 obj.TimeTracker.start(ttName)
-tmpFN = sprintf('-tmp-%s-%s',obj.Name,ttName);
+tmpFN = sprintf('.tmp-%s-%s',obj.Name,ttName)
 save(tmpFN)
 
 
