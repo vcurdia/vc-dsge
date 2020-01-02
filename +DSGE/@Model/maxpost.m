@@ -125,7 +125,7 @@ xAux = Mats.AuxParam;
 
 
 %% save minimization output
-save([obj.Name,'_MaxPostOut'],'MaxPostOut','idxMax')
+save([obj.Name,'-maxpost-out'],'MaxPostOut','idxMax')
 
 %% Show history evolution of robustness
 if op.ShowRobustness
