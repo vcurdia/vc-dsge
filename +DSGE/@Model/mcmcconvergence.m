@@ -35,7 +35,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('\nAnalyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
@@ -43,7 +43,7 @@ if ~isdir(op.PlotDirDraws),mkdir(op.PlotDirDraws),end
 if ~isdir(op.PlotDirTrace),mkdir(op.PlotDirTrace),end
 ReportFileName = sprintf('report-%s-mcmc-conv-%.0f',obj.Name,...
                          obj.Post.MCMCStage);
-ReportTitle = sprintf('%s\\\\Convergence Analysis\\\\MCMC Stage %.0f',...
+ReportTitle = sprintf('%s\\\\[30pt]Convergence Analysis\\\\MCMC Stage %.0f',...
                       obj.Name,obj.Post.MCMCStage);
 
 sample = obj.Post.MCMCSample;
