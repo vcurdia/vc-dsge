@@ -32,7 +32,7 @@ op = updateoptions(op,varargin{:});
 %% Preparations
 
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
-fprintf('Calibrating Jump Distribution for MCMC Sample %.0f\n', ...
+fprintf('\nCalibrating Jump Distribution for MCMC Sample %.0f\n', ...
         obj.Post.MCMCStage)
 ttName = sprintf('CalibrateMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)

@@ -13,7 +13,7 @@ function maxpost(obj,varargin)
 % Copyright (C) 2017-2018 Vasco Curdia
 
 %% Preamble
-fprintf('Searching for Posterior Mode\n')
+fprintf('\nSearching for Posterior Mode\n')
 ttName = 'maxpost';
 obj.TimeTracker.start(ttName)
 tmpFN = sprintf('.tmp-%s-%s',obj.Name,ttName);

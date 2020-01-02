@@ -34,7 +34,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Analyzing MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('\nAnalyzing MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('AnalyzePostMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
@@ -266,7 +266,7 @@ disp(' ')
 
 %% Make Prior Post Plots
 fprintf('Making Prior-Posterior Plots...\n')
-fn = sprintf('%s%s_Plots_MCMC_%.0f_PriorPost',...
+fn = sprintf('%s%s-plots-mcmc-%.0f-priorpost',...
              op.PlotDir,obj.Name,obj.Post.MCMCStage);
 nPlots = prod([op.Fig.Shape{:}]);
 drawsPrior.Param = obj.priordraw(op.NDrawsPrior);
@@ -335,7 +335,7 @@ for jP=1:2
         if op.TightFig
             tightfig(hfig,op.Fig.Shape,hf,op.TightFigOptions)
         end
-        print('-dpdf',sprintf('%s-%s-%.0f',fn,Pj,jF))
+        print('-dpdf',sprintf('%s-%s-%.0f',fn,lower(Pj),jF))
     end
 end
 close all
@@ -459,7 +459,7 @@ for jP=1:2
         fprintf(fid,'\\begin{figure}[htbp] \\centering\n');
         fprintf(fid,'\\label{Fig_%s_%.0f}\n',pList{jP},jF);
         fprintf(fid,'\\includegraphics[width=\\textwidth]{%s-%s-%.0f.pdf}\n',...
-                fn,pList{jP},jF);
+                fn,lower(pList{jP}),jF);
 %         fprintf(fid,['\\includegraphics[width=\\textwidth,clip,viewport=' ...
 %                      '130 230 490 540]{%s-%s-%.0f.pdf}\n'],fn,pList{jP},jF);
         fprintf(fid,'\\end{figure}\n');

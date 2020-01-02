@@ -35,7 +35,7 @@ op = updateoptions(op,varargin{:});
 
 %% Preparations
 
-fprintf('Analyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('\nAnalyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 
@@ -79,7 +79,7 @@ end
 
 %% Plot draws
 fprintf('Making plots of MCMC draws\n')
-pdFN = sprintf('%s%s-plots-mcmc-%.0f-Draws',...
+pdFN = sprintf('%s%s-plots-mcmc-%.0f-draws',...
              op.PlotDirDraws,obj.Name,obj.Post.MCMCStage);
 if op.Draws.AuxParam
     pdList = {'LPDF','Param','AuxParam'};

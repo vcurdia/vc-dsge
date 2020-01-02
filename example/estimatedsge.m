@@ -26,26 +26,26 @@ specname = 'mydsge';
 %% Load DSGE
 cd(specname)
 load(specname)
-fprintf('\n*** Model: %s\n\n',model.Name)
+fprintf('Model: %s\n\n',model.Name)
 
-%% MaxPost
-op.MaxPost.NMax = 10; %10
-op.MaxPost.Min.nit = 1; %1000;
-model.maxpost(op.MaxPost)
-save([specname,'-maxpost'])
-model.sim('Dist','PostMode')
+% %% MaxPost
+% op.MaxPost.NMax = 10; %10
+% op.MaxPost.Min.nit = 1; %1000;
+% model.maxpost(op.MaxPost)
+% save([specname,'-maxpost'])
+% model.sim('Dist','PostMode')
 
 
-% %% MCMC
-% op.MCMC.NDraws = 50000;
-% op.MCMC.NDrawsCalibrate = 1000;
-% for s=1
-%     model.Post.MCMCStage = s;
-%     model.mcmc(op.MCMC)
-%     save([specname,'-mcmc-',int2str(s)])
-%     model.sim('Dist','PostDraws')
-%     save(specname)
-% end
+%% MCMC
+op.MCMC.NDraws = 100; %50000
+op.MCMC.NDrawsCalibrate = 100; %1000
+for s=1
+    model.Post.MCMCStage = s;
+    model.mcmc(op.MCMC)
+    save([specname,'-mcmc-',int2str(s)])
+    model.sim('Dist','PostDraws')
+    save(specname)
+end
 
 
 %% Finish up

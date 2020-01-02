@@ -38,7 +38,7 @@ end
 %% Preparations
 
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
-fprintf('Generating MCMC Sample %.0f\n',obj.Post.MCMCStage)
+fprintf('\nGenerating MCMC Sample %.0f\n',obj.Post.MCMCStage)
 ttName = sprintf('MCMC%.0f',obj.Post.MCMCStage);
 obj.TimeTracker.start(ttName)
 tmpFN = sprintf('.tmp-%s-%s',obj.Name,ttName);

@@ -37,7 +37,7 @@ if isempty(op.ShockSize), op.ShockSize = ones(1,nShocks2Show); end
 
 %% Preamble
 
-fprintf('Making IRF\n')
+fprintf('\nMaking IRF\n')
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-irf%s',obj.Name,op.FNSuffix); 
