@@ -178,10 +178,7 @@ model.sim('Dist','PriorDraws')
 
 
 %% Finish up
-fprintf('\n'),tt.stop('Setup'),fprintf('\n')
+tt.stop('Setup')
 save(model.Name)
-% delete(gcp)
 diary off
 cd ..
-
-% exit

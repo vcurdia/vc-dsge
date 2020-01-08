@@ -30,7 +30,7 @@ vcdiary(specname,'maxpost')
 op.MaxPost.NMax = 10; %10
 % op.MaxPost.Min.nit = 10; %comment this line to use default (1000)
 model.maxpost(op.MaxPost)
-save([specname,'-maxpost'])
+save([specname,'%s-maxpost'])
 model.sim('Dist','PostMode')
 diary off
 
@@ -41,7 +41,7 @@ for s=1
     vcdiary(specname,sprintf('mcmc-%.0f',s))
     model.Post.MCMCStage = s;
     model.mcmc(op.MCMC)
-    save([specname,sprintf('-mcmc-%.0f',s)])
+    save(sprintf('%s-mcmc-%.0f',specname,s))
     model.sim('Dist','PostDraws')
     save(specname)
     diary off
@@ -49,11 +49,7 @@ end
 
 
 %% Finish up
-% delete(gcp)
-fprintf('\n'),tt.show,fprintf('\n')
+tt.show
 save(specname)
 cd ..
-
-% exit
-
 
