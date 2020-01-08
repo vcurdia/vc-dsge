@@ -20,31 +20,31 @@ setpath
 % Spec
 specname = 'mydsge';
 
-% Initiate parallel pool
-%parpool('local',20)
-
 %% Load DSGE
 cd(specname)
 load(specname)
 fprintf('Model: %s\n\n',model.Name)
 
 %% MaxPost
-op.MaxPost.NMax = 10;
-% op.MaxPost.Min.nit = 10; %1000;
+vcdiary(specname,'maxpost')
+op.MaxPost.NMax = 10; %10
+% op.MaxPost.Min.nit = 10; %comment this line to use default (1000)
 model.maxpost(op.MaxPost)
 save([specname,'-maxpost'])
 model.sim('Dist','PostMode')
-
+diary off
 
 %% MCMC
 op.MCMC.NDraws = 50000; %50000
-op.MCMC.NDrawsCalibrate = 1000; %1000
+% op.MCMC.NDrawsCalibrate = 100; %comment this line to use default (1000)
 for s=1
+    vcdiary(specname,sprintf('mcmc-%.0f',s))
     model.Post.MCMCStage = s;
     model.mcmc(op.MCMC)
-    save([specname,'-mcmc-',int2str(s)])
+    save([specname,sprintf('-mcmc-%.0f',s)])
     model.sim('Dist','PostDraws')
     save(specname)
+    diary off
 end
 
 

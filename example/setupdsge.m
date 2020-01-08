@@ -23,7 +23,8 @@ cd(specname)
 tt = TimeTracker;
 tt.start('Setup')
 
-% parpool(20)
+% keep log
+vcdiary(specname,'setup')
 
 %% Setup the model
 model = DSGE.Model(specname);
