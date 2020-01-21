@@ -36,8 +36,6 @@ op = updateoptions(op,varargin{:});
 %% Preparations
 
 fprintf('\nAnalyzing convergence of MCMC Sample %.0f\n',obj.Post.MCMCStage)
-ttName = sprintf('AnalyzeConvergenceMCMC%.0f',obj.Post.MCMCStage);
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDirDraws),mkdir(op.PlotDirDraws),end
 if ~isdir(op.PlotDirTrace),mkdir(op.PlotDirTrace),end
@@ -493,6 +491,7 @@ fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
 
-%% Finish up
-obj.TimeTracker.stop(ttName)
+
+
+end
 

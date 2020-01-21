@@ -224,9 +224,6 @@ classdef Model < matlab.mixin.Copyable
 %         NumSolvePrecision = 1e-6;
 %         NumSolveMaxIterations = 500;
 
-% time tracker for methods operations
-        TimeTracker
-
 % handle to the mats evaluation function
         mats
         
@@ -234,7 +231,6 @@ classdef Model < matlab.mixin.Copyable
     
     methods
         function obj = Model(name)
-            obj.TimeTracker = TimeTracker;
             if nargin>0
                 fprintf('Model: %s\n',name)
                 obj.Name = name;

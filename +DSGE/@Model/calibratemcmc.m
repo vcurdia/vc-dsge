@@ -34,8 +34,6 @@ op = updateoptions(op,varargin{:});
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\nCalibrating Jump Distribution for MCMC Sample %.0f\n', ...
         obj.Post.MCMCStage)
-ttName = sprintf('CalibrateMCMC%.0f',obj.Post.MCMCStage);
-obj.TimeTracker.start(ttName)
 
 pIdx = obj.Post.EstimateIdx;
 jumpScale = op.JumpScale;
@@ -181,7 +179,5 @@ if ~op.KeepFilesCalibrate
 end
  
 
-%% Finish up
-obj.TimeTracker.stop(ttName)
 
 

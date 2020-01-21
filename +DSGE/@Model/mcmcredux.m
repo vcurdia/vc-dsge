@@ -29,8 +29,6 @@ op = updateoptions(op,varargin{:});
 %% Preparations
 
 fprintf('Generating MCMC Draws Redux for Sample %.0f\n',obj.Post.MCMCStage)
-ttName = sprintf('ReduxMCMC%.0f',obj.Post.MCMCStage);
-obj.TimeTracker.start(ttName)
 
 sample = obj.Post.MCMCSample;
 
@@ -48,7 +46,4 @@ obj.Post.MCMCSample.FileNameRedux = fn;
 save(fn,'-struct','draws')
 fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
 
-
-%% Finish up
-obj.TimeTracker.stop(ttName)
 

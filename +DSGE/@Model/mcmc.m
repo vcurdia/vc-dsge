@@ -39,9 +39,7 @@ end
 
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\nGenerating MCMC Sample %.0f\n',obj.Post.MCMCStage)
-ttName = sprintf('MCMC%.0f',obj.Post.MCMCStage);
-obj.TimeTracker.start(ttName)
-tmpFN = sprintf('.tmp-%s-%s',obj.Name,ttName);
+tmpFN = sprintf('.tmp-%s-mcmc-%.0f',obj.Name,obj.Post.MCMCStage);
 save(tmpFN)
 
 pIdx = obj.Post.EstimateIdx;
@@ -112,7 +110,6 @@ if ~op.KeepLogs
 end
 
 %% Finish up MCMC
-obj.TimeTracker.stop(ttName)
 save(tmpFN)
 
 %% Run MCMC analysis
@@ -122,4 +119,7 @@ if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
 delete(tmpFN)
 
 
+
+
+end
 

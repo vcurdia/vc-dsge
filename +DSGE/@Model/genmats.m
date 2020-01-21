@@ -19,8 +19,6 @@ function genmats(obj,matspath)
 
 %% Preamble
 fprintf('Generating DSGE mats\n')
-% ttName = 'GenMats';
-% obj.TimeTracker.start(ttName)
 
 %% checks
 if nargin==1|| isempty(matspath)
@@ -375,5 +373,3 @@ obj.mats = str2func(MatsFN);
 mats = obj.solveree(obj.Param.Values,'Verbose',1);
 obj.AuxParam.Values = mats.AuxParam;
 
-%% Save timer
-% obj.TimeTracker.stop(ttName)

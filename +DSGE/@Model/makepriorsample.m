@@ -15,8 +15,6 @@ function makepriorsample(obj,varargin)
 
 %% Preamble
 fprintf('Making prior sample\n')
-ttName = 'MakePriorSample';
-obj.TimeTracker.start(ttName)
 
 %% Options
 op.NDraws = 10000;
@@ -58,6 +56,4 @@ draws.Param = xd;
 save(fn,'-struct','draws')
 fprintf('Saved prior sample to: %s.mat\n',fn)
 
-%% Finish up
-obj.TimeTracker.stop(ttName)
 

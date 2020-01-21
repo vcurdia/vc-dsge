@@ -15,8 +15,6 @@ function analyzeprior(obj,varargin)
 
 %% Preamble
 fprintf('\nAnalyzing Prior parameters\n')
-ttName = 'AnalyzePrior';
-obj.TimeTracker.start(ttName)
 
 %% Options
 op.NDraws = 10000;
@@ -189,7 +187,4 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
-
-%% Finish up
-obj.TimeTracker.stop(ttName)
 

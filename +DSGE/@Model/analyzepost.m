@@ -35,8 +35,6 @@ op = updateoptions(op,varargin{:});
 %% Preparations
 
 fprintf('\nAnalyzing MCMC Sample %.0f\n',obj.Post.MCMCStage)
-ttName = sprintf('AnalyzePostMCMC%.0f',obj.Post.MCMCStage);
-obj.TimeTracker.start(ttName)
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 ReportFileName = sprintf('report-%s-param-post-mcmc-%.0f',obj.Name,...
@@ -473,6 +471,4 @@ pdflatex(ReportFileName)
 
 
 
-%% Finish up
-obj.TimeTracker.stop(ttName)
 
