@@ -14,7 +14,7 @@ function maxpost(obj,varargin)
 
 %% Preamble
 fprintf('\nSearching for Posterior Mode\n')
-tmpFN = sprintf('.tmp-%s-maxpost',obj.Name);
+tmpFN = sprintf('%s-maxpost-tmp',obj.Name);
 save(tmpFN)
 
 

@@ -39,7 +39,7 @@ end
 
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\nGenerating MCMC Sample %.0f\n',obj.Post.MCMCStage)
-tmpFN = sprintf('.tmp-%s-mcmc-%.0f',obj.Name,obj.Post.MCMCStage);
+tmpFN = sprintf('%s-mcmc-%.0f-tmp',obj.Name,obj.Post.MCMCStage);
 save(tmpFN)
 
 pIdx = obj.Post.EstimateIdx;
