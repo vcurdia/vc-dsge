@@ -25,14 +25,18 @@ op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
-op = updateoptions(op,varargin{:});
+op = updateoptions(op,varargin{:})
+
+tt = TimeTracker;
 
 %% MCMC calibration
 if isempty(op.CalibrateMCMC)
     op.CalibrateMCMC = ~op.Augment;
 end
 if op.CalibrateMCMC
+    tt.start('calibratemcmc')
     op.JumpScale = obj.calibratemcmc(op);
+    tt.stop('calibratemcmc')
 end
 
 %% Preparations
@@ -87,12 +91,14 @@ opChain.Augment = op.Augment;
 opChain.NDraws = op.NDraws;
 opChain.JumpVar = obj.Post.MCMCSample.JumpVar;
 nRejections = obj.Post.MCMCSample.NRejections;
+tt.start('generatemcmc')
 parfor jChain=1:op.NChains
     opj = opChain;
     opj.fn = obj.Post.MCMCSample.FileNameDraws{jChain}
     opj.x0 = x0{jChain};
     nRejections(jChain) = obj.mcmcchain(opj);
 end
+tt.stop('generatemcmc')
     
 %% show rejection rates
 obj.Post.MCMCSample.NRejections = nRejections;
@@ -113,11 +119,22 @@ end
 save(tmpFN)
 
 %% Run MCMC analysis
-if op.AnalyzePost, obj.analyzepost, save(tmpFN), end
-if op.MCMCConvergence, obj.mcmcconvergence, save(tmpFN), end
+if op.AnalyzePost
+    tt.start('analyzepost')
+    obj.analyzepost
+    tt.stop('analyzepost')
+    save(tmpFN)
+end
+if op.MCMCConvergence
+    tt.start('mcmcconvergence')
+    obj.mcmcconvergence
+    tt.stop('mcmcconvergence')
+    save(tmpFN)
+end
 if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
 delete(tmpFN)
 
+tt.showtimers
 
 
 
