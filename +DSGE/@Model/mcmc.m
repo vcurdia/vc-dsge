@@ -25,7 +25,7 @@ op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
-op = updateoptions(op,varargin{:})
+op = updateoptions(op,varargin{:});
 
 tt = TimeTracker;
 
