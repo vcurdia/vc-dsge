@@ -25,6 +25,7 @@ op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
 op.MCMCRedux = 1;
+op.Analysis = struct;
 op = updateoptions(op,varargin{:});
 
 tt = TimeTracker;
@@ -121,13 +122,13 @@ save(tmpFN)
 %% Run MCMC analysis
 if op.AnalyzePost
     tt.start('analyzepost')
-    obj.analyzepost
+    obj.analyzepost(op.Analysis)
     tt.stop('analyzepost')
     save(tmpFN)
 end
 if op.MCMCConvergence
     tt.start('mcmcconvergence')
-    obj.mcmcconvergence
+    obj.mcmcconvergence(op.Analysis)
     tt.stop('mcmcconvergence')
     save(tmpFN)
 end

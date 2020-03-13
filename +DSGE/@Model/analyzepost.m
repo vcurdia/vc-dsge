@@ -27,7 +27,7 @@ op.Fig.FontSize = 8;
 op.TightFig = 1;
 op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
-op.PaperPosition = [0. 0, 6.5, 6.5];
+op.PaperPosition = [0, 0, 6.5, 6.5];
 op.PlotDir = 'plots-priorpost/';
 
 op = updateoptions(op,varargin{:});
