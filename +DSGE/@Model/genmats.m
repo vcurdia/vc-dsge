@@ -89,6 +89,8 @@ if obj.AuxVar.N>0
         vj = [obj.AuxVar.Names{j},'_t'];
         eval([vj,' = ',obj.AuxEq{j},';'])
         AuxEq(j) = eval(vj);
+        eval([vj,'F = ',strrep(obj.AuxEq{j},'_t','_tF'),';'])
+        eval([vj,'L = ',strrep(obj.AuxEq{j},'_t','_tL'),';'])
     end
 end
 
@@ -372,4 +374,7 @@ obj.mats = str2func(MatsFN);
 %% Test function
 mats = obj.solveree(obj.Param.Values,'Verbose',1);
 obj.AuxParam.Values = mats.AuxParam;
+
+
+end
 
