@@ -15,6 +15,7 @@ function mcmc(obj,varargin)
 %% Options
 op.KeepLogs = 1;
 op.x0 = [];
+op.uselastdraw = 1;
 op.UsePostDraw = 1;
 op.NChains = 4;
 op.JumpScale = 2.4;
@@ -29,6 +30,17 @@ op.Analysis = struct;
 op = updateoptions(op,varargin{:});
 
 tt = TimeTracker;
+
+%% initial draw
+if obj.Post.MCMCStage>1 && op.uselastdraw
+    op.x0 = zeros(obj.Post.NEstimate,op.NChains);
+    for jChain=1:obj.Post.MCMCSample.NChains
+        draws = load(obj.Post.MCMCSample.FileNameDraws{jChain});
+        op.x0(:,jChain) = draws.Param(:,end);
+    end
+    clear draws
+end
+
 
 %% MCMC calibration
 if isempty(op.CalibrateMCMC)
@@ -53,18 +65,20 @@ pIdx = obj.Post.EstimateIdx;
 x0 = cell(1,op.NChains);
 if nx0>0
     if npx0==obj.Param.N
-        op.x0 = op.x0(obj.Post.EstimateIdx,:); 
+        op.x0 = op.x0(pIdx,:); 
     end
     for j=1:nx0
         x0{j} = op.x0(:,j);
     end
 end
-if op.UsePostDraw && obj.Post.MCMCStage>1
+if nx0<op.NChains && op.UsePostDraw && obj.Post.MCMCStage>1
     x0d = obj.postdraw(op.NChains-nx0);
     for j=(nx0+1):op.NChains
         x0{j} = x0d(obj.Post.EstimateIdx,j-nx0);
     end
 end
+
+
 
 jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
 if op.JumpNewVarWeight<1 && obj.Post.MCMCStage>1
