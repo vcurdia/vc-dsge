@@ -22,6 +22,7 @@ op.JumpScale = 2.4;
 op.JumpNewVarWeight = 1;
 op.Augment = 0;
 op.NDraws = 50000;
+op.NDrawsKeep = 200000; 
 op.CalibrateMCMC = [];
 op.AnalyzePost = 1;
 op.MCMCConvergence = 1;
@@ -78,6 +79,8 @@ if nx0<op.NChains && op.UsePostDraw && obj.Post.MCMCStage>1
     end
 end
 
+op.NDrawsKeep = min(op.NDrawsKeep,op.NDraws);
+
 
 
 jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
@@ -104,6 +107,7 @@ save(tmpFN)
 %% create MCMC chains
 opChain.Augment = op.Augment;
 opChain.NDraws = op.NDraws;
+opChain.NDrawsKeep = op.NDrawsKeep;
 opChain.JumpVar = obj.Post.MCMCSample.JumpVar;
 nRejections = obj.Post.MCMCSample.NRejections;
 tt.start('generatemcmc')

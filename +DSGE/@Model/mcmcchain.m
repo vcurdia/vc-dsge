@@ -22,6 +22,7 @@ lpdfMode = obj.Post.ModeLPDF;
 op.verbose = 1;
 op.Augment = 0;
 op.NDraws = 50000;
+op.NDrawsKeep = 200000;
 op.NIRS = 1000;
 op.NBlocks = 10;
 op.ExplosionScale = [.4,.5,.6,.7];
@@ -36,8 +37,8 @@ op.InitDrawScale = [1,0.5,0.1];
 op.JumpVar = 2.4^2/np*Var;
 op.fn = 'MCMC_Chain';
 op.x0 = [];
-
 op = updateoptions(op,varargin{:});
+
 
 %% chain related variables
 fid = fopen([op.fn,'.log'],'wt');
@@ -123,6 +124,8 @@ if ~op.Augment && isempty(x0)
 end
 
 %% Prepare variables
+op.NDrawsKeep = min(op.NDrawsKeep,op.NDraws);
+op.NThinning = op.NDraws/op.NDrawsKeep;
 if ~op.Augment
     draws.N = 0;
     draws.Param = [];
@@ -181,4 +184,7 @@ fprintf(fid,'%.0f rejections out of %.0f draws (%.2f%%).\n',...
 
 %% close printed output file
 if fid~=1,fclose(fid);end
+
+
+end
 
