@@ -12,12 +12,19 @@ classdef MCMC < matlab.mixin.Copyable
         model = [];
         ndraws = 100000;
         ndrawskeep = 100000;
+        nchains = 4;
+        x0 = [];
+        jumpscale = 2.4;
+        jumpvar = [];
+        jumpnewvarweight = 1;
+        keeplogs = 1;
     end % properties
     
     methods
         function obj = MCMC(model)
             if nargin>0
                 obj.model = model;
+                obj.jumpvar = model.Post.Var;
             end
         end
         
@@ -29,6 +36,7 @@ classdef MCMC < matlab.mixin.Copyable
         function set.ndrawskeep(obj,n)
             obj.ndrawskeep = min(n,obj.ndraws);
         end
+        
         
     end %methods
     
