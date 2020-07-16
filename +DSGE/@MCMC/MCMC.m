@@ -17,10 +17,13 @@ classdef MCMC < matlab.mixin.Copyable
         jumpscale = 2.4;
         jumpvar = [];
         jumpnewvarweight = 1;
+        fnchains = {};
+        fnsample = '';
         keeplogs = 1;
     end % properties
     
     methods
+        
         function obj = MCMC(model)
             if nargin>0
                 obj.model = model;
