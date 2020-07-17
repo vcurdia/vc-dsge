@@ -165,14 +165,15 @@ else
     fprintf(fid,'\nInitial posterior level: %.8f\n\n',lpdf0);
 end
 nRejections = draws.NRejections;
-nDrawsBlock = ceil(nDraws/op.NBlocks);
 
 %% MCMC
+nDrawsBlock = ceil(nDraws/op.NBlocks);
 for jB=1:op.NBlocks
-    fprintf(fid,'Generating set %2.0f out of %.0f...\n',jB,op.NBlocks);
     nB = min(nDrawsBlock,nDraws-(jB-1)*nDrawsBlock);
-    xB = zeros(np,nB);
-    lpdfB = zeros(1,nB);
+    idxDraws = ceil(nNewThinning:nNewThinning:nB);
+    njkeep = length(idxDraws);
+    xB = zeros(np,njkeep);
+    lpdfB = zeros(1,njkeep);
     for j=1:nB
         xc = mvnrnd(x0,op.JumpVar,1)';
         lpdfc = lpdf(xc);
@@ -182,14 +183,18 @@ for jB=1:op.NBlocks
         else
             nRejections = nRejections+1;
         end
-        xB(:,j) = x0;
-        lpdfB(j) = lpdf0;
+        [tf,idxj] = ismember(j,idxDraws);
+        if tf
+            xB(:,idxj) = x0;
+            lpdfB(idxj) = lpdf0;
+        end
     end
     draws.N = draws.N+nB;
     draws.Param = [draws.Param,xB];
     draws.LPDF = [draws.LPDF,lpdfB];
     draws.NRejections = nRejections;
     save(op.fn,'-struct','draws')
+    fprintf(fid,'completed %3.0f%%\n',jB/op.NBlocks*100);
 end
 
 %% show number of rejections
