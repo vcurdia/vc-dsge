@@ -82,7 +82,6 @@ end
 op.NDrawsKeep = min(op.NDrawsKeep,op.NDraws);
 
 
-
 jumpVarRaw = obj.Post.Var(pIdx,pIdx)/obj.Post.NEstimate;
 if op.JumpNewVarWeight<1 && obj.Post.MCMCStage>1
     jumpVarRaw = op.JumpNewVarWeight^2*jumpVarRaw + ...
@@ -91,6 +90,7 @@ if op.JumpNewVarWeight<1 && obj.Post.MCMCStage>1
 end
 obj.Post.MCMCSample.NChains = op.NChains;
 obj.Post.MCMCSample.NDraws = op.NDraws;
+obj.Post.MCMCSample.NDrawsKeep = op.NDrawsKeep;
 if ~op.Augment
     obj.Post.MCMCSample.JumpScale = op.JumpScale;
     obj.Post.MCMCSample.JumpVar = op.JumpScale^2*jumpVarRaw;
