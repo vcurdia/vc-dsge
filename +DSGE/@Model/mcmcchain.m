@@ -124,14 +124,37 @@ if ~op.Augment && isempty(x0)
 end
 
 %% Prepare variables
-op.NDrawsKeep = min(op.NDrawsKeep,op.NDraws);
-op.NThinning = op.NDraws/op.NDrawsKeep;
-if ~op.Augment
+nDrawsKeep = min(op.NDrawsKeep,op.NDraws);
+if op.Augment
+    fprintf(fid,'Loading existing chain...\n');
+    draws = load(op.fn);
+    if ~ismember('NKeep',fieldnames(draws))
+        draws.NKeep = draws.N;
+        draws.NThinning = draws.N/draws.NKeep;
+    end
+    nDrawsOld = size(draws.Param,2)*draws.NThinning;
+    nOldKeep = nDrawsOld/op.NDraws*nDrawsKeep;
+    nThinningOld = nDrawsOld/nOldKeep/draws.NThinning;
+    idxold = ceil(nThinningOld:nThinningOld:(nDrawsOld/draws.NThinning));
+    draws.Param = draws.Param(:,idxold);
+    draws.LPDF = draws.LPDF(:,idxold);
+    draws.N = op.NDraws;
+    draws.NKeep = nDrawsKeep;
+    draws.NThinning = op.NDraws/nDrawsKeep;
+    save(SaveName,'-struct','draws');
+    nDraws = op.NDraws - draws.N;
+    nNewThinning = nDraws/(nDrawsKeep-nOldKeep);
+    x0 = draws.Param(:,end);
+    lpdf0 = lpdf(x0);
+else
     draws.N = 0;
     draws.Param = [];
     draws.LPDF = [];
     draws.NRejections = 0;
+    draws.NKeep = nDrawsKeep;
+    draws.NThinning = op.NDraws/nDrawsKeep;
     nDraws = op.NDraws;
+    nNewThinning = nDraws/nDrawsKeep;
     lpdf0 = lpdf(x0);
     pNames = obj.Param.Names(obj.Post.EstimateIdx);
     fprintf(fid,'Initial draw:\n');
@@ -140,12 +163,6 @@ if ~op.Augment
         fprintf(fid,['%',int2str(nameLength),'s %7.4f\n'],pNames{jp},x0(jp));
     end
     fprintf(fid,'\nInitial posterior level: %.8f\n\n',lpdf0);
-else
-    fprintf(fid,'Loading existing chain...\n');
-    draws = load(op.fn);
-    nDraws = op.NDraws - draws.N;
-    x0 = draws.Param(:,end);
-    lpdf0 = lpdf(x0);
 end
 nRejections = draws.NRejections;
 nDrawsBlock = ceil(nDraws/op.NBlocks);
