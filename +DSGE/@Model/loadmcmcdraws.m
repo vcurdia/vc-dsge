@@ -33,12 +33,12 @@ nThinning = sample.NDraws/sample.NDrawsKeep;
 % idxDraws = (op.BurnIn*sample.NDraws+1):op.Thinning:sample.NDraws;
 for jChain=1:sample.NChains
     dc = load(sample.FileNameDraws{jChain});
-    nDrawsKeep = min(nDrawsKeep,size(draws.Param,2));
+    nDrawsKeep = min(nDrawsKeep,size(dc.Param,2));
     idxDraws = (op.BurnIn*nDrawsKeep+1):nDrawsKeep;
     draws.Param(:,:,jChain) = dc.Param(:,idxDraws);
     draws.LPDF(:,:,jChain) = dc.LPDF(:,idxDraws);
 end
-nDraws = nDrawsKeep*nThinning;
+nDraws = length(idxDraws);
 
 if op.AuxParam
     fprintf('Generating AuxParam draws\n')
