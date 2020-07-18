@@ -151,7 +151,7 @@ if op.MCMCConvergence
     save(tmpFN)
 end
 if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
-delete(tmpFN)
+delete([tmpFN,'.mat'])
 
 tt.showtimers
 
