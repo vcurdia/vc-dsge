@@ -29,6 +29,7 @@ op.TightFigOptions = struct;
 op.PaperSize = [6.5, 6.5];
 op.PaperPosition = [0, 0, 6.5, 6.5];
 op.PlotDir = 'plots-priorpost/';
+op.showcorr = 0;
 
 op = updateoptions(op,varargin{:});
 
@@ -241,26 +242,28 @@ for jt=1:ntau
 end
 disp(' ')
 
-% show correlation matrix
-fprintf('\nCorrelation matrix:')
-fprintf('\n===================\n')
-namelength = [cellfun('length',pNames)];
-namelengthmax = max(namelength);
-str2show = sprintf(['%',int2str(namelengthmax),'s'],'');
-for jc=1:np
-    str2show = sprintf(['%s  %',int2str(namelengthmax),'s'],str2show,...
-                       pNames{jc});
-end
-disp(str2show)
-for jr=1:np
-    str2show = sprintf(['%-',int2str(namelengthmax),'s'],pNames{jr});
+%% show correlation matrix
+if op.showcorr
+    fprintf('\nCorrelation matrix:')
+    fprintf('\n===================\n')
+    namelength = [cellfun('length',pNames)];
+    namelengthmax = max(namelength);
+    str2show = sprintf(['%',int2str(namelengthmax),'s'],'');
     for jc=1:np
-        str2show = sprintf(['%s  %',int2str(namelengthmax),'.4f'],str2show,...
-                           obj.Post.Corr(jr,jc));
+        str2show = sprintf(['%s  %',int2str(namelengthmax),'s'],str2show,...
+                           pNames{jc});
     end
     disp(str2show)
+    for jr=1:np
+        str2show = sprintf(['%-',int2str(namelengthmax),'s'],pNames{jr});
+        for jc=1:np
+            str2show = sprintf(['%s  %',int2str(namelengthmax),'.4f'],str2show,...
+                               obj.Post.Corr(jr,jc));
+        end
+        disp(str2show)
+    end
+    disp(' ')
 end
-disp(' ')
 
 %% Make Prior Post Plots
 fprintf('Making Prior-Posterior Plots...\n')
@@ -471,4 +474,7 @@ pdflatex(ReportFileName)
 
 
 
+
+
+end
 
