@@ -141,7 +141,7 @@ if op.Augment
     draws.N = op.NDraws;
     draws.NKeep = nDrawsKeep;
     draws.NThinning = op.NDraws/nDrawsKeep;
-    save(SaveName,'-struct','draws');
+    save(op.fn,'-struct','draws');
     nDraws = op.NDraws - draws.N;
     nNewThinning = nDraws/(nDrawsKeep-nOldKeep);
     x0 = draws.Param(:,end);
