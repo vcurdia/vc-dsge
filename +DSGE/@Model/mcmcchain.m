@@ -22,6 +22,7 @@ lpdfMode = obj.Post.ModeLPDF;
 op.verbose = 1;
 op.Augment = 0;
 op.NDraws = 50000;
+op.NDrawsKeep = 200000;
 op.NIRS = 1000;
 op.NBlocks = 10;
 op.ExplosionScale = [.4,.5,.6,.7];
@@ -36,8 +37,8 @@ op.InitDrawScale = [1,0.5,0.1];
 op.JumpVar = 2.4^2/np*Var;
 op.fn = 'MCMC_Chain';
 op.x0 = [];
-
 op = updateoptions(op,varargin{:});
+
 
 %% chain related variables
 fid = fopen([op.fn,'.log'],'wt');
@@ -123,12 +124,38 @@ if ~op.Augment && isempty(x0)
 end
 
 %% Prepare variables
-if ~op.Augment
+nDrawsKeep = min(op.NDrawsKeep,op.NDraws);
+if op.Augment
+    fprintf(fid,'Loading existing chain...\n');
+    draws = load(op.fn);
+    if ~ismember('NKeep',fieldnames(draws))
+        draws.NKeep = draws.N;
+        draws.NThinning = draws.N/draws.NKeep;
+    end
+    nDrawsOld = size(draws.Param,2)*draws.NThinning;
+    nOldKeep = nDrawsOld/op.NDraws*nDrawsKeep;
+    nThinningOld = nDrawsOld/nOldKeep/draws.NThinning;
+    idxold = ceil(nThinningOld:nThinningOld:(nDrawsOld/draws.NThinning));
+    draws.Param = draws.Param(:,idxold);
+    draws.LPDF = draws.LPDF(:,idxold);
+    draws.N = nDrawsOld;
+    draws.NKeep = nDrawsKeep;
+    draws.NThinning = op.NDraws/nDrawsKeep;
+    save(op.fn,'-struct','draws');
+    nDraws = op.NDraws - nDrawsOld;
+    nNewThinning = nDraws/(nDrawsKeep-nOldKeep);
+    x0 = draws.Param(:,end);
+    lpdf0 = lpdf(x0);
+    fprintf(fid,'Adding %.0f draws to existing chain\n',nDraws);
+else
     draws.N = 0;
     draws.Param = [];
     draws.LPDF = [];
     draws.NRejections = 0;
+    draws.NKeep = nDrawsKeep;
+    draws.NThinning = op.NDraws/nDrawsKeep;
     nDraws = op.NDraws;
+    nNewThinning = nDraws/nDrawsKeep;
     lpdf0 = lpdf(x0);
     pNames = obj.Param.Names(obj.Post.EstimateIdx);
     fprintf(fid,'Initial draw:\n');
@@ -137,22 +164,17 @@ if ~op.Augment
         fprintf(fid,['%',int2str(nameLength),'s %7.4f\n'],pNames{jp},x0(jp));
     end
     fprintf(fid,'\nInitial posterior level: %.8f\n\n',lpdf0);
-else
-    fprintf(fid,'Loading existing chain...\n');
-    draws = load(op.fn);
-    nDraws = op.NDraws - draws.N;
-    x0 = draws.Param(:,end);
-    lpdf0 = lpdf(x0);
 end
 nRejections = draws.NRejections;
-nDrawsBlock = ceil(nDraws/op.NBlocks);
 
 %% MCMC
+nDrawsBlock = ceil(nDraws/op.NBlocks);
 for jB=1:op.NBlocks
-    fprintf(fid,'Generating set %2.0f out of %.0f...\n',jB,op.NBlocks);
     nB = min(nDrawsBlock,nDraws-(jB-1)*nDrawsBlock);
-    xB = zeros(np,nB);
-    lpdfB = zeros(1,nB);
+    idxDraws = ceil(nNewThinning:nNewThinning:nB);
+    njkeep = length(idxDraws);
+    xB = zeros(np,njkeep);
+    lpdfB = zeros(1,njkeep);
     for j=1:nB
         xc = mvnrnd(x0,op.JumpVar,1)';
         lpdfc = lpdf(xc);
@@ -162,14 +184,18 @@ for jB=1:op.NBlocks
         else
             nRejections = nRejections+1;
         end
-        xB(:,j) = x0;
-        lpdfB(j) = lpdf0;
+        [tf,idxj] = ismember(j,idxDraws);
+        if tf
+            xB(:,idxj) = x0;
+            lpdfB(idxj) = lpdf0;
+        end
     end
     draws.N = draws.N+nB;
     draws.Param = [draws.Param,xB];
     draws.LPDF = [draws.LPDF,lpdfB];
     draws.NRejections = nRejections;
     save(op.fn,'-struct','draws')
+    fprintf(fid,'completed %3.0f%%\n',jB/op.NBlocks*100);
 end
 
 %% show number of rejections
@@ -181,4 +207,7 @@ fprintf(fid,'%.0f rejections out of %.0f draws (%.2f%%).\n',...
 
 %% close printed output file
 if fid~=1,fclose(fid);end
+
+
+end
 

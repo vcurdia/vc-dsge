@@ -48,7 +48,9 @@ sample = obj.Post.MCMCSample;
 
 %% load the mcmc draws
 draws = obj.loadmcmcdraws(op.Draws,'BurnIn',0,'CombineChains',0,'ExpandParam',0);
-nDrawsUsed = size(draws.LPDF,2);
+nDrawsUsed = draws.N;
+idxburned = ceil(op.Draws.BurnIn*nDrawsUsed+1:nDrawsUsed);
+
 
 if isempty(op.NBin), op.NBin = round(2*nDrawsUsed^(1/3)); end
 
@@ -110,7 +112,7 @@ for jL=1:length(pdList)
             if nc>1
                 jh = jh+1;
                 h(jh) = subplot(sample.NChains,2,jh);
-                histogram(xd(1,op.Draws.BurnIn*nDrawsUsed+1:end,jChain),...
+                histogram(xd(1,idxburned,jChain),...
                           op.NBin,'Normalization','probability',...
                           'FaceColor',op.Fig.Color(1,:),'FaceAlpha',1)
                 if pMax>pMin
@@ -135,10 +137,10 @@ end
 close all
 
 %% eliminate BurnIn
-draws.Param = draws.Param(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
-draws.LPDF = draws.LPDF(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
+draws.Param = draws.Param(:,idxburned,:);
+draws.LPDF = draws.LPDF(:,idxburned,:);
 if op.Draws.AuxParam
-    draws.AuxParam = draws.AuxParam(:,(nDrawsUsed*op.Draws.BurnIn+1):end,:);
+    draws.AuxParam = draws.AuxParam(:,idxburned,:);
 end
 nDrawsUsed = size(draws.LPDF,2);
 fprintf('Burn in for rest of convergence analysis: %.0f%%\n',...
