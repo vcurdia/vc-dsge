@@ -138,7 +138,7 @@ if op.Augment
     idxold = ceil(nThinningOld:nThinningOld:(nDrawsOld/draws.NThinning));
     draws.Param = draws.Param(:,idxold);
     draws.LPDF = draws.LPDF(:,idxold);
-    draws.N = op.NDraws;
+    draws.N = nDrawsOld;
     draws.NKeep = nDrawsKeep;
     draws.NThinning = op.NDraws/nDrawsKeep;
     save(op.fn,'-struct','draws');

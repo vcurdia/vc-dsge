@@ -135,7 +135,7 @@ nB = 10;
 for jB=1:nB
 %     fprintf('Computing %.0f of %.0f...\n',jB,nB)
     for jd=1:draws.N/nB
-        idx = draws.N/nB*(jB-1)+jd;
+        idx = ceil(draws.N/nB*(jB-1)+jd);
         pratio = xdd(:,idx)'*InvVar*xdd(:,idx);
         pw(:,idx) = (pratio<=chi2Crit).*...
             exp(lfConst-1/2*pratio-draws.LPDF(idx)+lpdfMean);

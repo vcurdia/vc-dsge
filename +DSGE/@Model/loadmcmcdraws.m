@@ -34,7 +34,7 @@ nThinning = sample.NDraws/sample.NDrawsKeep;
 for jChain=1:sample.NChains
     dc = load(sample.FileNameDraws{jChain});
     nDrawsKeep = min(nDrawsKeep,size(dc.Param,2));
-    idxDraws = (op.BurnIn*nDrawsKeep+1):nDrawsKeep;
+    idxDraws = ceil((op.BurnIn*nDrawsKeep+1):nDrawsKeep);
     draws.Param(:,:,jChain) = dc.Param(:,idxDraws);
     draws.LPDF(:,:,jChain) = dc.LPDF(:,idxDraws);
 end
@@ -53,8 +53,12 @@ if op.AuxParam
     draws.AuxParam = dAux;
 end
 
-draws.N = nDraws*sample.NChains;
+draws.N = nDraws;
+draws.NChains = sample.NChains;
+draws.NTotal = nDraws*sample.NChains;
+
 if op.CombineChains
+    draws.N = draws.NTotal;
     draws.Param = reshape(draws.Param,obj.Post.NEstimate,draws.N);
     draws.LPDF = reshape(draws.LPDF,1,draws.N);
     if op.AuxParam
@@ -67,8 +71,10 @@ if op.ExpandParam
 end
 
 fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
+fprintf('Number of chains: %.0f\n', sample.NChains)
 fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
-fprintf('Thinning used: %.0f\n', nThinning)
+fprintf('Thinning used: %.1f\n', nThinning)
+if op.CombineChains, fprintf('Chains were combined.\n'), end
 fprintf('Total number of draws used: %.0f\n', draws.N)
 fprintf('\n')
 
