@@ -142,10 +142,11 @@ if op.Augment
     draws.NKeep = nDrawsKeep;
     draws.NThinning = op.NDraws/nDrawsKeep;
     save(op.fn,'-struct','draws');
-    nDraws = op.NDraws - draws.N;
+    nDraws = op.NDraws - nDrawsOld;
     nNewThinning = nDraws/(nDrawsKeep-nOldKeep);
     x0 = draws.Param(:,end);
     lpdf0 = lpdf(x0);
+    fprintf(fid,'Adding %.0f draws to existing chain\n',nDraws);
 else
     draws.N = 0;
     draws.Param = [];
