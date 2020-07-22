@@ -91,6 +91,7 @@ end
 obj.Post.MCMCSample.NChains = op.NChains;
 obj.Post.MCMCSample.NDraws = op.NDraws;
 obj.Post.MCMCSample.NDrawsKeep = op.NDrawsKeep;
+obj.Post.MCMCSample.NThinning = op.NDraws/op.NDrawsKeep;
 if ~op.Augment
     obj.Post.MCMCSample.JumpScale = op.JumpScale;
     obj.Post.MCMCSample.JumpVar = op.JumpScale^2*jumpVarRaw;

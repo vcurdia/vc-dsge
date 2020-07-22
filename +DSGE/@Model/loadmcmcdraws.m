@@ -24,12 +24,15 @@ fprintf('Loading MCMC draws from sample %.0f\n',obj.Post.MCMCStage)
 if ~isfield(obj.Post.MCMCSample,'NDrawsKeep')
     obj.Post.MCMCSample.NDrawsKeep = obj.Post.MCMCSample.NDraws; 
 end
-
+if ~isfield(obj.Post.MCMCSample,'NThinning')
+    obj.Post.MCMCSample.NThinning = ...
+        obj.Post.MCMCSample.NDraws/obj.Post.MCMCSample.NDrawsKeep; 
+end
 sample = obj.Post.MCMCSample;
+
 draws.N = 0;
 
-nDrawsKeep = min(sample.NDrawsKeep,sample.NDraws);
-nThinning = sample.NDraws/sample.NDrawsKeep;
+nDrawsKeep = sample.NDrawsKeep;
 % idxDraws = (op.BurnIn*sample.NDraws+1):op.Thinning:sample.NDraws;
 for jChain=1:sample.NChains
     dc = load(sample.FileNameDraws{jChain});
@@ -73,7 +76,7 @@ end
 fprintf('Total number of draws per chain: %.0f\n', sample.NDraws)
 fprintf('Number of chains: %.0f\n', sample.NChains)
 fprintf('Burn in: %.0f%%\n', 100*op.BurnIn)
-fprintf('Thinning used: %.1f\n', nThinning)
+fprintf('Thinning used: %.1f\n', sample.NThinning)
 if op.CombineChains, fprintf('Chains were combined.\n'), end
 fprintf('Total number of draws used: %.0f\n', draws.N)
 fprintf('\n')

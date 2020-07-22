@@ -15,7 +15,6 @@ function analyzepost(obj,varargin)
 
 %% Options
 op.Draws.BurnIn = 0.25;
-op.Draws.Thinning = 1;
 op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op.Table = DSGE.Options.Table;
 op.NDrawsPrior = 20000;
@@ -351,7 +350,7 @@ fprintf(fid,'number of chains: & %.0f\\\\\n',sample.NChains);
 fprintf(fid,'size of each chain: & %.0f\\\\\n',sample.NDraws);
 fprintf(fid,'burn in used: & %.0f (%.0f\\%%)\\\\\n',...
         op.Draws.BurnIn*sample.NDraws,op.Draws.BurnIn*100);
-fprintf(fid,'thinning used: & %.0f\\\\\n',op.Draws.Thinning);
+fprintf(fid,'thinning used: & %.0f\\\\\n',sample.NThinning);
 fprintf(fid,'number of draws used: & %.0f\\\\\\\\\n',draws.N);
 fprintf(fid,'log-marginal likelihood: & %.4f\n',obj.Post.LogMgLikelihood);
 fprintf(fid,'\\end{tabular}\n');

@@ -20,7 +20,6 @@ op.List = {'IRF','States'};
 op.Dist = '';
 op.NDraws = [];
 op.Draws = [];
-
 op = updateoptions(op,varargin{:});
 
 
@@ -59,4 +58,7 @@ if ismember('IRF',op.List), obj.irf(xd,op); end
 if ismember('VD',op.List), obj.vd(xd,op), end
 if ismember('States',op.List), obj.states(xd,op), end
 if ismember('SD',op.List), obj.sd(xd,op), end
+
+
+end
 
