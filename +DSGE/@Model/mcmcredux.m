@@ -17,33 +17,30 @@ function mcmcredux(obj,varargin)
 % Created: April 3, 2017
 % Copyright (C) 2017-2018 Vasco Curdia
 
-%% Options
-op.Draws.BurnIn = 0.25;
-op.Draws.AuxParam = 0;
-op.Draws.CombineChains = 1;
-op.Draws.ExpandParam = 0;
-op.NDraws = 10000;
+    %% Options
+    op.Draws.BurnIn = 0.25;
+    op.Draws.AuxParam = 0;
+    op.Draws.CombineChains = 1;
+    op.Draws.ExpandParam = 0;
+    op.NDraws = 10000;
+    op = updateoptions(op,varargin{:});
 
-op = updateoptions(op,varargin{:});
+    fprintf('Generating MCMC Draws Redux\n')
 
-%% Preparations
+    %% load the mcmc draws
+    draws = obj.loadmcmcdraws(op.Draws,'silent',1);
+    nThinning = draws.N/op.NDraws;
+    idxdraws = ceil(nThinning:nThinning:draws.N);
+    draws.Param = draws.Param(:,idxdraws);
+    draws.LPDF = draws.LPDF(idxdraws);
+    draws.N = length(idxdraws);
+    fprintf('Number of draws kept: %.0f\n',draws.N);
 
-fprintf('Generating MCMC Draws Redux for Sample %.0f\n',obj.Post.MCMCStage)
+    %% Save MCMC draws Redux
+    fn = sprintf('%s-mcmc-redux',obj.Name);
+    obj.Post.MCMCSample.FileNameRedux = fn;
+    save(fn,'-struct','draws')
+    fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
 
-sample = obj.Post.MCMCSample;
-
-nDrawsAvailable = floor(sample.NDraws*(1-op.Draws.BurnIn))*sample.NChains;
-nDraws = min(op.NDraws,nDrawsAvailable);
-
-%% load the mcmc draws
-op.Draws.Thinning = max(1,...
-    floor(sample.NDraws*sample.NChains*(1-op.Draws.BurnIn)/nDraws));
-draws = obj.loadmcmcdraws(op.Draws);
-
-%% Save MCMC draws Redux
-fn = sprintf('%s-mcmc-%.0f-redux',obj.Name,obj.Post.MCMCStage);
-obj.Post.MCMCSample.FileNameRedux = fn;
-save(fn,'-struct','draws')
-fprintf('Saved MCMC draws redux to: %s.mat\n',fn)
-
+end
 
