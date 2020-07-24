@@ -376,6 +376,6 @@ end
 
 
 %% Finish up
-delete(tmpFN)
+delete([tmpFN,'.mat'])
 end
 
