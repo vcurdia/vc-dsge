@@ -55,7 +55,7 @@ fprintf('\nSimulating States\n')
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-states%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('report-%s-states%s',obj.Name,op.FNSuffix);
+ReportFileName = sprintf('%s-states%s',obj.Name,op.FNSuffix);
 ReportTitle = sprintf('%s\\\\[30pt]States\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'-',''));
 
@@ -154,3 +154,6 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
+
+end
+

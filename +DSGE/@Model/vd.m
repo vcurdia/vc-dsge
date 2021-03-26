@@ -46,7 +46,7 @@ fprintf('\nMaking VD\n')
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-vd%s',obj.Name,op.FNSuffix); 
-ReportFileName = sprintf('report-%s-vd%s',obj.Name,op.FNSuffix);
+ReportFileName = sprintf('%s-vd%s',obj.Name,op.FNSuffix);
 ReportTitle = sprintf('%s\\\\[30pt]VD\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'-',''));
 
@@ -301,3 +301,6 @@ pdflatex(ReportFileName)
 
 %% Finish up
 close all
+
+end
+

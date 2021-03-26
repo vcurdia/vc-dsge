@@ -23,7 +23,7 @@ op.Table = DSGE.Options.Table;
 op = updateoptions(op,varargin{:});
 
 %% other settings
-ReportFileName = sprintf('report-%s-param-prior',obj.Name);
+ReportFileName = sprintf('%s-param-prior',obj.Name);
 ReportTitle = sprintf('%s\\\\[30pt]Parameter Analysis\\\\Prior',obj.Name);
 
 %% useful variables
@@ -187,4 +187,7 @@ end
 fprintf(fid,'\\end{document}\n');
 fclose(fid);
 pdflatex(ReportFileName)
+
+
+end
 

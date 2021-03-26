@@ -41,7 +41,7 @@ fprintf('\nMaking IRF\n')
 
 if ~isdir(op.PlotDir),mkdir(op.PlotDir),end
 PlotFileName = sprintf('%s-irf%s',obj.Name,op.FNSuffix); 
-ReportFileName = ['report-',obj.Name,'-irf',op.FNSuffix];
+ReportFileName = [obj.Name,'-irf',op.FNSuffix];
 ReportTitle = sprintf('%s\\\\[30pt]IRF\\\\%s',obj.Name,...
                       strrep(op.FNSuffix,'-',''));
 
@@ -179,3 +179,6 @@ end
 
 %% Finish up
 close all
+
+end
+
