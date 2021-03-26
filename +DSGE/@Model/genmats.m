@@ -121,7 +121,7 @@ end
 
 %% Generate code to eval matrices
 
-MatsFN = sprintf('%smats',obj.Name);
+MatsFN = strrep(sprintf('mats_%s',obj.Name),'-','_');
 
 % Initiate file
 fid = fopen([matspath,MatsFN,'.m'],'wt');
