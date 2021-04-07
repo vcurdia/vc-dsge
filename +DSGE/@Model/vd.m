@@ -118,7 +118,7 @@ parfor jd=1:nDraws
             end
             if nAuxVar>0
                 for jH=1:nHorizons
-                    VAux(:,:,jH) = matj.AuxEq.Phi*V(:,:,jH-1)*matj.AuxEq.Phi';
+                    VAux(:,:,jH) = matj.AuxEq.Phi*V(:,:,jH)*matj.AuxEq.Phi';
                 end
             end
             for jH=1:nHorizons
