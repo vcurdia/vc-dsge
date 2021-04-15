@@ -73,11 +73,25 @@ if nAuxVar>0, tList = {tList{:},'AuxVar'}; end
 tid = 1:nHorizons;
 if isempty(op.Fig.XTick), op.Fig.XTick = tid; end
 if isempty(op.Fig.XTickLabel), op.Fig.XTickLabel = VDHorizons; end
-if isempty(op.Fig.Color)
-    op.Fig.Color = colorscheme('nColors',nShockVar,'LightFactors',[0,0.4, ...
-                        0.6]);
-end
 
+if ~isfield(op,'ShockGroups')
+    op.ShockGroups = cell(obj.ShockVar.N,2);
+    for j=1:obj.ShockVar.N
+        op.ShockGroups(j,:) = {obj.ShockVar.PrettyNames{j},...
+                            obj.ShockVar.Names(j)};
+    end
+end
+allgroups = [op.ShockGroups{:,2}];
+tf = ~ismember(obj.ShockVar.Names,allgroups);
+if any(tf)
+    op.ShockGroups(end+1,:) = {'Other',obj.ShockVar.Names(tf)};
+end
+nGroups = length(op.ShockGroups);
+
+if isempty(op.Fig.Color)
+    op.Fig.Color = colorscheme('nColors',nGroups,...
+                               'LightFactors',[0,0.4,0.6]);
+end
 
 %% Prepare draws
 if nargin<2 || isempty(xd)
@@ -90,20 +104,24 @@ nDraws = size(xd,2);
 %                'StoreParam',0,'StoreStateEq',0,'StoreKF',0,'StoreAuxEq',0);
 VDCheck = ones(1,nDraws);
 idxMat = eye(nShockVar);
-VD = nan(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons,nDraws);
+VD = nan(nStateVar+nObsVar+nAuxVar,nGroups,nHorizons,nDraws);
 VDCheck = zeros(1,nDraws);
 verbose = op.Verbose;
+shockIdx = false(nGroups,nShockVar);
+for jG=1:nGroups
+    shockIdx(jG,:) = ismember(obj.ShockVar.Names,op.ShockGroups{jG,2});
+end
 parfor jd=1:nDraws
 %     matj = fnmats(xd(:,jd));
     matj = obj.solveree(xd(:,jd));
     checkj = matj.Status;
     if checkj
-        Vj = zeros(nStateVar+nObsVar+nAuxVar,nShockVar,nHorizons);
-        for jS=1:nShockVar
+        Vj = zeros(nStateVar+nObsVar+nAuxVar,nGroups,nHorizons);
+        for jG=1:nGroups
             V = zeros(nStateVar,nStateVar,nHorizons);
             VAux = zeros(nAuxVar,nAuxVar,nHorizons);
             VObs = zeros(nObsVar,nObsVar,nHorizons);
-            V(:,:,1) = matj.REE.G2*idxMat(:,jS)*idxMat(jS,:)*matj.REE.G2';
+            V(:,:,1) = matj.REE.G2*idxMat(:,shockIdx(jG,:))*idxMat(shockIdx(jG,:),:)*matj.REE.G2';
             for jH=2:MaxHorizon
                 V(:,:,jH) = V(:,:,1) + matj.REE.G1*V(:,:,jH-1)*matj.REE.G1';
             end
@@ -125,10 +143,10 @@ parfor jd=1:nDraws
                 v = diag(V(:,:,jH));
                 if nObsVar>0, v = [v;diag(VObs(:,:,jH))]; end
                 if nAuxVar>0, v = [v;diag(VAux(:,:,jH))]; end
-                Vj(:,jS,jH) = v;
+                Vj(:,jG,jH) = v;
             end
         end
-        VD(:,:,:,jd) = abs(Vj./repmat(sum(Vj,2),[1,nShockVar,1]));
+        VD(:,:,:,jd) = abs(Vj./repmat(sum(Vj,2),[1,nGroups,1]));
         VDCheck(jd) = 1;
     else
         VDCheck(jd) = 0;
@@ -139,41 +157,41 @@ VDCheck(~VDCheck) = [];
 nDrawsUsed = length(VDCheck);
 
 %% Create tables
-fprintf('\nVariance decomposition:')
-fprintf('\n=======================\n')
-if ~isempty(op.FNSuffix)
-    fprintf('%s\n',op.FNSuffix)
-end
-fprintf('\n')
-for jH=op.Fig.XTick
-    for jL=1:length(tList)
-        Lj = tList{jL};
-        fprintf('Horizon: %.0f, %s',VDHorizons(jH),Lj)
-        vj = obj.(Lj).Names;
-        nj = obj.(Lj).N;
-        vIdx = ismember(vNames,vj);
-        for jPrc=1:max(length(op.VDPrctiles)*(nDrawsUsed>1),1)
-            if nDrawsUsed==1
-                VDj = VD(vIdx,:,jH);
-                fprintf('\n')
-            else
-                Prcj = op.VDPrctiles(jPrc);
-                fprintf(', Percentile %.1f',Prcj)
-                VDj = prctile(VD(vIdx,:,jH,:),Prcj,4);
-                fprintf('\n',Prcj)
-            end
-            fprintf(['%-',int2str(vNameLengthMax),'s',...
-                     repmat(['   %',int2str(sNameLengthMax),'s'],1,nShockVar),...
-                     '\n'],'',sNames{:})
-            for jV=1:nj
-                fprintf(['%-',int2str(vNameLengthMax),'s',...
-                         repmat(['   %',int2str(sNameLengthMax),'.3f'],1,...
-                                nShockVar),'\n'],vj{jV},VDj(jV,:))
-            end
-            fprintf('\n')
-        end
-    end
-end
+% fprintf('\nVariance decomposition:')
+% fprintf('\n=======================\n')
+% if ~isempty(op.FNSuffix)
+%     fprintf('%s\n',op.FNSuffix)
+% end
+% fprintf('\n')
+% for jH=op.Fig.XTick
+%     for jL=1:length(tList)
+%         Lj = tList{jL};
+%         fprintf('Horizon: %.0f, %s',VDHorizons(jH),Lj)
+%         vj = obj.(Lj).Names;
+%         nj = obj.(Lj).N;
+%         vIdx = ismember(vNames,vj);
+%         for jPrc=1:max(length(op.VDPrctiles)*(nDrawsUsed>1),1)
+%             if nDrawsUsed==1
+%                 VDj = VD(vIdx,:,jH);
+%                 fprintf('\n')
+%             else
+%                 Prcj = op.VDPrctiles(jPrc);
+%                 fprintf(', Percentile %.1f',Prcj)
+%                 VDj = prctile(VD(vIdx,:,jH,:),Prcj,4);
+%                 fprintf('\n',Prcj)
+%             end
+%             fprintf(['%-',int2str(vNameLengthMax),'s',...
+%                      repmat(['   %',int2str(sNameLengthMax),'s'],1,nShockVar),...
+%                      '\n'],'',sNames{:})
+%             for jV=1:nj
+%                 fprintf(['%-',int2str(vNameLengthMax),'s',...
+%                          repmat(['   %',int2str(sNameLengthMax),'.3f'],1,...
+%                                 nShockVar),'\n'],vj{jV},VDj(jV,:))
+%             end
+%             fprintf('\n')
+%         end
+%     end
+% end
 
 %% Plot VD
 for jP=1:length(op.FigPanels)
@@ -193,10 +211,12 @@ for jP=1:length(op.FigPanels)
         else
             PlotData = squeeze(prctile(VD(vIdx,:,:,:),50,4));
         end
-        bar(tid,permute(PlotData,[2,1]),'stacked','BarWidth',1,...
-            'EdgeColor','none')
+        hb = bar(tid,permute(PlotData,[2,1]),'stacked','BarWidth',1,...
+            'EdgeColor','none');
         axis tight
-        colormap(Figj.Color)
+        for jsd=1:nGroups
+            hb(jsd).FaceColor = Figj.Color(jsd,:);
+        end
         if Figj.ShowPlotTitle
             title(Pj.PrettyNames{jV});
         end
@@ -206,13 +226,13 @@ for jP=1:length(op.FigPanels)
 %         ha(jV).FontSize = Figj.FontSize;
     end
     if prod([Figj.Shape{:}])==1
-        hl = legend(obj.ShockVar.PrettyNames,'Location',op.Fig.LegPos);
+        hl = legend(op.ShockGroups{:,1},'Location',op.Fig.LegPos);
         hl.Orientation = op.Fig.LegOrientation;
         if strcmp(op.Fig.LegPos,'SO')
             hl.Position(2) = 0;
         end
     else
-        hl = legend(obj.ShockVar.PrettyNames,'Location','S');
+        hl = legend(op.ShockGroups{:,1},'Location','S');
         hl.Orientation = 'horizontal';
         legPos = hl.Position;
         legPos(1) = 0.5-legPos(3)/2;
@@ -260,9 +280,9 @@ for jH=op.Fig.XTick
                 if op.Table.MoveLeft
                     fprintf(fid,'\\hspace{-0.5in}\n');
                 end
-                fprintf(fid,'\\begin{tabular}{l%s}\n',repmat('r',1,nShockVar));
+                fprintf(fid,'\\begin{tabular}{l%s}\n',repmat('r',1,nGroups));
                 fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-                fprintf(fid,' & %s', obj.ShockVar.PrettyNames{:});
+                fprintf(fid,' & %s', op.ShockGroups{:,1});
                 fprintf(fid,'\n\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
                 for jr=idxPar
                     fprintf(fid,'%s',obj.(Lj).PrettyNames{jr});
