@@ -167,7 +167,6 @@ for jP = 1:nPanels
         hb{2} = bar(1:T,min(0,PlotData),'stacked','EdgeColor','none');
         hold off
         axis tight
-%         colormap(Figj.Color)
         for jp=1:2
             for jsd=1:nGroups+op.ShowOther
                 hb{jp}(jsd).FaceColor = Figj.Color(jsd,:);
