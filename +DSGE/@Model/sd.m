@@ -162,12 +162,17 @@ for jP = 1:nPanels
         else
             PlotData = Pj.Scale(jV)*squeeze(median(SD(vIdx,idxT,:,:),4));
         end
-        bar(1:T,max(0,PlotData),'stacked','EdgeColor','none')
+        hb{1} = bar(1:T,max(0,PlotData),'stacked','EdgeColor','none');
         hold on
-        bar(1:T,min(0,PlotData),'stacked','EdgeColor','none')
+        hb{2} = bar(1:T,min(0,PlotData),'stacked','EdgeColor','none');
         hold off
         axis tight
-        colormap(Figj.Color)
+%         colormap(Figj.Color)
+        for jp=1:2
+            for jsd=1:nGroups+op.ShowOther
+                hb{jp}(jsd).FaceColor = Figj.Color(jsd,:);
+            end
+        end
         if Figj.ShowPlotTitle
             title(Pj.PrettyNames{jV});
         end
