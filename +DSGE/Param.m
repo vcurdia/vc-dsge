@@ -151,6 +151,57 @@ classdef Param < matlab.mixin.Copyable
             end
         end
     
+        function p1 = merge(obj,varargin)
+            p1 = copy(obj);
+            isDuplicates = false;
+            for j=1:nargin-1
+                p = varargin{j};
+                if ~strcmp(class(p),'DSGE.Param')
+                    error('Cannot merge Param. Input needs to be instance of DSGE.Param')
+                end
+                if p.N==0, continue, end
+                if p1.N==0
+                    p1 = copy(p);
+                    continue
+                end
+                tf = ismember(p.Names,p1.Names);
+                isDuplicates = (isDuplicates || any(tf));
+                if ~all(tf)
+                    names = [p1.Names;p.Names(~tf)];
+                    prettynames = [p1.PrettyNames;p.PrettyNames(~tf)];
+                    values = [p1.Values;p.Values(~tf)];
+                    priordist = [p1.PriorDist;p.PriorDist(~tf)];
+                    priormean = [p1.PriorMean;p.PriorMean(~tf)];
+                    priorsd = [p1.PriorSD;p.PriorSD(~tf)];
+                    p1.Names = names;
+                    p1.PrettyNames = prettynames;
+                    p1.Values = values;
+                    p1.PriorDist = priordist;
+                    p1.PriorMean = priormean;
+                    p1.PriorSD = priorsd;
+                end
+            end
+%             if isDuplicates
+%                 fprintf('Duplicate variable names found.\n')
+%             end
+        end
+        
+        function [p1,idx] = subset(obj,names)
+            [tf,idx] = obj.ismember(names);
+            idx = idx(tf);
+            p1 = DSGE.Param(obj.Names(idx));
+            p1.Values = obj.Values(idx);
+            p1.PrettyNames = obj.PrettyNames(idx);
+            p1.PriorDist = obj.PriorDist(idx);
+            p1.PriorMean = obj.PriorMean(idx);
+            p1.PriorSD = obj.PriorSD(idx);
+        end
+        
+        function [tf,idx] = ismember(obj,names)
+            if isa(names,'DSGE.Param'), names = names.Names; end
+            [tf,idx] = ismember(names,obj.Names);
+        end
+        
 
     end %methods
     
