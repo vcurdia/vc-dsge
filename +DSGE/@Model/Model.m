@@ -14,7 +14,7 @@ classdef Model < matlab.mixin.Copyable
 %   ObsVar   - Observation variables (optional)
 %   StateVar - State variables
 %   ShockVar - Shock variables
-%   AuxVar   - Auxiliary Variables (optional) 
+%   AuxVar   - Auxiliary Variables (optional)
 % 
 %   Variable objects do not include any time subscripts of any sort, just the
 %   variable names. In the equations need to reference variables always with a
@@ -229,6 +229,12 @@ classdef Model < matlab.mixin.Copyable
         
     end
     
+
+    properties (SetAccess = protected)
+        %   vars - All variables excluding shocks (StateVar,ObsVar,AuxVar)
+        vars = DSGE.Var;
+    end
+    
     methods
         function obj = Model(name)
             if nargin>0
@@ -278,6 +284,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.ObsVar = v;
             end
+            updatevars(obj)
         end
     
         function set.StateVar(obj,v)
@@ -286,6 +293,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.StateVar = v;
             end
+            updatevars(obj)
         end
     
         function set.ShockVar(obj,v)
@@ -304,6 +312,11 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.AuxVar = v;
             end
+            updatevars(obj)
+        end
+        
+        function updatevars(obj)
+            obj.vars = merge(obj.ObsVar,obj.StateVar,obj.AuxVar);
         end
         
 %         function set.ObsEq(obj,eq)
@@ -331,9 +344,9 @@ classdef Model < matlab.mixin.Copyable
                          'of variables (%i).\n'],eqType,nEq,nVar)
             end
         end
-        
+
         function prettynames = findvarprettynames(obj,names)
-            vv = merge(obj.ObsVar,obj.StateVar,obj.AuxVar);
+            vv = allvars(obj);
             [tf,idx] = ismember(names,vv.Names);
             if ~all(tf)
                 error('Could not find %s\n',names{~tf})
