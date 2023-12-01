@@ -15,6 +15,8 @@ classdef Model < matlab.mixin.Copyable
 %   StateVar - State variables
 %   ShockVar - Shock variables
 %   AuxVar   - Auxiliary Variables (optional)
+% TODO: add Var (instead of vars)
+% TODO: provide solution in terms of Var (use gbar, g1, ...)
 % 
 %   Variable objects do not include any time subscripts of any sort, just the
 %   variable names. In the equations need to reference variables always with a
