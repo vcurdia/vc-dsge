@@ -284,6 +284,9 @@ if obj.ObsVar.N>0
         fprintf(fid,'    ];\n');
     end
     fprintf(fid,'Mats.ObsEq = ObsEq;\n');
+else
+    fprintf(fid,'Mats.ObsEq.HBar = [];\n');
+    fprintf(fid,'Mats.ObsEq.H = [];\n');
 end
 
 fprintf(fid,'\n%% State equation matrices\n');
@@ -362,6 +365,9 @@ if obj.AuxVar.N>0
         fprintf(fid,'    ];\n\n');
     end
     fprintf(fid,'Mats.AuxEq = AuxEq;\n');
+else
+    fprintf(fid,'Mats.AuxEq.PhiBar = [];\n');
+    fprintf(fid,'Mats.AuxEq.Phi = [];\n');
 end
 
 % close file

@@ -15,6 +15,7 @@ classdef Model < matlab.mixin.Copyable
 %   StateVar - State variables
 %   ShockVar - Shock variables
 %   AuxVar   - Auxiliary Variables (optional)
+%   Var      - All model Variables (excluding shocks)
 % 
 %   Variable objects do not include any time subscripts of any sort, just the
 %   variable names. In the equations need to reference variables always with a
@@ -53,6 +54,20 @@ classdef Model < matlab.mixin.Copyable
 %     ObsVar_t   = ObsEq.HBar   + ObsEq.H*StateVar_t
 %     AuxVar_t   = AuxEq.PhiBar + AuxEq.Phi*StateVar_t
 %
+%   Full model solution in compact form
+%     Var_t = gbar + g1*Var_tL + g2*ShockVar_t
+%   with
+%     gbar = [REE.GBar;
+%             ObsEq.HBar;
+%             AuxEq.PhiBar]
+%     g1   = [REE.G1 0;
+%             ObsEq.H*REE.G1 0;
+%             AuxEq.Phi*REE.G1 0]
+%     g2   = [REE.G2;
+%             ObsEq.H*REE.G2;
+%             AuxEq.Phi*REE.G2]
+%
+% TODO: provide solution in terms of Var (use gbar, g1, ...)
 %
 % * Properties describing model parameters
 %   Param          - Set of parameters to be calibrated or estimated
@@ -96,143 +111,144 @@ classdef Model < matlab.mixin.Copyable
 % Copyright 2016-2018 Vasco Curdia
     
     properties
-% Name of the model specification
+        % Name of the model specification
         Name = '';
         
-% Param - Set of parameters to be calibrated or estimated
-%
-%   Main set of parameters set or estimated for a model specification.
-% 
-%   Can be set directly for model calibration or through DSGE.Prior to set it 
-%   up for model estimation.
+        % Param - Set of parameters to be calibrated or estimated
+        %
+        %   Main set of parameters set or estimated for a model specification.
+        % 
+        %   Can be set directly for model calibration or through DSGE.Prior to set it 
+        %   up for model estimation.
         Param = DSGE.Param;
 
-% NumSolveParam - Parameters to be solved numberically (optional)
-%
-%   Parameters that need to be solved numerically, as functions of Param and 
-%   CompositeParam.
-%
-%   System of nonlinear equations are set in model property NumSolveEq.
+        % NumSolveParam - Parameters to be solved numberically (optional)
+        %
+        %   Parameters that need to be solved numerically, as functions of Param and 
+        %   CompositeParam.
+        %
+        %   System of nonlinear equations are set in model property NumSolveEq.
         NumSolveParam = DSGE.Param;
 
-% NumSolveEq - system of equations to solve for NumSolveParam
-%
-%   Array with expressions for the system of nonlinear equations to be solved 
-%   for NunmSolveParam.
+        % NumSolveEq - system of equations to solve for NumSolveParam
+        %
+        %   Array with expressions for the system of nonlinear equations to be solved 
+        %   for NunmSolveParam.
         NumSolveEq
         
-% CompositeParam - Parameters that are combinations of Param (optional)
-%
-%   Parameters that are combinations of the main Param. Used to renormalize 
-%   parameters, de4fined ratios of parameters to use in equation expressions, 
-%   or simply reference combinations of parameters to keep track (e.g. as 
-%   checks to model behavior)
-%
-%   Their expressions are defined in model propery CompositeExpressions.
+        % CompositeParam - Parameters that are combinations of Param (optional)
+        %
+        %   Parameters that are combinations of the main Param. Used to renormalize 
+        %   parameters, de4fined ratios of parameters to use in equation expressions, 
+        %   or simply reference combinations of parameters to keep track (e.g. as 
+        %   checks to model behavior)
+        %
+        %   Their expressions are defined in model propery CompositeExpressions.
         CompositeParam = DSGE.Param;
         
-% CompositeExpressions - Definitions of CompositeParam
-%
-%   Array of expressions with definitions of CompositeParam. 
+        % CompositeExpressions - Definitions of CompositeParam
+        %
+        %   Array of expressions with definitions of CompositeParam. 
         CompositeExpressions
 
-% AuxParam - combined NumSolveParam and CompositeParam (not defined by user)
-%
-%   Combines all parameters set in NumSolveParam and CompounParam to be used in 
-%   simulations. This way there is only one set of auxiliary parameters to keep 
-%   track, rather than two.
+        % AuxParam - combined NumSolveParam and CompositeParam (not defined by user)
+        %
+        %   Combines all parameters set in NumSolveParam and CompounParam to be used in 
+        %   simulations. This way there is only one set of auxiliary parameters to keep 
+        %   track, rather than two.
         AuxParam = DSGE.Param;
         
-% ObsVar - Observation variables (optional)
-%   DSGE.Var object representing observation variables.
-%   Their names need to match with variable names in the DSGE.Data object.
+        % ObsVar - Observation variables (optional)
+        %   DSGE.Var object representing observation variables.
+        %   Their names need to match with variable names in the DSGE.Data object.
         ObsVar = DSGE.Var;
         
-% StateVar - State variables
-%   Include jump variables and pre-determined variables, endogenous or 
-%   exogenous. It can also include any additional auxiliary variables needed to 
-%   satisfy equation canonic form, such as adding lags or leads beyond one 
-%   period.
+        % StateVar - State variables
+        %   Include jump variables and pre-determined variables, endogenous or 
+        %   exogenous. It can also include any additional auxiliary variables needed to 
+        %   satisfy equation canonic form, such as adding lags or leads beyond one 
+        %   period.
         StateVar = DSGE.Var;
         
-%  ShockVar - Shock variables
-%   Innovations to the exogenous variables. Assumed to be iid normal 
-%   distributed.
+        %  ShockVar - Shock variables
+        %   Innovations to the exogenous variables. Assumed to be iid normal 
+        %   distributed.
         ShockVar = DSGE.Var;
         
-% AuxVar - Auxiliary Variables (optional) 
-%   Variables not needed to solve REE but which are useful to track for later 
-%   simulations. Restriction is that only depends on current period states and
-%   a constant.
+        % AuxVar - Auxiliary Variables (optional) 
+        %   Variables not needed to solve REE but which are useful to track for later 
+        %   simulations. Restriction is that only depends on current period states and
+        %   a constant.
         AuxVar = DSGE.Var;
 
-% ObsEq - Observation equations (optional)
-%
-%   Array with expressions for the equations linking ObsVar to StateVar:
-%     0 = HBar + H*StateVar_t - H0*ObsVar_t
-%   rules:
-%     - no leads or lags for any variables
-%     - no ShockVar_t or AuxVar_t
+        % Var - All variables excluding shocks (StateVar,ObsVar,AuxVar)
+        Var = DSGE.Var;
+
+        % ObsEq - Observation equations (optional)
+        %
+        %   Array with expressions for the equations linking ObsVar to StateVar:
+        %     0 = HBar + H*StateVar_t - H0*ObsVar_t
+        %   rules:
+        %     - no leads or lags for any variables
+        %     - no ShockVar_t or AuxVar_t
         ObsEq
 
-% StateEq - State equations
-%
-%   Array with expressions for the laws of motion of economy in Chris Sims 
-%   gensys canonical form:
-%     0 = GammaBar + Gamma1*StateVar_tL + Gamma2*ShockVar_t + Gamma3*eta_t
-%         - Gamma0*StateVar_t
-%   where eta_t is an endogenous expectation error. The codes identify 
-%   equations with forward looking components and automatically rearrange
-%   matrices to fit in this canonical form.
-%
-%   Rules:
-%     - cannot have both leads and lags in same equation
-%     - in order to use leads and lags in same equation create artificial 
-%       variables, e.g. xL_t = x_tL means that new variable 'xL' is the lag 
-%       of 'x'
-%     - for higher order leads or lags use auxiliary variables as needed.
-%
-%   The solution of the REE yields:
-%     StateVar_t = REE.GBar + REE.G1*StateVar_tL + REE.G2*ShockVar_t
+        % StateEq - State equations
+        %
+        %   Array with expressions for the laws of motion of economy in Chris Sims 
+        %   gensys canonical form:
+        %     0 = GammaBar + Gamma1*StateVar_tL + Gamma2*ShockVar_t + Gamma3*eta_t
+        %         - Gamma0*StateVar_t
+        %   where eta_t is an endogenous expectation error. The codes identify 
+        %   equations with forward looking components and automatically rearrange
+        %   matrices to fit in this canonical form.
+        %
+        %   Rules:
+        %     - cannot have both leads and lags in same equation
+        %     - in order to use leads and lags in same equation create artificial 
+        %       variables, e.g. xL_t = x_tL means that new variable 'xL' is the lag 
+        %       of 'x'
+        %     - for higher order leads or lags use auxiliary variables as needed.
+        %
+        %   The solution of the REE yields:
+        %     StateVar_t = REE.GBar + REE.G1*StateVar_tL + REE.G2*ShockVar_t
         StateEq
         
-% AuxEq - Auxiliary equations (optional) 
-%
-%   Array with expressions of equations defining AuxVar as functions of 
-%   StateVar and ShockVar.
-%
-%   Assumed structure:
-%     AuxVar_t = PhiBar + Phi*StateVar_t
-%   rules:
-%     - no leads or lags for any variables
-%     - no ShockVar_t
+        % AuxEq - Auxiliary equations (optional) 
+        %
+        %   Array with expressions of equations defining AuxVar as functions of 
+        %   StateVar and ShockVar.
+        %
+        %   Assumed structure:
+        %     AuxVar_t = PhiBar + Phi*StateVar_t
+        %   rules:
+        %     - no leads or lags for any variables
+        %     - no ShockVar_t
         AuxEq
         
-% structure containing Prior information, if a prior exists
+        % structure containing Prior information, if a prior exists
         Prior
         
-% Data for the model
+        % Data for the model
         Data
         
-% structure containing Posterior information, if a posterior exists
+        % structure containing Posterior information, if a posterior exists
         Post
         
-% Other model properties and options
+        % Other model properties and options
         KFInitState
         KFInitVariance
         GensysOptions
 %         NumSolvePrecision = 1e-6;
 %         NumSolveMaxIterations = 500;
 
-% handle to the mats evaluation function
+        % handle to the mats evaluation function
         mats
         
     end
     
 
     properties (SetAccess = protected)
-        %   vars - All variables excluding shocks (StateVar,ObsVar,AuxVar)
-        vars = DSGE.Var;
     end
     
     methods
@@ -284,7 +300,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.ObsVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
     
         function set.StateVar(obj,v)
@@ -293,7 +309,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.StateVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
     
         function set.ShockVar(obj,v)
@@ -312,11 +328,11 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.AuxVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
         
-        function updatevars(obj)
-            obj.vars = merge(obj.ObsVar,obj.StateVar,obj.AuxVar);
+        function updatevar(obj)
+            obj.Var = merge(obj.ObsVar,obj.StateVar,obj.AuxVar);
         end
         
 %         function set.ObsEq(obj,eq)
