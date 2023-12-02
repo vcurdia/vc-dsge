@@ -121,3 +121,17 @@ if obj.ObsVar.N>0
     KF.sig00rc = sig00rc;
     Mats.KF = KF;
 end
+
+%% complete solution
+nvarnew = obj.Var.N-obj.StateVar.N;
+Mats.gbar = [Mats.REE.GBar;
+             Mats.ObsEq.HBar;
+             Mats.AuxEq.PhiBar];
+Mats.g1 = [Mats.REE.G1,zeros(obj.StateVar.N,nvarnew);
+           Mats.ObsEq.H*Mats.REE.G1,zeros(obj.ObsVar.N,nvarnew);
+           Mats.AuxEq.Phi*Mats.REE.G1,zeros(obj.AuxVar.N,nvarnew)];
+Mats.g2 = [Mats.REE.G2;
+           Mats.ObsEq.H*Mats.REE.G2;
+           Mats.AuxEq.Phi*Mats.REE.G2];
+
+
