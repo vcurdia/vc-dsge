@@ -300,7 +300,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.ObsVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
     
         function set.StateVar(obj,v)
@@ -309,7 +309,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.StateVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
     
         function set.ShockVar(obj,v)
@@ -328,7 +328,7 @@ classdef Model < matlab.mixin.Copyable
             else
                 obj.AuxVar = v;
             end
-            updatevars(obj)
+            updatevar(obj)
         end
         
         function updatevar(obj)
