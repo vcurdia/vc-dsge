@@ -58,6 +58,7 @@ for t=1:T
 end
 
 %% Generate difference between observables and random series
+% assume that REE.GBar = 0
 DataDiff = data'-mats.KF.ObsVarBar-H*Sr(:,2:T+1);
 
 %% Run KF on Xs
@@ -97,3 +98,12 @@ draw.StateVar = StateDraw(:,2:T+1);
 draw.ShockVar = Er+E;
 draw.StateVar0 = StateDraw(:,1);
 
+%% full var (assume StateVar has no constant)
+draw.Var0 = [draw.StateVar0;
+      mats.ObsEq.HBar + mats.ObsEq.H*draw.StateVar0;
+      mats.AuxEq.PhiBar + mats.AuxEq.Phi*draw.StateVar0];
+v = mats.gbar + mats.g1*draw.Var0 + mats.g2*draw.ShockVar(:,1);
+for t=2:T
+    v(:,t) = mats.gbar + mats.g1*v(:,t-1) + mats.g2*draw.ShockVar(:,t);
+end
+draw.Var = v;
