@@ -31,10 +31,13 @@ classdef Var < matlab.mixin.Copyable
     end
     
     properties (SetAccess = protected)
-% N number of variables in instance
-%
-% This property is automatically populated every time that Names is changed.
+        % N number of variables in instance
+        %
+        % This property is automatically populated every time that Names is changed.
         N = 0; 
+        
+        %NameLength maximum length of Names
+        NameLength = 0;
     end
     
     methods
@@ -56,6 +59,7 @@ classdef Var < matlab.mixin.Copyable
                 obj.PrettyNames = names;
             end
             obj.Scale = ones(obj.N,1);
+            obj.NameLength = max([cellfun('length',obj.Names)]);
         end
         
         function set.PrettyNames(obj,prettynames)
