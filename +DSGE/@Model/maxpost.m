@@ -58,6 +58,7 @@ pNameLengthMax = max(pNameLength);
 pDist = obj.Prior.Dist(pIdx);
 lpdfneg = @(x,varargin)(-obj.postlpdf(x,varargin{:}));
 
+rng(0)
 x0 = zeros(np,nMax);
 for jm=1:nMax
     if jm<=nx0
@@ -99,6 +100,7 @@ save(tmpFN)
 MaxPostOut = cell(1,nMax);
 x0j = op.GuessMean;
 parfor jm=1:nMax
+    rng(jm)
     fid = fopen(sprintf('%s-maxpost-%03.0f.log',obj.Name,jm),'wt');
     opj = op.Min;
     opj.MatFn = sprintf('%s-maxpost-%03.0f',obj.Name,jm);

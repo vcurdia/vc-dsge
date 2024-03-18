@@ -33,6 +33,7 @@ op = updateoptions(op,varargin{:});
 tt = TimeTracker;
 
 %% initial draw
+rng(0)
 if obj.Post.MCMCStage>1 && op.uselastdraw
     op.x0 = zeros(obj.Post.NEstimate,op.NChains);
     for jChain=1:obj.Post.MCMCSample.NChains
@@ -113,6 +114,7 @@ opChain.JumpVar = obj.Post.MCMCSample.JumpVar;
 nRejections = obj.Post.MCMCSample.NRejections;
 tt.start('generatemcmc')
 parfor jChain=1:op.NChains
+    rng(jChain)
     opj = opChain;
     opj.fn = obj.Post.MCMCSample.FileNameDraws{jChain}
     opj.x0 = x0{jChain};
