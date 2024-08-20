@@ -22,6 +22,7 @@ op.Percentiles = [0.01, 0.05, 0.15, 0.25, 0.75, 0.85, 0.95, 0.99];
 op = updateoptions(op,varargin{:});
 
 %% Make draws
+rng(0)
 BadDraws = false(1,op.NDraws);
 xd = nan(obj.Param.N,op.NDraws);
 for j=1:obj.Param.N
