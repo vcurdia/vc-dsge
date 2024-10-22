@@ -27,7 +27,7 @@ np = obj.Post.NEstimate;
 pIdx = obj.Post.EstimateIdx;
 
 %% Options
-op.NMax = 10;
+op.NMax = 20;
 op.ShowRobustness = 1;
 op.DrawAll = 0;
 op.Min.verbose = 1;
