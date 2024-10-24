@@ -29,9 +29,13 @@ else
     addpath(matspath)
 end
 
+% make sure that obj.Var has the full set of variables
+obj.updatevar
+
 if (obj.StateVar.N==0) || isempty(obj.StateEq)
     error('Cannot proceed without specifying state variables and equations')
 end
+
 
 %% Sym Params
 list = {'','NumSolve','Composite'};
