@@ -114,7 +114,7 @@ nMax = length(MaxPostOut);
 save(tmpFN)
 
 %% save minimization output
-save([obj.Name,'-maxpost-out'],'MaxPostOut','idxMax')
+save([obj.Name,'-maxpost-out'],'MaxPostOut')
 
 %% extract the best one
 obj.maxpostchoosebest
