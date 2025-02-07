@@ -42,7 +42,10 @@ list = {'','NumSolve','Composite'};
 % sList = struct;
 for j=1:length(list)
     jstr = [list{j},'Param'];
-    if obj.(jstr).N>0, vcsym(obj.(jstr).Names{:}), end
+    if obj.(jstr).N>0
+        % obj.(jstr).Names{:}
+        vcsym(obj.(jstr).Names{:})
+    end
 %     sList.(jstr) = sym(zeros(1,obj.(jstr).N));
 %     for jp=1:obj.(jstr).N
 %         sList.(jstr)(jp) = eval(obj.(jstr).Names{jp});
@@ -228,9 +231,11 @@ if obj.CompositeParam.N>0
 end
 
 % Combine NumSolve, and Composite into AuxParam
-obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompositeParam.Names];
-obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
-                    obj.CompositeParam.PrettyNames];
+if obj.NumSolveParam.N+obj.CompositeParam.N>0
+    obj.AuxParam.Names = [obj.NumSolveParam.Names;obj.CompositeParam.Names];
+    obj.AuxParam.PrettyNames = [obj.NumSolveParam.PrettyNames;
+                                obj.CompositeParam.PrettyNames];
+end
 
 fprintf(fid,'Mats.AuxParam = nan(%.0f,1);\n',obj.AuxParam.N);
 for j=1:obj.AuxParam.N
