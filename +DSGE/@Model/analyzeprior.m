@@ -69,7 +69,6 @@ AuxNames = obj.AuxParam.Names;
 nAux = obj.AuxParam.N;
 
 % Table
-pList = {'Param','AuxParam'};
 DispList = {'    Mean','Mean';
             '      SD','SD';
             '      5%','Prc05';
@@ -77,8 +76,14 @@ DispList = {'    Mean','Mean';
             '     95%','Prc95';
            };
 nc = size(DispList,1);
-namelengthmax = max([cellfun('length',{obj.Param.Names{:}, ...
-                    obj.AuxParam.Names{:}})]);
+if obj.AuxParam.N>0
+    pList = {'Param','AuxParam'};
+    namelengthmax = max([cellfun('length',{obj.Param.Names{:}, ...
+                                           obj.AuxParam.Names{:}})]);
+else
+    pList = {'Param'};
+    namelengthmax = max([cellfun('length',obj.Param.Names)]);
+end
 for jP=1:length(pList)
     Pj = pList{jP};
     psj = obj.(Pj);
@@ -149,39 +154,41 @@ for jBreak=1:nBreaks
     fprintf(fid,'\\clearpage\n');
 end
 
-% fprintf(fid,'\\section{Auxiliary Parameters}\n');
-str = [' & $%.',int2str(op.Table.Precision),'f$'];
-tableBreaks = settablebreaks(nAux,op.Table.MaxRows);
-idxPar = 0;
-nBreaks = length(tableBreaks);
-for jBreak=1:nBreaks
-    idxPar = (idxPar(end)+1):tableBreaks(jBreak);
-    if nBreaks==1
-        fprintf(fid,'\\section{Auxiliary Parameters}\n');
-    else
-        fprintf(fid,'\\section{Auxiliary Parameters (%.0f/%.0f)}\n',...
-                jBreak,nBreaks);
+if obj.AuxParam.N>0
+    % fprintf(fid,'\\section{Auxiliary Parameters}\n');
+    str = [' & $%.',int2str(op.Table.Precision),'f$'];
+    tableBreaks = settablebreaks(nAux,op.Table.MaxRows);
+    idxPar = 0;
+    nBreaks = length(tableBreaks);
+    for jBreak=1:nBreaks
+        idxPar = (idxPar(end)+1):tableBreaks(jBreak);
+        if nBreaks==1
+            fprintf(fid,'\\section{Auxiliary Parameters}\n');
+        else
+            fprintf(fid,'\\section{Auxiliary Parameters (%.0f/%.0f)}\n',...
+                    jBreak,nBreaks);
+        end
+        fprintf(fid,'\\begin{equation*}\n');
+        fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+3));
+        fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
+        fprintf(fid,'& \\multicolumn{3}{c}{Prior Sample} \\\\[0.5ex]\n');
+        fprintf(fid,'& 5\\%% & Median & 95\\%% \n');
+        fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
+        for jr=idxPar
+            fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
+            fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc05(jr));
+            fprintf(fid,str,obj.Prior.Sample.AuxParam.Median(jr));
+            fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc95(jr));
+            fprintf(fid,' \\\\\n');
+            if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
+                fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
+            end        
+        end
+        fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
+        fprintf(fid,'\\end{tabular}\n');
+        fprintf(fid,'\\end{equation*}\n');
+        fprintf(fid,'\\clearpage\n');
     end
-    fprintf(fid,'\\begin{equation*}\n');
-    fprintf(fid,'\\begin{tabular}{l%s} \n',repmat('r',1,1+3));
-    fprintf(fid,'\\hline\\hline\\\\[-1.5ex]\n');
-    fprintf(fid,'& \\multicolumn{3}{c}{Prior Sample} \\\\[0.5ex]\n');
-    fprintf(fid,'& 5\\%% & Median & 95\\%% \n');
-    fprintf(fid,'\\\\[0.5ex]\\hline\\\\[-1.5ex]\n');
-    for jr=idxPar
-        fprintf(fid,'%s',obj.AuxParam.PrettyNames{jr});
-        fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc05(jr));
-        fprintf(fid,str,obj.Prior.Sample.AuxParam.Median(jr));
-        fprintf(fid,str,obj.Prior.Sample.AuxParam.Prc95(jr));
-        fprintf(fid,' \\\\\n');
-        if ismember(jr,op.Table.Lines) && jr~=idxPar(end)
-            fprintf(fid,'\\\\[-1.5ex]\\hline\\\\[-1.5ex]\n');
-        end        
-    end
-    fprintf(fid,'\\\\[-1.5ex]\\hline\\hline\n');
-    fprintf(fid,'\\end{tabular}\n');
-    fprintf(fid,'\\end{equation*}\n');
-    fprintf(fid,'\\clearpage\n');
 end
 
 fprintf(fid,'\\end{document}\n');
