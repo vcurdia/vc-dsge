@@ -139,7 +139,7 @@ if obj.AuxVar.N>0
     Mats.gbar = [Mats.gbar;
                  Mats.AuxEq.PhiBar];
     Mats.g1 = [Mats.g1;
-               Mats.AuxEq.Phi*Mats.REE.G1,zeros(obj.StateVar.N,nvarnew)];
+               Mats.AuxEq.Phi*Mats.REE.G1,zeros(obj.AuxVar.N,nvarnew)];
     Mats.g2 = [Mats.g2;
                Mats.AuxEq.Phi*Mats.REE.G2];
 end
