@@ -33,6 +33,9 @@ classdef Data < matlab.mixin.Copyable
         
 % TickLabels (optional) array of ticks to show in plots
         TickLabels
+
+        % editmode
+        EditMode = 0;
     end
 
     properties (SetAccess=protected)
@@ -63,7 +66,7 @@ classdef Data < matlab.mixin.Copyable
         end
         
         function set.Var(obj,Var)
-            if ~isempty(obj.Var)
+            if ~isempty(obj.Var) && ~obj.EditMode
                 [tf,idx] = ismember(Var,obj.Var);
                 if ~all(tf)
                     error('Variables not found in data.')
@@ -101,6 +104,21 @@ classdef Data < matlab.mixin.Copyable
         
         function set.TickLabels(obj,tList)
             obj.TickLabels = tList(ismember(tList,obj.TimeIdx));
+        end
+
+        function add(obj,vname,vdata)
+            if iscell(vname)
+                nv = length(vname)
+            elseif ischar(vname)
+                nv = 1;
+                vname = {vname};
+            else
+                error('first argument has to be cell or char array')
+            end
+            obj.EditMode = 1;
+            obj.Var = [obj.Var,vname];
+            obj.Values(:,end+[1:nv]) = vdata;
+            obj.EditMode = 0;
         end
         
     end %methods
