@@ -27,3 +27,5 @@ obj.Post.Var = diag(obj.Prior.SD.^2);
 obj.Post.Median = obj.Prior.Median;
 obj.Post.Prc05 = obj.Prior.Prc05;
 obj.Post.Prc95 = obj.Prior.Prc95;
+obj.Post.MaxPost = 0;
+obj.Post.MCMCStage = 0;

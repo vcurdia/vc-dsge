@@ -12,6 +12,12 @@ function maxpost(obj,varargin)
 % Created: March 24, 2017
 % Copyright (C) 2017-2018 Vasco Curdia
 
+%% check if maxpost already done
+if obj.Post.MaxPost
+    fprintf('\nSearch for Posterior Mode already completed.\n')
+    return
+end
+
 %% Preamble
 fprintf('\nSearching for Posterior Mode\n')
 tmpFN = sprintf('%s-maxpost-tmp',obj.Name);
@@ -208,6 +214,8 @@ end
 %% make maxpost report
 obj.maxpostreport(op)
 
+%% mark maxpost completed
+obj.Post.MaxPost = 1;
 
 %% Finish up
 delete([tmpFN,'.mat'])
