@@ -55,11 +55,9 @@ if op.CalibrateMCMC
 end
 
 %% Preparations
-
 if isempty(obj.Post.MCMCStage), obj.Post.MCMCStage = 1; end
 fprintf('\nGenerating MCMC Sample %.0f\n',obj.Post.MCMCStage)
-tmpFN = sprintf('%s-mcmc-%.0f-tmp',obj.Name,obj.Post.MCMCStage);
-save(tmpFN)
+obj.save
 
 pIdx = obj.Post.EstimateIdx;
 
@@ -104,7 +102,6 @@ for jChain=1:op.NChains
         '%s-mcmc-%.0f-chain-%.0f',obj.Name,obj.Post.MCMCStage,jChain);
 end
 obj.Post.MCMCSample.FileNameRedux = [];
-save(tmpFN)
 
 %% create MCMC chains
 opChain.Augment = op.Augment;
@@ -121,14 +118,13 @@ parfor jChain=1:op.NChains
     nRejections(jChain) = obj.mcmcchain(opj);
 end
 tt.stop('generatemcmc')
-    
-%% show rejection rates
 obj.Post.MCMCSample.NRejections = nRejections;
 for jChain=1:op.NChains
     fprintf('Chain %.0f: JumpScale = %4.2f, Rejection rate = %5.1f%%\n',...
             jChain,op.JumpScale,nRejections(jChain)/op.NDraws*100)
 end
 fprintf('\n')
+obj.save
 
 %% Clean up
 if ~op.KeepLogs
@@ -137,28 +133,26 @@ if ~op.KeepLogs
     end
 end
 
-%% Finish up MCMC
-save(tmpFN)
 
 %% Run MCMC analysis
 if op.AnalyzePost
     tt.start('analyzepost')
     obj.analyzepost(op.Analysis)
     tt.stop('analyzepost')
-    save(tmpFN)
+    obj.save
 end
 if op.MCMCConvergence
     tt.start('mcmcconvergence')
     obj.mcmcconvergence(op.Analysis)
     tt.stop('mcmcconvergence')
-    save(tmpFN)
+    obj.save
 end
-if op.MCMCRedux, obj.mcmcredux, save(tmpFN), end
-delete([tmpFN,'.mat'])
+if op.MCMCRedux
+    obj.mcmcredux
+    obj.save
+end
 
 tt.showtimers
-
-
 
 end
 

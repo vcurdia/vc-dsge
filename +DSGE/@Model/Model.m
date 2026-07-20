@@ -378,6 +378,12 @@ classdef Model < matlab.mixin.Copyable
 %             end
 %         end
             
+        function save(obj)
+            load(obj.Name)
+            model = obj;
+            save(obj.Name)
+        end
+
     end %methods
     
     methods(Static)
