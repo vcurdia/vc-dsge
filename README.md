@@ -9,7 +9,8 @@ Created January 21, 2016 by Vasco Cúrdia.
 
 ### MATLAB
 
-MATLAB R2024a or later, with:
+Developed and tested on MATLAB R2024a. Other releases are untested and may
+work. The following toolboxes are required:
 
 - Symbolic Math Toolbox
 - Statistics and Machine Learning Toolbox
