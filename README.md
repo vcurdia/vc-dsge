@@ -100,7 +100,7 @@ For details on any class or method, use MATLAB's help, e.g.:
 
 ```matlab
 doc DSGE.Model
-help DSGE.Model.irf
+help DSGE.Model
 ```
 
 ## License
