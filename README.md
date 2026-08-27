@@ -31,15 +31,16 @@ default MATLAB text interpreter to `latex`.
 ## Setup
 
 Add this toolbox and its dependencies to the MATLAB path. `example/setpath.m`
-shows one such arrangement, expecting the dependencies as sibling directories:
+shows one such arrangement, expecting the following layout under `~/matlab`:
 
 ```
-Matlab/
-  VC-DSGE/        <- this toolbox
-  VC-Tools/
-  Sims-Gensys/
-  Sims-KF/
-  Sims-Optimize/
+~/matlab/
+  vc-dsge/          <- this toolbox
+  vc-tools/
+  sims/
+    gensys/
+    kf/
+    optimize/
 ```
 
 Adjust `pathBase` and `pathList` in `example/setpath.m` to match your own layout.
