@@ -1,4 +1,4 @@
-# vcDSGE toolbox
+# vc-dsge toolbox
 
 An object-oriented MATLAB toolbox to simulate and estimate Dynamic Stochastic
 General Equilibrium (DSGE) models, including Bayesian estimation via MCMC.
@@ -20,7 +20,7 @@ work. The following toolboxes are required:
 
 | Dependency | Purpose | Source |
 | --- | --- | --- |
-| vcTools (Vasco Cúrdia) | Miscellaneous scripts, functions and objects | [github.com/vcurdia/vc-tools](https://github.com/vcurdia/vc-tools) |
+| vc-tools (Vasco Cúrdia) | Miscellaneous scripts, functions and objects | [github.com/vcurdia/vc-tools](https://github.com/vcurdia/vc-tools) |
 | gensys (Chris Sims) | DSGE rational expectations equilibrium solver | <http://sims.princeton.edu/yftp/gensys/> |
 | optimize (Chris Sims) | Optimization and non-linear equation solvers | <http://dge.repec.org/codes/sims/optimize/> |
 | KF (Chris Sims) | Kalman filter and smoother | <http://sims.princeton.edu/yftp/Times09/KFmatlab/> |
@@ -109,16 +109,16 @@ help DSGE.Model.irf
 
 ## License
 
-vcDSGE is free software: you can redistribute it and/or modify it under the
+vc-dsge is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
 version.
 
-vcDSGE is distributed in the hope that it will be useful, but WITHOUT ANY
+vc-dsge is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-vcDSGE. If not, see <http://www.gnu.org/licenses/>.
+vc-dsge. If not, see <http://www.gnu.org/licenses/>.
 
 Copyright 2016-2026 Vasco Cúrdia
