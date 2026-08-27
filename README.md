@@ -9,7 +9,7 @@ Created January 21, 2016 by Vasco Cúrdia.
 
 ### MATLAB
 
-MATLAB R2016b or later, with:
+MATLAB R2024a or later, with:
 
 - Symbolic Math Toolbox
 - Statistics and Machine Learning Toolbox
@@ -120,4 +120,4 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 vcDSGE. If not, see <http://www.gnu.org/licenses/>.
 
-Copyright 2016-2017 Vasco Cúrdia
+Copyright 2016-2026 Vasco Cúrdia
