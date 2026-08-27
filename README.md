@@ -84,11 +84,6 @@ work:
 A model need not be estimated; it can be a simple parameterized model used only
 for simulation.
 
-### `DSGE.MCMC`
-
-Encapsulates an MCMC run over the model posterior, including its configuration
-and the `run` method that generates the sample.
-
 ### `DSGE.Data`
 
 Data and data properties used throughout estimation and simulation.
