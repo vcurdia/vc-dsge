@@ -5,7 +5,6 @@ function setpath
 % Set path to codes needed.
 %
 % Created: August 18, 2016 by Vasco Curdia
-% Copyright 2016-2018 by Vasco Curdia
 
 %% set path
 pathBase = fullfile(getenv('HOME'),'matlab');
